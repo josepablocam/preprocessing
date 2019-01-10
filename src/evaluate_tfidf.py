@@ -3,13 +3,15 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from .evaluation import location_of_correct, get_mrr, get_fraction_correct_at
 
+
 def load_evaluation_data(code_path, queries_path):
     code = np.load(code_path)
     queries = np.load(queries_path)
     return code, queries
 
+
 def eval_traditional(queries, code, args):
-    ''' 
+    '''
     queries and code are both np matrix (n,max_len_query), (n,max_len_code)
     '''
     # Get vocab size, padding idx
@@ -32,9 +34,12 @@ def eval_traditional(queries, code, args):
     idf[np.nonzero(idf)] = np.log(np.true_divide(n, idf[np.nonzero(idf)])) + 1
 
     # Compute tf
-    tf_code = np.true_divide(count_matrix_code, count_matrix_code.sum(1, keepdims=True))
-    tf_queries = np.true_divide(count_matrix_queries, count_matrix_queries.sum(1, keepdims=True))
-
+    tf_code = np.true_divide(
+        count_matrix_code, count_matrix_code.sum(1, keepdims=True)
+    )
+    tf_queries = np.true_divide(
+        count_matrix_queries, count_matrix_queries.sum(1, keepdims=True)
+    )
 
     if args.method == 'tfidf':
         # Compute tfidf for each entry
@@ -45,7 +50,10 @@ def eval_traditional(queries, code, args):
     elif args.method == 'bm25':
         query_vecs = count_matrix_queries * np.expand_dims(idf, axis=0)
         code_lens = count_matrix_code.sum(1, keepdims=True)
-        code_vecs = np.true_divide(count_matrix_code * (args.k+1), count_matrix_code+args.k*(1-args.b+args.b*code_lens/np.mean(code_lens)))
+        code_vecs = np.true_divide(
+            count_matrix_code * (args.k + 1), count_matrix_code +
+            args.k * (1 - args.b + args.b * code_lens / np.mean(code_lens))
+        )
         # Compute score matrix
         sim_mat = np.matmul(query_vecs, np.transpose(code_vecs))
     else:
@@ -76,7 +84,9 @@ def eval_traditional(queries, code, args):
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Evaluate using keyword-based retrieve methods")
+    parser = argparse.ArgumentParser(
+        description="Evaluate using keyword-based retrieve methods"
+    )
     parser.add_argument(
         "-m",
         "--method",
