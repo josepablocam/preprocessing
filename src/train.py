@@ -13,13 +13,12 @@ import tqdm
 from . import configuration
 from . import data
 from . import code_search_model
-from . import domain_adaptation_model
 from . import utils
 
 outputManager = 0
 
 
-def load_data(batch_size, code_path, docstring_path, query_path, answers_path):
+def load_data(batch_size, code_path, docstring_path):
     code = np.load(code_path).astype(np.int64)
     docstrings = np.load(docstring_path).astype(np.int64)
 
@@ -28,49 +27,7 @@ def load_data(batch_size, code_path, docstring_path, query_path, answers_path):
         docstrings = torch.tensor(docstrings).cuda()
 
     paired_dataset = data.CodeSearchDataset(code, docstrings)
-
-    # data loaders
-    paired_dl = torch.utils.data.DataLoader(
-        paired_dataset,
-        batch_size,
-        shuffle=True,
-        drop_last=True,
-    )
-    if query_path is not None:
-        queries = np.load(query_path).astype(np.int64)
-        if utils.have_gpu():
-            queries = torch.tensor(queries).cuda()
-        adversarial_nl_dataset = data.CrossDomainDataset(
-            docstrings,
-            queries,
-        )
-        adversarial_nl_dl = torch.utils.data.DataLoader(
-            adversarial_nl_dataset,
-            batch_size=batch_size * 2,
-            shuffle=True,
-            drop_last=True,
-        )
-    else:
-        adversarial_nl_dl = None
-
-    if answers_path is not None:
-        answers = np.load(answers_path).astype(np.int64)
-        if utils.have_gpu():
-            answers = torch.tensor(answers).cuda()
-        adversarial_code_dataset = data.CrossDomainDataset(
-            code,
-            answers,
-        )
-        adversarial_code_dl = torch.utils.data.DataLoader(
-            adversarial_code_dataset,
-            batch_size=batch_size * 2,
-            shuffle=True,
-            drop_last=True,
-        )
-    else:
-        adversarial_code_dl = None
-
-    return paired_dl, adversarial_nl_dl, adversarial_code_dl
+    return paired_dataset
 
 
 def log_losses(named_losses, batch_count, print_every, tensorboard_writer):
@@ -79,8 +36,9 @@ def log_losses(named_losses, batch_count, print_every, tensorboard_writer):
         mean_loss = np.mean(loss_values)
         summary[loss_name] = mean_loss
         # log training info for tensorboard
-        tensorboard_writer.add_scalar("train/{}".format(loss_name), mean_loss,
-                                      batch_count)
+        tensorboard_writer.add_scalar(
+            "train/{}".format(loss_name), mean_loss, batch_count
+        )
 
     if batch_count % print_every == 0:
         outputManager.say("Batch: {}, {}".format(batch_count, summary))
@@ -97,7 +55,8 @@ def log_models(named_models, folder, epoch, time_seconds=None):
             model_name,
             epoch,
             time_seconds,
-            symlink_latest=True)
+            symlink_latest=True
+        )
     return named_models
 
 
@@ -136,12 +95,9 @@ def train(
         config,
         code_path,
         docstrings_path,
-        queries_path=None,
-        answers_path=None,
         embeddings_path=True,
         code_vocab_encoder_path=None,
         nl_vocab_encoder_path=None,
-        same_embedding_fun=False,
         print_every=1000,
         save_every=1,
         output_folder=None,
@@ -175,16 +131,15 @@ def train(
         json.dump(config, fout)
 
     tensorboard_writer = SummaryWriter(
-        log_dir=os.path.join("runs", run_folder))
+        log_dir=os.path.join("runs", run_folder)
+    )
     global outputManager
     outputManager = utils.OutputManager(os.path.join("runs", run_folder))
 
-    paired_dl, nl_ada_dl, code_ada_dl = load_data(
+    paired_dl = load_data(
         batch_size,
         code_path,
         docstrings_path,
-        queries_path,
-        answers_path,
     )
     if model_type == "dan":
         sim_model = code_search_model.CodeDocstringModel(
@@ -194,7 +149,6 @@ def train(
             emb_size,
             fixed_embeddings=fixed_embeddings,
             num_dan_layers=num_dan_layers,
-            same_embedding_fun=same_embedding_fun,
         )
     elif model_type == "lstm":
         sim_model = code_search_model.LSTMModel(
@@ -205,7 +159,6 @@ def train(
             config["hidden_size"],
             bidirectional=config["bidirectional"],
             fixed_embeddings=fixed_embeddings,
-            same_embedding_fun=same_embedding_fun,
         )
     if embeddings_path is not None:
         code_search_model.setup_precomputed_embeddings(
@@ -223,29 +176,6 @@ def train(
     models = {}
     models["sim_model"] = sim_model
 
-    use_adversarial_queries = queries_path is not None
-    use_adversarial_code = answers_path is not None
-
-    if use_adversarial_queries:
-        # adversarial queries
-        nl_ada_wrapper = domain_adaptation_model.AdversarialWrapper(
-            config,
-            sim_model.output_size,
-            nl_ada_dl,
-            sim_model.embed_nl,
-        )
-        models["nl_ada_model"] = nl_ada_wrapper.model
-
-    if use_adversarial_code:
-        # adversarial code
-        code_ada_wrapper = domain_adaptation_model.AdversarialWrapper(
-            config,
-            sim_model.output_size,
-            code_ada_dl,
-            sim_model.embed_code,
-        )
-        models["code_ada_model"] = code_ada_wrapper.model
-
     log_models(models, run_folder, "pre-start")
     batch_count = 0
     losses = defaultdict(lambda: [])
@@ -254,38 +184,13 @@ def train(
     for epoch in range(num_epochs):
         outputManager.say("Epoch:{}".format(epoch))
         for code, docstrings, fake_docstrings in tqdm.tqdm(paired_dl):
-            if use_adversarial_queries:
-                nl_ada_wrapper.zero_grad()
-
-            if use_adversarial_code:
-                code_ada_wrapper.zero_grad()
-
             sim_optimizer.zero_grad()
 
             sim_losses = sim_model.losses(code, docstrings, fake_docstrings)
             total_loss = sim_losses.mean()
-            losses["sim_loss"].append(total_loss.item())
-
-            if use_adversarial_queries:
-                nl_ada_loss, nl_ada_weight = nl_ada_wrapper.train_iteration()
-                losses["nl_ada_loss"] = nl_ada_loss.item()
-                total_loss -= nl_ada_loss * nl_ada_weight
-
-            if use_adversarial_code:
-                code_ada_loss, code_ada_weight = code_ada_wrapper.train_iteration()
-                losses["code_ada_loss"] = code_ada_loss.item()
-                total_loss -= code_ada_loss * code_ada_weight
-
-            losses["total_loss"] = total_loss.item()
-            # do single backward for performance reasons
+            losses["total_loss"].append(total_loss.item())
             total_loss.backward()
             sim_optimizer.step()
-
-            if use_adversarial_queries:
-                nl_ada_wrapper.step()
-
-            if use_adversarial_code:
-                code_ada_wrapper.step()
 
             losses = log_losses(
                 losses,
@@ -321,12 +226,14 @@ def get_args():
     parser = argparse.ArgumentParser(description="Train model")
     parser.add_argument("config", type=str, help="Name of configuration")
     parser.add_argument(
-        "-c", "--code_path", type=str, help="Path to github code .npy file")
+        "-c", "--code_path", type=str, help="Path to github code .npy file"
+    )
     parser.add_argument(
         "-d",
         "--docstrings_path",
         type=str,
-        help="Path to github docstrings .npy file")
+        help="Path to github docstrings .npy file"
+    )
     parser.add_argument(
         "-e",
         "--embeddings_path",
@@ -348,21 +255,6 @@ def get_args():
         default=None,
         help="Path to NL vocabulary encoder .pkl fil",
     )
-    # used for adversarial training
-    parser.add_argument(
-        "-q",
-        "--queries_path",
-        type=str,
-        default=None,
-        help="Path to adversarial SO queries .npy file",
-    )
-    parser.add_argument(
-        "-a",
-        "--answers_path",
-        type=str,
-        default=None,
-        help="Path to adversarial SO answers .npy file",
-    )
     parser.add_argument(
         "--same_embedding_fun",
         action="store_true",
@@ -383,7 +275,8 @@ def get_args():
         "--print_every",
         type=int,
         default=1000,
-        help="Print losses every N batches")
+        help="Print losses every N batches"
+    )
     parser.add_argument(
         "-s",
         "--save_every",
@@ -397,11 +290,6 @@ def get_args():
         type=str,
         help="Directory name to save execution info in models/ and runs/",
     )
-    parser.add_argument(
-        "--ada_lr",
-        type=float,
-        help="Learning rate for the adversarial part",
-    )
     args = parser.parse_args()
 
     embeddings_args = [
@@ -411,10 +299,12 @@ def get_args():
     ]
     embeddings_args_defined = sum(e is not None for e in embeddings_args)
     if (embeddings_args_defined != 0 and embeddings_args_defined != 3):
-        raise ValueError("""
+        raise ValueError(
+            """
             embeddings_path, code_vocab_encoder_path, nl_vocab_encoder_path
             are all required if one is defined
-            """)
+            """
+        )
 
     return args
 
@@ -431,12 +321,9 @@ def main():
         config,
         args.code_path,
         args.docstrings_path,
-        queries_path=args.queries_path,
-        answers_path=args.answers_path,
         embeddings_path=args.embeddings_path,
         code_vocab_encoder_path=args.code_vocab_encoder_path,
         nl_vocab_encoder_path=args.nl_vocab_encoder_path,
-        same_embedding_fun=args.same_embedding_fun,
         print_every=args.print_every,
         save_every=args.save_every,
         output_folder=args.output_folder,
