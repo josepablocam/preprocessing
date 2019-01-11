@@ -12,7 +12,7 @@ from .precomputed_embeddings import read_embeddings
 def encode_doc_to_matrix(doc, vocab_encoder, length):
     if isinstance(doc[0], str):
         # assume we have not tokenized yet, since first line is string not list
-        tokens = [data.split_into_subtokens(line) for line in tqdm.tqdm(doc)]
+        tokens = [line.split() for line in tqdm.tqdm(doc)]
     else:
         tokens = doc
     encoded = vocab_encoder.encode(tokens)

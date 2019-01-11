@@ -13,34 +13,11 @@ UNKNOWN_TOKEN_ID = 0
 PAD_TOKEN_ID = 1
 NUM_PREDEFINED_VOCAB_TERMS = 2
 
-ENGLISH_STOPWORDS = stopwords.words("english")
-
-
-def split_camel_case(token):
-    return re.sub('([a-z])([A-Z])', r'\1 \2', token).split()
-
-
-def split_into_subtokens(_str):
-    # replace into spaces
-    replace_regex = "[!\?'\"\*\+\-\=\(\)\[\]\{\}:,]"
-    clean_str = re.sub(replace_regex, " ", _str)
-    # split on underscore, period, and whitespace
-    split_regex = "[_\\.\s+]"
-    tokens = re.split(split_regex, clean_str)
-    # split again but on camel case and lower case them
-    tokens = [
-        subtoken.lower() for token in tokens
-        for subtoken in split_camel_case(token) if len(token) > 0
-    ]
-    # remove stopwords
-    tokens = [t for t in tokens if t not in ENGLISH_STOPWORDS]
-    return tokens
-
 
 def read_doc_as_tokenized_lines(doc_path):
     with open(doc_path, "r") as fin:
         lines = fin.readlines()
-    tokenized_lines = [split_into_subtokens(line) for line in tqdm.tqdm(lines)]
+    tokenized_lines = [line.split() for line in tqdm.tqdm(lines)]
     return tokenized_lines
 
 
