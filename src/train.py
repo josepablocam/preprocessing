@@ -3,6 +3,7 @@ from collections import defaultdict
 import datetime
 import json
 import os
+import pickle
 
 import numpy as np
 from tensorboardX import SummaryWriter
@@ -10,12 +11,17 @@ import torch.optim as optim
 import torch.utils.data
 import tqdm
 
-from . import configuration
 from . import data
 from . import code_search_model
+from . import precomputed_embeddings
 from . import utils
 
 outputManager = 0
+
+BATCH_SIZE = 50
+MARGIN = 0.25
+NUM_EPOCHS = 100
+LR = 5e-4
 
 
 def load_data(batch_size, code_path, docstring_path):
@@ -92,30 +98,26 @@ def save_model(
 
 
 def train(
-        config,
         code_path,
         docstrings_path,
-        embeddings_path=True,
-        code_vocab_encoder_path=None,
-        nl_vocab_encoder_path=None,
+        embeddings_path,
+        vocab_encoder_path,
         print_every=1000,
         save_every=1,
         output_folder=None,
+        batch_size=BATCH_SIZE,
+        lr=LR,
+        margin=MARGIN,
+        num_epochs=NUM_EPOCHS,
+        fixed_embeddings=True,
 ):
-    # model parameters
-    margin = config["margin"]
-    code_vocab_size = config["code_vocab_top_k"]
-    nl_vocab_size = config["nl_vocab_top_k"]
-    emb_size = config["embedding_size"]
-    fixed_embeddings = config.get("fixed_embeddings", False)
-    model_type = config["model"]
-    if model_type == "dan":
-        num_dan_layers = config.get("num_dan_layers", 0)
+    embeddings = precomputed_embeddings.read_embeddings(embeddings_path)
+    emb_size = list(embeddings.values()).shape[1]
 
-    # training parameters
-    batch_size = config["batch_size"]
-    lr = config["lr"]
-    num_epochs = config["epochs"]
+    with open(vocab_encoder_path, "rb") as fin:
+        vocab_encoder = pickle.load(fin)
+
+    vocab_size = len(vocab_encoder.vocab_map)
 
     # folder name to save down stuff...
     if output_folder:
@@ -127,6 +129,18 @@ def train(
     model_folder = os.path.join("models", run_folder)
     utils.create_dir(model_folder)
     # save down the configuration for reference
+    config = {
+        "code_path": code_path,
+        "docstrings_path": docstrings_path,
+        "embeddings_path": embeddings_path,
+        "vocab_encoder_path": vocab_encoder_path,
+        "output_folder": output_folder,
+        "batch_size": batch_size,
+        "lr": lr,
+        "margin": margin,
+        "num_epochs": num_epochs,
+        "fixed_embeddings": fixed_embeddings,
+    }
     with open(os.path.join(model_folder, "config.json"), "w") as fout:
         json.dump(config, fout)
 
@@ -141,32 +155,20 @@ def train(
         code_path,
         docstrings_path,
     )
-    if model_type == "dan":
-        sim_model = code_search_model.CodeDocstringModel(
-            margin,
-            code_vocab_size,
-            nl_vocab_size,
-            emb_size,
-            fixed_embeddings=fixed_embeddings,
-            num_dan_layers=num_dan_layers,
-        )
-    elif model_type == "lstm":
-        sim_model = code_search_model.LSTMModel(
-            margin,
-            code_vocab_size,
-            nl_vocab_size,
-            emb_size,
-            config["hidden_size"],
-            bidirectional=config["bidirectional"],
-            fixed_embeddings=fixed_embeddings,
-        )
-    if embeddings_path is not None:
-        code_search_model.setup_precomputed_embeddings(
-            sim_model,
-            code_vocab_encoder_path,
-            nl_vocab_encoder_path,
-            embeddings_path,
-        )
+    sim_model = code_search_model.LSTMModel(
+        margin,
+        vocab_size,
+        emb_size,
+        config["hidden_size"],
+        bidirectional=config["bidirectional"],
+        fixed_embeddings=fixed_embeddings,
+        same_embedding_fun=False,
+    )
+    code_search_model.setup_precomputed_embeddings(
+        sim_model,
+        vocab_encoder_path,
+        embeddings_path,
+    )
 
     if utils.have_gpu():
         sim_model = sim_model.cuda()
@@ -206,25 +208,8 @@ def train(
             log_models(models, run_folder, epoch, amt_time_seconds)
 
 
-def update_configuration(config, new_options_str):
-    # copy first
-    config = dict(config)
-    new_options = [o.split(":") for o in new_options_str.split(",")]
-    for k, new_v in new_options:
-        if k not in config:
-            raise ValueError("Cannot overwrite nonexisting config option")
-        _type = type(config[k])
-        if _type == bool:
-            typed_new_v = new_v == "True"
-        else:
-            typed_new_v = _type(new_v)
-        config[k] = typed_new_v
-    return config
-
-
 def get_args():
     parser = argparse.ArgumentParser(description="Train model")
-    parser.add_argument("config", type=str, help="Name of configuration")
     parser.add_argument(
         "-c", "--code_path", type=str, help="Path to github code .npy file"
     )
@@ -242,33 +227,11 @@ def get_args():
         help="Path to precomputed embeddings .vec file",
     )
     parser.add_argument(
-        "-cv",
-        "--code_vocab_encoder_path",
+        "-v",
+        "--vocab_encoder_path",
         type=str,
         default=None,
-        help="Path to code vocabulary encoder .pkl file",
-    )
-    parser.add_argument(
-        "-nv",
-        "--nl_vocab_encoder_path",
-        type=str,
-        default=None,
-        help="Path to NL vocabulary encoder .pkl fil",
-    )
-    parser.add_argument(
-        "--same_embedding_fun",
-        action="store_true",
-        help="Use same embedding function for code and NL",
-    )
-    parser.add_argument(
-        "-o",
-        "--overwrite_config",
-        type=str,
-        default=None,
-        help="""
-        comma-separate list of configuration options,
-        format should be <key-name>:<value>
-        """,
+        help="Path to vocabulary encoder .pkl file",
     )
     parser.add_argument(
         "-p",
@@ -291,39 +254,16 @@ def get_args():
         help="Directory name to save execution info in models/ and runs/",
     )
     args = parser.parse_args()
-
-    embeddings_args = [
-        args.embeddings_path,
-        args.code_vocab_encoder_path,
-        args.nl_vocab_encoder_path,
-    ]
-    embeddings_args_defined = sum(e is not None for e in embeddings_args)
-    if (embeddings_args_defined != 0 and embeddings_args_defined != 3):
-        raise ValueError(
-            """
-            embeddings_path, code_vocab_encoder_path, nl_vocab_encoder_path
-            are all required if one is defined
-            """
-        )
-
     return args
 
 
 def main():
     args = get_args()
-    config = configuration.get_configuration(args.config)
-    if args.overwrite_config is not None:
-        config = update_configuration(config, args.overwrite_config)
-    # record the command line arguments in the config, so we have when saved
-    config.update(vars(args))
-
     train(
-        config,
         args.code_path,
         args.docstrings_path,
         embeddings_path=args.embeddings_path,
-        code_vocab_encoder_path=args.code_vocab_encoder_path,
-        nl_vocab_encoder_path=args.nl_vocab_encoder_path,
+        vocab_encoder_path=args.vocab_encoder_path,
         print_every=args.print_every,
         save_every=args.save_every,
         output_folder=args.output_folder,

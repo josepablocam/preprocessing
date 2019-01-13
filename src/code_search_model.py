@@ -5,10 +5,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from . import configuration
 from . import data
 from . import precomputed_embeddings
-from . import utils
 
 
 def _load_precomputed_embeddings(emb_layer, vocab_encoder, embeddings_file):
