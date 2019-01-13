@@ -20,7 +20,8 @@ source activate <env>
 bash scripts/download_data.sh
 ```
 
-downloads necessary data and creates a canonical representation for a corpus.
+downloads necessary data and creates a canonical representation for a corpus
+(see `CanonicalInput` in src/preprocess.py for details).
 
 # Generate experiment folders and run
 
@@ -33,7 +34,8 @@ python -m src.experiments generate \
 ```
 
 Will produce a folder for each experiment configuration. You can add
-more experiments by adding them to the source in `src/experiments.generate_experiments`.
+more experiments by adding them to the source in
+`generate_experiments` in src/experiments.py.
 Each folder is self-contained.
 
 You can then run the experiments by pointing to the root folder of the

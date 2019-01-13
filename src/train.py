@@ -20,7 +20,7 @@ outputManager = 0
 
 BATCH_SIZE = 50
 MARGIN = 0.25
-NUM_EPOCHS = 2
+NUM_EPOCHS = 100
 LR = 5e-4
 HIDDEN_SIZE = 300
 
