@@ -25,26 +25,23 @@ def _load_precomputed_embeddings(emb_layer, vocab_encoder, embeddings_file):
 
 def setup_precomputed_embeddings(
         model,
-        code_vocab_encoder_path,
-        nl_vocab_encoder_path,
+        vocab_encoder_path,
         embeddings_path,
 ):
-    with open(code_vocab_encoder_path, "rb") as fin:
-        code_vocab_encoder = pickle.load(fin)
 
-    with open(nl_vocab_encoder_path, "rb") as fin:
-        nl_vocab_encoder = pickle.load(fin)
+    with open(vocab_encoder_path, "rb") as fin:
+        vocab_encoder = pickle.load(fin)
 
     # shared embeddings to start
     _load_precomputed_embeddings(
         model.code_embeddings,
-        code_vocab_encoder,
+        vocab_encoder,
         embeddings_path,
     )
 
     _load_precomputed_embeddings(
         model.nl_embeddings,
-        nl_vocab_encoder,
+        vocab_encoder,
         embeddings_path,
     )
 
