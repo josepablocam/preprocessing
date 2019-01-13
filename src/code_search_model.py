@@ -66,7 +66,7 @@ class CodeDocstringModel(nn.Module):
         super().__init__()
         self.margin = margin
         self.code_embeddings = nn.Embedding(
-            code_vocab_size + data.NUM_PREDEFINED_VOCAB_TERMS,
+            code_vocab_size,
             emb_size,
             padding_idx=data.PAD_TOKEN_ID,
         )
@@ -77,7 +77,7 @@ class CodeDocstringModel(nn.Module):
             self.nl_attention = self.code_attention
         else:
             self.nl_embeddings = nn.Embedding(
-                nl_vocab_size + data.NUM_PREDEFINED_VOCAB_TERMS,
+                nl_vocab_size,
                 emb_size,
                 padding_idx=data.PAD_TOKEN_ID,
             )
@@ -148,7 +148,7 @@ class LSTMModel(nn.Module):
         super().__init__()
         self.margin = margin
         self.code_embeddings = nn.Embedding(
-            code_vocab_size + data.NUM_PREDEFINED_VOCAB_TERMS,
+            code_vocab_size,
             emb_size,
             padding_idx=data.PAD_TOKEN_ID,
         )
@@ -164,7 +164,7 @@ class LSTMModel(nn.Module):
             self.nl_lstm = self.code_lstm
         else:
             self.nl_embeddings = nn.Embedding(
-                nl_vocab_size + data.NUM_PREDEFINED_VOCAB_TERMS,
+                nl_vocab_size,
                 emb_size,
                 padding_idx=data.PAD_TOKEN_ID,
             )
@@ -235,7 +235,7 @@ class UnsupervisedModel(nn.Module):
     ):
         super().__init__()
         self.code_embeddings = nn.Embedding(
-            code_vocab_size + data.NUM_PREDEFINED_VOCAB_TERMS,
+            code_vocab_size,
             emb_size,
             padding_idx=data.PAD_TOKEN_ID,
         )
@@ -243,7 +243,7 @@ class UnsupervisedModel(nn.Module):
             self.nl_embeddings = self.code_embeddings
         else:
             self.nl_embeddings = nn.Embedding(
-                nl_vocab_size + data.NUM_PREDEFINED_VOCAB_TERMS,
+                nl_vocab_size,
                 emb_size,
                 padding_idx=data.PAD_TOKEN_ID,
             )

@@ -76,6 +76,12 @@ def split_on_whitespace(text):
     return text.split()
 
 
+def lower_case(_input):
+    if isinstance(_input, str):
+        _input = split_on_whitespace(_input)
+    return [t.lower() for t in _input]
+
+
 def _split_camel_case_regex(token):
     return re.sub('([a-z])([A-Z])', r'\1 \2', token).split()
 
@@ -124,12 +130,15 @@ def plus(*fs):
 class CanonicalInput(object):
     def __init__(self, corpus):
         self.corpus = corpus
-        self.transformed = []
+        self.transformed = corpus
+
+    def reset_transformed(self):
+        self.transformed = self.corpus
 
     def apply_pipeline(self, pipeline, which):
         print("Applying pipeline to {} dimension".format(which))
-        self.transformed = []
-        for obs in tqdm.tqdm(self.corpus):
+        new_dataset = []
+        for obs in tqdm.tqdm(self.transformed):
             code = obs["code"]
             nl = obs["nl"]
 
@@ -144,7 +153,9 @@ class CanonicalInput(object):
                 raise ValueError("Unknown member name")
 
             if len(code) > 0 and len(nl) > 0:
-                self.transformed.append({"code": code, "nl": nl})
+                new_dataset.append({"code": code, "nl": nl})
+
+        self.transformed = new_dataset
 
     def downsample(self, n, seed=42):
         np.random.seed(seed)
@@ -152,10 +163,6 @@ class CanonicalInput(object):
         self.corpus = self.corpus[:n]
 
     def to_text(self, code_output, nl_output):
-        if len(self.transformed) == 0:
-            print("Outputting original corpus, no transformations")
-            self.transformed = self.corpus
-
         with open(code_output, "w") as code, open(nl_output, "w") as nl:
             for obs in self.transformed:
                 code.write(obs["code"] + "\n")

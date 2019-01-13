@@ -20,8 +20,9 @@ outputManager = 0
 
 BATCH_SIZE = 50
 MARGIN = 0.25
-NUM_EPOCHS = 100
+NUM_EPOCHS = 2
 LR = 5e-4
+HIDDEN_SIZE = 300
 
 
 def load_data(batch_size, code_path, docstring_path):
@@ -33,7 +34,12 @@ def load_data(batch_size, code_path, docstring_path):
         docstrings = torch.tensor(docstrings).cuda()
 
     paired_dataset = data.CodeSearchDataset(code, docstrings)
-    return paired_dataset
+    paired_dl = torch.utils.data.DataLoader(
+        paired_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+    )
+    return paired_dl
 
 
 def log_losses(named_losses, batch_count, print_every, tensorboard_writer):
@@ -53,11 +59,11 @@ def log_losses(named_losses, batch_count, print_every, tensorboard_writer):
     return named_losses
 
 
-def log_models(named_models, folder, epoch, time_seconds=None):
+def log_models(named_models, model_folder, epoch, time_seconds=None):
     for model_name, model in named_models.items():
         save_model(
             model,
-            folder,
+            model_folder,
             model_name,
             epoch,
             time_seconds,
@@ -68,29 +74,28 @@ def log_models(named_models, folder, epoch, time_seconds=None):
 
 def save_model(
         model,
-        run_folder,
+        model_folder,
         model_name,
         epoch,
         time_seconds=None,
         symlink_latest=True,
 ):
     model_checkpoint_path = os.path.join(
-        "models",
-        run_folder,
+        model_folder,
         "{}_epoch_{}.pth".format(model_name, epoch),
     )
     torch.save(model, model_checkpoint_path)
 
     # write training time associated with this model
     if time_seconds is not None:
-        model_time_file = os.path.join("models", run_folder, "timestamps.csv")
+        model_time_file = os.path.join(model_folder, "timestamps.csv")
         file_mode = "a" if os.path.exists(model_time_file) else "w"
         with open(model_time_file, file_mode) as fout:
             fout.write("{},{}\n".format(model_checkpoint_path, time_seconds))
 
     if symlink_latest:
         symlink_name = "{}_latest".format(model_name)
-        symlink_path = os.path.join("models", run_folder, symlink_name)
+        symlink_path = os.path.join(model_folder, symlink_name)
         if os.path.exists(symlink_path):
             os.remove(symlink_path)
         # need to point to absolute location
@@ -109,10 +114,11 @@ def train(
         lr=LR,
         margin=MARGIN,
         num_epochs=NUM_EPOCHS,
+        hidden_size=HIDDEN_SIZE,
         fixed_embeddings=True,
 ):
     embeddings = precomputed_embeddings.read_embeddings(embeddings_path)
-    emb_size = list(embeddings.values()).shape[1]
+    emb_size = list(embeddings.values())[0].shape[0]
 
     with open(vocab_encoder_path, "rb") as fin:
         vocab_encoder = pickle.load(fin)
@@ -126,7 +132,7 @@ def train(
         run_folder = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
     # folder to save down model checkpoints
-    model_folder = os.path.join("models", run_folder)
+    model_folder = os.path.join(run_folder, "models")
     utils.create_dir(model_folder)
     # save down the configuration for reference
     config = {
@@ -144,11 +150,13 @@ def train(
     with open(os.path.join(model_folder, "config.json"), "w") as fout:
         json.dump(config, fout)
 
+    log_dir = os.path.join(run_folder, "runs")
+    utils.create_dir(log_dir)
     tensorboard_writer = SummaryWriter(
-        log_dir=os.path.join("runs", run_folder)
+        log_dir=log_dir
     )
     global outputManager
-    outputManager = utils.OutputManager(os.path.join("runs", run_folder))
+    outputManager = utils.OutputManager(log_dir)
 
     paired_dl = load_data(
         batch_size,
@@ -157,10 +165,11 @@ def train(
     )
     sim_model = code_search_model.LSTMModel(
         margin,
+        vocab_size,  # same vocab for both code/NL
         vocab_size,
         emb_size,
-        config["hidden_size"],
-        bidirectional=config["bidirectional"],
+        hidden_size=hidden_size,
+        bidirectional=True,
         fixed_embeddings=fixed_embeddings,
         same_embedding_fun=False,
     )
@@ -178,7 +187,7 @@ def train(
     models = {}
     models["sim_model"] = sim_model
 
-    log_models(models, run_folder, "pre-start")
+    log_models(models, model_folder, "pre-start")
     batch_count = 0
     losses = defaultdict(lambda: [])
 
@@ -205,7 +214,7 @@ def train(
         if batch_count % save_every == 0:
             current_time = datetime.datetime.now()
             amt_time_seconds = (current_time - start_time).total_seconds()
-            log_models(models, run_folder, epoch, amt_time_seconds)
+            log_models(models, model_folder, epoch, amt_time_seconds)
 
 
 def get_args():
