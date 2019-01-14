@@ -34,8 +34,13 @@ def produce_experiment_configuration(
         min_vocab_count,
         output_dir,
         target_len=TARGET_LEN,
-        dim=DIMENSION
+        dim=DIMENSION,
+        seed=None,
 ):
+
+    if seed is not None:
+        np.random.seed(seed)
+
     utils.create_dir(output_dir)
     train_data.reset_transformed()
     test_data.reset_transformed()
@@ -76,9 +81,8 @@ def produce_experiment_configuration(
     # concatenate code and nl into single file
     embeddings_raw_path = os.path.join(output_dir, "embeddings")
     embeddings_path = embeddings_raw_path + ".vec"
-    run_fasttext(
-        combined_train_path, min_vocab_count, dim, embeddings_raw_path
-    )
+    run_fasttext(combined_train_path, min_vocab_count, dim,
+                 embeddings_raw_path)
     # vocabulary encoder from embeddings
     encoder_path = os.path.join(output_dir, "encoder.pkl")
     print("Building encoder to {}.pkl".format(encoder_path))
@@ -91,14 +95,10 @@ def produce_experiment_configuration(
 
     for input_path in text_files:
         output_path = os.path.splitext(input_path)[0] + ".npy"
-        print(
-            "Encoding {} w/ {} to {}".format(
-                input_path, encoder_path, output_path
-            )
-        )
-        apply_encoder(
-            input_path, encoder_path, target_len, "numpy", output_path
-        )
+        print("Encoding {} w/ {} to {}".format(input_path, encoder_path,
+                                               output_path))
+        apply_encoder(input_path, encoder_path, target_len, "numpy",
+                      output_path)
 
 
 def generate_experiments(
@@ -131,10 +131,16 @@ def generate_experiments(
         "code": raw_lower_case_tokens,
         "nl": raw_lower_case_tokens,
         "min_count": 5,
-        "output_dir": os.path.join(output_dir, "basic")
     }
 
-    experiments = [experiment_1]
+    random_seeds = [1, 2, 10, 42, 100]
+    experiments = []
+    for seed in random_seeds:
+        exp = dict(experiment_1)
+        exp["seed"] = seed
+        exp["output_dir"] = os.path.join(output_dir, "seed-{}".format(seed))
+        experiments.append(exp)
+
     for exp in experiments:
         print("Generating experiment: {}".format(exp["name"]))
         produce_experiment_configuration(
@@ -144,6 +150,7 @@ def generate_experiments(
             nl_pipeline=exp["nl"],
             min_vocab_count=exp["min_count"],
             output_dir=exp["output_dir"],
+            seed=exp.get("seed", None),
         )
 
 
@@ -161,7 +168,7 @@ def run_experiments(base_dir):
             nl_path,
             embeddings_path,
             encoder_path,
-            print_every=1000,
+            print_every=10,
             save_every=1,
             output_folder=experiment,
         )
@@ -173,8 +180,7 @@ def run_experiments(base_dir):
 
         model_paths = glob.glob(os.path.join(experiment, "models", "*latest"))
         assert len(
-            model_paths
-        ) == 1, "Should only have 1 symlinked latest model"
+            model_paths) == 1, "Should only have 1 symlinked latest model"
 
         model = load_model(model_paths[0])
 
@@ -190,8 +196,7 @@ def run_experiments(base_dir):
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="Setup and run preprocessing experiments"
-    )
+        description="Setup and run preprocessing experiments")
     subparsers = parser.add_subparsers(help="Actions")
     gen_parser = subparsers.add_parser("generate")
     gen_parser.add_argument(
@@ -227,8 +232,7 @@ def get_args():
         "-d",
         "--data",
         type=str,
-        help="Root directory with experiment subfolders generated"
-    )
+        help="Root directory with experiment subfolders generated")
     run_parser.set_defaults(which="run")
     return parser.parse_args()
 

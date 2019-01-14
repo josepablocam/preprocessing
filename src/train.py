@@ -107,7 +107,7 @@ def train(
         docstrings_path,
         embeddings_path,
         vocab_encoder_path,
-        print_every=1000,
+        print_every=10,
         save_every=1,
         output_folder=None,
         batch_size=BATCH_SIZE,
