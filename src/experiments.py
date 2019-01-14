@@ -157,11 +157,17 @@ def generate_experiments(
         )
 
 
-def run_experiments(base_dir):
+def run_experiments(base_dir, force=False):
     experiment_folders = [
         os.path.join(base_dir, p) for p in os.listdir(base_dir)
     ]
     for experiment in experiment_folders:
+        eval_results_path = os.path.join(experiment, "results.json")
+        if os.path.exists(eval_results_path) and not force:
+            print("Skipping {}, results.json exists".format(experiment))
+            print("Use --force if re-run is desired")
+            continue
+
         code_path = os.path.join(experiment, "train-code.npy")
         nl_path = os.path.join(experiment, "train-nl.npy")
         embeddings_path = os.path.join(experiment, "embeddings.vec")
@@ -192,7 +198,6 @@ def run_experiments(base_dir):
             test_code,
             test_queries,
         )
-        eval_results_path = os.path.join(experiment, "results.json")
         with open(eval_results_path, "w") as fout:
             json.dump(eval_results, fout)
 
@@ -236,6 +241,12 @@ def get_args():
         "--data",
         type=str,
         help="Root directory with experiment subfolders generated")
+    run_parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Force rerun of subdirectories with results (else skips)",
+    )
     run_parser.set_defaults(which="run")
     return parser.parse_args()
 
@@ -251,7 +262,7 @@ def main():
             seed=args.seed,
         )
     elif args.which == "run":
-        run_experiments(args.data)
+        run_experiments(args.data, args.force)
     else:
         raise ValueError("Unknown action: {}".format(args.which))
 
