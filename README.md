@@ -23,6 +23,14 @@ bash scripts/download_data.sh
 downloads necessary data and creates a canonical representation for a corpus
 (see `CanonicalInput` in src/preprocess.py for details).
 
+# Build fastttext
+
+```
+cd fastText-0.1.0 && make clean && make
+```
+
+builds the necessary fasttext library for creating the initial embeddings.
+
 # Generate experiment folders and run
 
 ```
