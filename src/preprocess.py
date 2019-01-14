@@ -157,8 +157,9 @@ class CanonicalInput(object):
 
         self.transformed = new_dataset
 
-    def downsample(self, n, seed=42):
-        np.random.seed(seed)
+    def downsample(self, n, seed=None):
+        if seed is not None:
+            np.random.seed(seed)
         np.random.shuffle(self.corpus)
         self.corpus = self.corpus[:n]
 

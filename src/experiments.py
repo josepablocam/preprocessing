@@ -114,11 +114,8 @@ def generate_experiments(
     with open(test_data_path, "rb") as fin:
         test_data = pickle.load(fin)
 
-    if seed is not None:
-        np.random.seed(seed)
-
     if train_downsample is not None:
-        train_data.downsample(train_downsample)
+        train_data.downsample(train_downsample, seed=seed)
 
     utils.create_dir(output_dir)
 
