@@ -111,6 +111,7 @@ def generate_experiments(
         output_dir,
         train_downsample=None,
         seed=None,
+        force=False,
 ):
     with open(train_data_path, "rb") as fin:
         train_data = pickle.load(fin)
@@ -145,6 +146,11 @@ def generate_experiments(
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["name"]))
+        if os.path.exists(exp["output_dir"]) and not force:
+            print("Skipping {}, output folder exists".format(exp["name"]))
+            print("Use --force if re-run is desired")
+            continue
+
         produce_experiment_configuration(
             train_data,
             test_data,
@@ -233,6 +239,12 @@ def get_args():
         help="RNG seed",
         default=42,
     )
+    gen_parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Force generation of data, otherwise if folder exists skips",
+    )
     gen_parser.set_defaults(which="generate")
 
     run_parser = subparsers.add_parser("run")
@@ -260,9 +272,10 @@ def main():
             args.output,
             train_downsample=args.downsample,
             seed=args.seed,
+            force=args.force,
         )
     elif args.which == "run":
-        run_experiments(args.data, args.force)
+        run_experiments(args.data, force=args.force)
     else:
         raise ValueError("Unknown action: {}".format(args.which))
 
