@@ -35,6 +35,7 @@ def produce_experiment_configuration(
         output_dir,
         target_len=TARGET_LEN,
         dim=DIMENSION,
+        downsample_n=None,
         seed=None,
 ):
 
@@ -42,8 +43,11 @@ def produce_experiment_configuration(
         np.random.seed(seed)
 
     utils.create_dir(output_dir)
-    train_data.reset_transformed()
-    test_data.reset_transformed()
+    train_data.reset()
+    test_data.reset()
+
+    if downsample_n is not None:
+        train_data.downsample(downsample_n)
 
     print("Transforming training data")
     train_data.apply_pipeline(code_pipeline, which="code")
@@ -114,9 +118,6 @@ def generate_experiments(
     with open(test_data_path, "rb") as fin:
         test_data = pickle.load(fin)
 
-    if train_downsample is not None:
-        train_data.downsample(train_downsample, seed=seed)
-
     utils.create_dir(output_dir)
 
     raw_lower_case_tokens = preprocess.sequence(
@@ -128,14 +129,18 @@ def generate_experiments(
         "code": raw_lower_case_tokens,
         "nl": raw_lower_case_tokens,
         "min_count": 5,
+        "downsample_n": train_downsample,
     }
 
     random_seeds = [1, 2, 10, 42, 100]
     experiments = []
-    for seed in random_seeds:
+    for poss_seed in random_seeds:
         exp = dict(experiment_1)
-        exp["seed"] = seed
-        exp["output_dir"] = os.path.join(output_dir, "seed-{}".format(seed))
+        exp["seed"] = poss_seed
+        exp["output_dir"] = os.path.join(
+            output_dir,
+            "seed-{}".format(poss_seed),
+        )
         experiments.append(exp)
 
     for exp in experiments:
@@ -147,7 +152,8 @@ def generate_experiments(
             nl_pipeline=exp["nl"],
             min_vocab_count=exp["min_count"],
             output_dir=exp["output_dir"],
-            seed=exp.get("seed", None),
+            downsample_n=exp["downsample_n"],
+            seed=exp.get("seed", seed),
         )
 
 
@@ -165,7 +171,7 @@ def run_experiments(base_dir):
             nl_path,
             embeddings_path,
             encoder_path,
-            print_every=10,
+            print_every=1000,
             save_every=1,
             output_folder=experiment,
         )

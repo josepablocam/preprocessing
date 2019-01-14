@@ -131,8 +131,15 @@ class CanonicalInput(object):
     def __init__(self, corpus):
         self.corpus = corpus
         self.transformed = corpus
+        # only set if downsampled at some point
+        self.downsampled = False
+        self.full_corpus = None
 
-    def reset_transformed(self):
+    def reset(self):
+        if self.downsampled:
+            assert self.full_corpus is not None
+            self.corpus = self.full_corpus
+        self.downsampled = False
         self.transformed = self.corpus
 
     def apply_pipeline(self, pipeline, which):
@@ -160,8 +167,13 @@ class CanonicalInput(object):
     def downsample(self, n, seed=None):
         if seed is not None:
             np.random.seed(seed)
+        # back up before downsampling
+        self.downsampled = True
+        self.full_corpus = list(self.corpus)
+
         np.random.shuffle(self.corpus)
         self.corpus = self.corpus[:n]
+        self.transformed = self.corpus
 
     def to_text(self, code_output, nl_output):
         with open(code_output, "w") as code, open(nl_output, "w") as nl:
