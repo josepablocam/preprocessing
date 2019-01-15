@@ -133,17 +133,18 @@ class CodeDocstringModel(nn.Module):
 
 class LSTMModel(nn.Module):
     """LSTM model"""
+
     def __init__(
-        self,
-        margin,
-        code_vocab_size,
-        nl_vocab_size,
-        emb_size,
-        hidden_size,
-        bidirectional=False,
-        num_layers=1,
-        fixed_embeddings=False,
-        same_embedding_fun=False,
+            self,
+            margin,
+            code_vocab_size,
+            nl_vocab_size,
+            emb_size,
+            hidden_size,
+            bidirectional=False,
+            num_layers=1,
+            fixed_embeddings=False,
+            same_embedding_fun=False,
     ):
         super().__init__()
         self.margin = margin
@@ -153,12 +154,11 @@ class LSTMModel(nn.Module):
             padding_idx=data.PAD_TOKEN_ID,
         )
         self.code_lstm = nn.LSTM(
-            input_size = emb_size,
-            hidden_size = hidden_size,
-            num_layers = num_layers,
-            bidirectional = bidirectional,
-            batch_first = True
-        )
+            input_size=emb_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            bidirectional=bidirectional,
+            batch_first=True)
         if same_embedding_fun:
             self.nl_embeddings = self.code_embeddings
             self.nl_lstm = self.code_lstm
@@ -169,38 +169,44 @@ class LSTMModel(nn.Module):
                 padding_idx=data.PAD_TOKEN_ID,
             )
             self.nl_lstm = nn.LSTM(
-                input_size = emb_size,
-                hidden_size = hidden_size,
-                num_layers = num_layers,
-                bidirectional = bidirectional,
-                batch_first = True
-            )
+                input_size=emb_size,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                bidirectional=bidirectional,
+                batch_first=True)
 
         if fixed_embeddings:
             self.code_embeddings.weight.requires_grad = False
             self.nl_embeddings.weight.requires_grad = False
 
         if bidirectional:
-            self.output_size = 2*hidden_size
+            self.output_size = 2 * hidden_size
         else:
             self.output_size = hidden_size
 
     def _embed(self, _input, emb_layer, lstm_layer):
-        embedded = emb_layer(_input) # (batch_size, num_tokens, emb_dim)
-        mask = (_input != data.PAD_TOKEN_ID).to(torch.float) # (batch_size, num_tokens)
+        embedded = emb_layer(_input)  # (batch_size, num_tokens, emb_dim)
+        mask = (_input != data.PAD_TOKEN_ID).to(
+            torch.float)  # (batch_size, num_tokens)
         # Pack input
-        lengths_tensor, indices = torch.sort(mask.int().sum(1), descending=True)
+        lengths_tensor, indices = torch.sort(
+            mask.int().sum(1), descending=True)
         if lengths_tensor.is_cuda:
-            lengths = lengths_tensor.data.cpu().numpy().tolist() # (batch_size)
+            lengths = lengths_tensor.data.cpu().numpy().tolist(
+            )  # (batch_size)
         else:
             lengths = lengths_tensor.data.numpy().tolist()
-        packed_inputs = nn.utils.rnn.pack_padded_sequence(embedded[indices], lengths, batch_first=True)
+        packed_inputs = nn.utils.rnn.pack_padded_sequence(
+            embedded[indices], lengths, batch_first=True)
         # Compute
         packed_outputs, final_hidden_state = lstm_layer(packed_inputs)
-        outputs, _ = nn.utils.rnn.pad_packed_sequence(packed_outputs, batch_first=True) # (batch_size, num_tokens, num_dir*hidden_dim)
+        outputs, _ = nn.utils.rnn.pad_packed_sequence(
+            packed_outputs,
+            batch_first=True)  # (batch_size, num_tokens, num_dir*hidden_dim)
         # Get output in original order
         _, re_order_indices = torch.sort(indices)
-        return torch.mean(outputs[re_order_indices],1) # (batch_size, num_dir*hidden_dim)
+        return torch.mean(outputs[re_order_indices],
+                          1)  # (batch_size, num_dir*hidden_dim)
 
     def embed_code(self, code):
         # code: (batch_size, num_tokens)
@@ -228,14 +234,13 @@ class LSTMModel(nn.Module):
 class UnsupervisedModel(nn.Module):
     def __init__(
             self,
-            code_vocab_size,
-            nl_vocab_size,
+            vocab_size,
             emb_size,
             same_embedding_fun=False,
     ):
         super().__init__()
         self.code_embeddings = nn.Embedding(
-            code_vocab_size,
+            vocab_size,
             emb_size,
             padding_idx=data.PAD_TOKEN_ID,
         )
@@ -243,7 +248,7 @@ class UnsupervisedModel(nn.Module):
             self.nl_embeddings = self.code_embeddings
         else:
             self.nl_embeddings = nn.Embedding(
-                nl_vocab_size,
+                vocab_size,
                 emb_size,
                 padding_idx=data.PAD_TOKEN_ID,
             )
@@ -258,24 +263,25 @@ class UnsupervisedModel(nn.Module):
         return avg_ignore_padding(embs, nl)
 
 
-def store_unsupervised_model(
-        config, code_vocab_encoder_path, nl_vocab_encoder_path,
-        embeddings_path, output_path
-):
+def store_unsupervised_model(vocab_encoder_path, embeddings_path, output_path):
+    with open(vocab_encoder_path, "rb") as fin:
+        vocab_encoder = pickle.load(fin)
+    vocab_size = len(vocab_encoder.vocab_map)
+
+
+    embeddings = precomputed_embeddings.read_embeddings(embeddings_path)
+    embsize = list(embeddings.values())[0].shape[0]
+
     model = UnsupervisedModel(
-        config["code_vocab_top_k"],
-        config["nl_vocab_top_k"],
-        config["embedding_size"],
+        vocab_size,
+        embsize,
     )
-    setup_precomputed_embeddings(
-        model, code_vocab_encoder_path, nl_vocab_encoder_path, embeddings_path
-    )
+    setup_precomputed_embeddings(model, vocab_encoder_path, embeddings_path)
     torch.save(model, output_path)
 
 
 def get_args():
     parser = argparse.ArgumentParser(description="Store unsupervised model")
-    parser.add_argument("config", type=str, help="Model config")
     parser.add_argument(
         "-e",
         "--embeddings_path",
@@ -283,31 +289,21 @@ def get_args():
         default=None,
     )
     parser.add_argument(
-        "-cv",
-        "--code_vocab_encoder_path",
+        "-v",
+        "--vocab_encoder_path",
         type=str,
         default=None,
     )
     parser.add_argument(
-        "-nv",
-        "--nl_vocab_encoder_path",
-        type=str,
-        help=None,
-    )
-    parser.add_argument(
-        "-o", "--output", type=str, help="Path to store pickled"
-    )
+        "-o", "--output", type=str, help="Path to store pickled")
     args = parser.parse_args()
     return args
 
 
 def main():
     args = get_args()
-    config = configuration.get_configuration(args.config)
     store_unsupervised_model(
-        config,
-        args.code_vocab_encoder_path,
-        args.nl_vocab_encoder_path,
+        args.vocab_encoder_path,
         args.embeddings_path,
         args.output,
     )
