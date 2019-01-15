@@ -26,7 +26,34 @@ TARGET_LEN = 50
 DIMENSION = 100
 
 
-def produce_experiment_configuration(
+def produce_embeddings(train_data, min_vocab_count, dim, output_dir):
+    """
+    Builds embeddings using fastText
+    """
+    code_path = os.path.join(output_dir, "/tmp/code.txt")
+    nl_path = os.path.join(output_dir, "/tmp/nl.txt")
+    train_data.to_text(
+        code_path,
+        nl_path,
+    )
+    combined_path = os.path.join(output_dir, "embedding-input.txt")
+    subprocess.call(
+        "cat {} > {}".format(code_path, combined_path),
+        shell=True,
+    )
+    subprocess.call(
+        "cat {} >> {}".format(nl_path, combined_path),
+        shell=True,
+    )
+
+    # concatenate code and nl into single file
+    embeddings_raw_path = os.path.join(output_dir, "embeddings")
+    embeddings_path = embeddings_raw_path + ".vec"
+    run_fasttext(combined_path, min_vocab_count, dim, embeddings_raw_path)
+    return embeddings_path
+
+
+def generate_experiment_folder(
         train_data,
         test_data,
         code_pipeline,
@@ -38,16 +65,22 @@ def produce_experiment_configuration(
         downsample_n=None,
         seed=None,
 ):
+    """
+    Produces experiment subfolder with all necessary data.
+    Order of operations:
+        * Applies preprocessing pipelines to code and nl
+        * Generates embeddings from *complete* transformed training data
+            (starts with code input and appends at end of file NL input)
+        * Downsamples training data if relevant
+        * Extracts vocabulary from embeddings file
+        * Writes out encoded version of training/test data using vocabulary
+    """
 
     if seed is not None:
         np.random.seed(seed)
 
-    utils.create_dir(output_dir)
     train_data.reset()
     test_data.reset()
-
-    if downsample_n is not None:
-        train_data.downsample(downsample_n)
 
     print("Transforming training data")
     train_data.apply_pipeline(code_pipeline, which="code")
@@ -56,6 +89,18 @@ def produce_experiment_configuration(
     print("Transforming test data")
     test_data.apply_pipeline(code_pipeline, which="code")
     test_data.apply_pipeline(nl_pipeline, which="nl")
+
+    utils.create_dir(output_dir)
+    print("Producing embeddings")
+    embeddings_path = produce_embeddings(
+        train_data,
+        min_vocab_count,
+        dim,
+        output_dir,
+    )
+
+    if downsample_n is not None:
+        train_data.downsample(downsample_n, seed=seed)
 
     train_code_path = os.path.join(output_dir, "train-code.txt")
     train_nl_path = os.path.join(output_dir, "train-nl.txt")
@@ -66,28 +111,12 @@ def produce_experiment_configuration(
 
     test_code_path = os.path.join(output_dir, "test-code.txt")
     test_nl_path = os.path.join(output_dir, "test-nl.txt")
-
     test_data.to_text(
         test_code_path,
         test_nl_path,
     )
 
-    combined_train_path = os.path.join(output_dir, "train-code-and-nl.txt")
-    subprocess.call(
-        "cat {} > {}".format(train_code_path, combined_train_path),
-        shell=True,
-    )
-    subprocess.call(
-        "cat {} >> {}".format(train_nl_path, combined_train_path),
-        shell=True,
-    )
-
-    # concatenate code and nl into single file
-    embeddings_raw_path = os.path.join(output_dir, "embeddings")
-    embeddings_path = embeddings_raw_path + ".vec"
-    run_fasttext(combined_train_path, min_vocab_count, dim,
-                 embeddings_raw_path)
-    # vocabulary encoder from embeddings
+    # vocabulary encoder from embeddings file
     encoder_path = os.path.join(output_dir, "encoder.pkl")
     print("Building encoder to {}.pkl".format(encoder_path))
     encoder_from_embeddings(embeddings_path, encoder_path)
@@ -99,10 +128,18 @@ def produce_experiment_configuration(
 
     for input_path in text_files:
         output_path = os.path.splitext(input_path)[0] + ".npy"
-        print("Encoding {} w/ {} to {}".format(input_path, encoder_path,
-                                               output_path))
-        apply_encoder(input_path, encoder_path, target_len, "numpy",
-                      output_path)
+        print("Encoding {} w/ {} to {}".format(
+            input_path,
+            encoder_path,
+            output_path,
+        ))
+        apply_encoder(
+            input_path,
+            encoder_path,
+            target_len,
+            "numpy",
+            output_path,
+        )
 
 
 def generate_experiments(
@@ -113,6 +150,9 @@ def generate_experiments(
         seed=None,
         force=False,
 ):
+    """
+    Generates subfolders for experiments
+    """
     with open(train_data_path, "rb") as fin:
         train_data = pickle.load(fin)
 
@@ -121,37 +161,63 @@ def generate_experiments(
 
     utils.create_dir(output_dir)
 
-    raw_lower_case_tokens = preprocess.sequence(
+
+    empty_experiment = {
+        "code": None,
+        "nl": None,
+        "min_count": 5,
+        "downsample_n": 10000,
+        "seed": 42,
+    }
+
+    # pipelines
+    lower_case_pipeline = preprocess.sequence(
         preprocess.split_on_whitespace,
         preprocess.lower_case,
     )
-    experiment_1 = {
-        "name": "base",
-        "code": raw_lower_case_tokens,
-        "nl": raw_lower_case_tokens,
-        "min_count": 5,
-        "downsample_n": train_downsample,
-    }
 
-    random_seeds = [1, 2, 10, 42, 100]
+    reasonable_code = preprocess.sequence(
+        preprocess.plus(
+            preprocess.extract_def_name,
+            preprocess.extract_call_tokens,
+        ),
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+    )
+
+    reasonable_nl = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+    )
+
+
+    # Experiments
     experiments = []
-    for poss_seed in random_seeds:
-        exp = dict(experiment_1)
-        exp["seed"] = poss_seed
-        exp["output_dir"] = os.path.join(
-            output_dir,
-            "seed-{}".format(poss_seed),
-        )
-        experiments.append(exp)
+
+    raw_experiment = dict(empty_experiment)
+    raw_experiment["code"] = lower_case_pipeline
+    raw_experiment["nl"] = lower_case_pipeline
+    raw_experiment["output_dir"] = os.path.join(output_dir, "raw")
+    experiments.append(raw_experiment)
+
+
+    reasonable_experiment = dict(empty_experiment)
+    reasonable_experiment["code"] = reasonable_code
+    reasonable_experiment["nl"] = reasonable_nl
+    reasonable_experiment["output_dir"] = os.path.join(output_dir, "reasonable")
+    experiments.append(reasonable_experiment)
+
 
     for exp in experiments:
-        print("Generating experiment: {}".format(exp["name"]))
+        print("Generating experiment: {}".format(exp["output_dir"]))
         if os.path.exists(exp["output_dir"]) and not force:
-            print("Skipping {}, output folder exists".format(exp["name"]))
+            print("Skipping {}, output folder exists".format(exp["output_dir"]))
             print("Use --force if re-run is desired")
             continue
 
-        produce_experiment_configuration(
+        generate_experiment_folder(
             train_data,
             test_data,
             code_pipeline=exp["code"],
