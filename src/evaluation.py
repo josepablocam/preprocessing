@@ -1,4 +1,5 @@
 import argparse
+import json
 
 import numpy as np
 import torch
@@ -126,6 +127,12 @@ def get_args():
         help="Seed for random number generator",
         default=42,
     )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        help="Output path",
+    )
     args = parser.parse_args()
     return args
 
@@ -142,11 +149,14 @@ def main():
 
     model = load_model(args.model_path)
 
-    evaluate_with_known_answer(
+    res = evaluate_with_known_answer(
         model,
         code,
         queries,
     )
+    if args.output is not None:
+        with open(args.output, "w") as fout:
+            json.dump(res, fout)
 
 
 if __name__ == "__main__":
