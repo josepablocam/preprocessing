@@ -139,22 +139,37 @@ def plus(*fs):
 class CanonicalInput(object):
     def __init__(self, corpus):
         self.corpus = corpus
-        self.transformed = corpus
+
+        # only if transformed at some point
+        self.is_transformed = False
+        self.transformed = None
+
         # only set if downsampled at some point
-        self.downsampled = False
+        self.is_downsampled = False
         self.full_corpus = None
 
     def reset(self):
-        if self.downsampled:
+        if self.is_downsampled:
             assert self.full_corpus is not None
             self.corpus = self.full_corpus
-        self.downsampled = False
-        self.transformed = self.corpus
+
+        self.is_downsampled = False
+        self.full_corpus = None
+
+        self.is_transformed = False
+        self.transformed = None
 
     def apply_pipeline(self, pipeline, which):
         print("Applying pipeline to {} dimension".format(which))
         new_dataset = []
-        for obs in tqdm.tqdm(self.transformed):
+        # incrementally apply transformations to previous if available
+        if self.is_transformed:
+            assert self.is_transformed is not None
+            dataset = self.is_transformed
+        else:
+            dataset = self.corpus
+
+        for obs in tqdm.tqdm(dataset):
             code = obs["code"]
             nl = obs["nl"]
 
@@ -172,6 +187,7 @@ class CanonicalInput(object):
                 new_dataset.append({"code": code, "nl": nl})
 
         self.transformed = new_dataset
+        self.is_transformed = True
 
     def downsample(self, n, seed=None):
         if seed is not None:
@@ -180,12 +196,22 @@ class CanonicalInput(object):
         self.downsampled = True
         self.full_corpus = list(self.corpus)
 
-        np.random.shuffle(self.corpus)
-        self.corpus = self.corpus[:n]
-        self.transformed = self.corpus
+        if self.is_transformed:
+            assert self.is_transformed is not None
+            np.random.shuffle(self.transformed)
+            self.transformed = self.transformed[:n]
+        else:
+            np.random.shuffle(self.corpus)
+            self.corpus = self.corpus[:n]
 
     def to_text(self, code_output, nl_output):
+        if self.is_transformed:
+            assert self.is_transformed is not None
+            dataset = self.transformed
+        else:
+            dataset = self.corpus
+
         with open(code_output, "w") as code, open(nl_output, "w") as nl:
-            for obs in self.transformed:
+            for obs in dataset:
                 code.write(obs["code"] + "\n")
                 nl.write(obs["nl"] + "\n")
