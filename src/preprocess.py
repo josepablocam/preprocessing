@@ -165,7 +165,7 @@ class CanonicalInput(object):
         # incrementally apply transformations to previous if available
         if self.is_transformed:
             assert self.is_transformed is not None
-            dataset = self.is_transformed
+            dataset = self.transformed
         else:
             dataset = self.corpus
 
