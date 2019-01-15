@@ -32,20 +32,24 @@ class AbstractAstTokenCollector(ast.NodeVisitor):
 class CallCollector(AbstractAstTokenCollector):
     def visit_Call(self, node):
         func = astunparse.unparse(node.func).strip()
-        func = func.replace("\n", "")
+        func = func.replace("\n", " ")
         self.tokens.append(func)
 
 
 class NameCollector(AbstractAstTokenCollector):
     def visit_Name(self, node):
         name = node.id.strip()
+        name = name.replace("\n", " ")
         self.tokens.append(name)
         self.generic_visit(node)
 
 
 class DefinitionNameCollector(AbstractAstTokenCollector):
     def visit_FunctionDef(self, node):
-        self.tokens.append(node.name.strip())
+        name = node.name.strip()
+        name = name.replace("\n", " ")
+        self.tokens.append(name)
+        self.generic_visit(node)
 
 
 def extract_call_tokens(src):
@@ -87,7 +91,7 @@ def _split_camel_case_regex(token):
     return re.sub('([a-z])([A-Z])', r'\1 \2', token).split()
 
 
-def _split_on_camel_case_single(_str):
+def _split_on_code_characters_single(_str):
     # replace into spaces
     replace_regex = "[!\?'\"\*\+\-\=\(\)\[\]\{\}:,]"
     clean_str = re.sub(replace_regex, " ", _str)
@@ -102,10 +106,14 @@ def _split_on_camel_case_single(_str):
     return tokens
 
 
-def split_on_camel_case(_input):
+def split_on_code_characters(_input):
+    """
+    Splits on camel case, snake case, period, certain operators, parentheses,
+    braces, commas, and colons
+    """
     if isinstance(_input, str):
         _input = split_on_whitespace(_input)
-    return [st for t in _input for st in _split_on_camel_case_single(t)]
+    return [st for t in _input for st in _split_on_code_characters_single(t)]
 
 
 def remove_english_stopwords(_input):
