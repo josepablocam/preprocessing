@@ -128,11 +128,13 @@ def generate_experiment_folder(
 
     for input_path in text_files:
         output_path = os.path.splitext(input_path)[0] + ".npy"
-        print("Encoding {} w/ {} to {}".format(
-            input_path,
-            encoder_path,
-            output_path,
-        ))
+        print(
+            "Encoding {} w/ {} to {}".format(
+                input_path,
+                encoder_path,
+                output_path,
+            )
+        )
         apply_encoder(
             input_path,
             encoder_path,
@@ -161,7 +163,6 @@ def generate_experiments(
 
     utils.create_dir(output_dir)
 
-
     empty_experiment = {
         "code": None,
         "nl": None,
@@ -172,48 +173,100 @@ def generate_experiments(
 
     # pipelines
     lower_case_pipeline = preprocess.sequence(
-        preprocess.split_on_whitespace,
+        preprocess.split_on_code_characters,
         preprocess.lower_case,
     )
 
-    reasonable_code = preprocess.sequence(
+    # Experiments
+    experiments = []
+
+    # No process
+    exp0 = dict(empty_experiment)
+    exp0["code"] = lower_case_pipeline
+    exp0["nl"] = lower_case_pipeline
+    exp0["output_dir"] = os.path.join(output_dir, "exp0")
+    experiments.append(exp0)
+
+    # Split on code characters
+    exp1 = dict(empty_experiment)
+    exp1["code"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    exp1["nl"] = lower_case_pipeline
+    exp1["output_dir"] = os.path.join(output_dir, "exp1")
+    experiments.append(exp1)
+
+    # Split code characters but only method name
+    exp2 = dict(empty_experiment)
+    exp2["code"] = preprocess.sequence(
+        preprocess.extract_qualified_def_name,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    exp2["nl"] = lower_case_pipeline
+    exp2["output_dir"] = os.path.join(output_dir, "exp2")
+    experiments.append(exp2)
+
+    # Split code characters, method name and calls
+    exp3 = dict(empty_experiment)
+    exp3["code"] = preprocess.sequence(
         preprocess.plus(
-            preprocess.extract_def_name,
+            preprocess.extract_qualified_def_name,
+            preprocess.extract_call_tokens,
+        ),
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    exp3["nl"] = lower_case_pipeline
+    exp3["output_dir"] = os.path.join(output_dir, "exp3")
+    experiments.append(exp3)
+
+    # Remove stop words and stem
+    exp4 = dict(empty_experiment)
+    exp4["code"] = preprocess.sequence(
+        preprocess.plus(
+            preprocess.extract_qualified_def_name,
             preprocess.extract_call_tokens,
         ),
         preprocess.split_on_code_characters,
         preprocess.lower_case,
         preprocess.remove_english_stopwords,
+        preprocess.stem_english_words,
     )
+    exp4["nl"] = lower_case_pipeline
+    exp4["output_dir"] = os.path.join(output_dir, "exp4")
+    experiments.append(exp4)
 
-    reasonable_nl = preprocess.sequence(
+    # Better NL: take first sentence in docstring, split, remove stop
+    # words and stem
+    exp5 = dict(empty_experiment)
+    exp5["code"] = preprocess.sequence(
+        preprocess.plus(
+            preprocess.extract_qualified_def_name,
+            preprocess.extract_call_tokens,
+        ),
         preprocess.split_on_code_characters,
         preprocess.lower_case,
         preprocess.remove_english_stopwords,
+        preprocess.stem_english_words,
     )
-
-
-    # Experiments
-    experiments = []
-
-    raw_experiment = dict(empty_experiment)
-    raw_experiment["code"] = lower_case_pipeline
-    raw_experiment["nl"] = lower_case_pipeline
-    raw_experiment["output_dir"] = os.path.join(output_dir, "raw")
-    experiments.append(raw_experiment)
-
-
-    reasonable_experiment = dict(empty_experiment)
-    reasonable_experiment["code"] = reasonable_code
-    reasonable_experiment["nl"] = reasonable_nl
-    reasonable_experiment["output_dir"] = os.path.join(output_dir, "reasonable")
-    experiments.append(reasonable_experiment)
-
+    exp5["nl"] = preprocess.sequence(
+        preprocess.naive_docstring_summary,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+        preprocess.stem_english_words,
+    )
+    exp5["output_dir"] = os.path.join(output_dir, "exp5")
+    experiments.append(exp5)
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
         if os.path.exists(exp["output_dir"]) and not force:
-            print("Skipping {}, output folder exists".format(exp["output_dir"]))
+            print(
+                "Skipping {}, output folder exists".format(exp["output_dir"])
+            )
             print("Use --force if re-run is desired")
             continue
 
@@ -261,7 +314,8 @@ def run_experiments(base_dir, force=False):
 
         model_paths = glob.glob(os.path.join(experiment, "models", "*latest"))
         assert len(
-            model_paths) == 1, "Should only have 1 symlinked latest model"
+            model_paths
+        ) == 1, "Should only have 1 symlinked latest model"
 
         model = load_model(model_paths[0])
 
@@ -276,7 +330,8 @@ def run_experiments(base_dir, force=False):
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="Setup and run preprocessing experiments")
+        description="Setup and run preprocessing experiments"
+    )
     subparsers = parser.add_subparsers(help="Actions")
     gen_parser = subparsers.add_parser("generate")
     gen_parser.add_argument(
@@ -318,7 +373,8 @@ def get_args():
         "-d",
         "--data",
         type=str,
-        help="Root directory with experiment subfolders generated")
+        help="Root directory with experiment subfolders generated"
+    )
     run_parser.add_argument(
         "-f",
         "--force",
