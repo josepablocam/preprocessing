@@ -79,6 +79,5 @@ python -m src.conala \
   --output "${CONALA_DIR}/dataset.pkl"
 
 python -m src.github \
-  --code "${GITHUB_DIR}/train_original_function.json" \
-  --nl "${GITHUB_DIR}/train.docstring" \
+  --input "${GITHUB_DIR}/train_original_function.json" \
   --output "${GITHUB_DIR}/dataset.pkl"

@@ -1,5 +1,6 @@
 # Convert the Github files into canonical format
 import argparse
+import ast
 import json
 import tqdm
 import pickle
@@ -7,38 +8,30 @@ import pickle
 from .preprocess import CanonicalInput
 
 
-def parse_json_lines(json_path):
-    """Parse file where each line is json"""
-    parsed = []
-    with open(json_path, "r") as fin:
-        for line in tqdm.tqdm(fin):
-            parsed_line = json.loads(line)
-            parsed.append(parsed_line)
-    return parsed
-
-
-def parse_json(json_path):
+def get_code_and_nl(src):
     try:
-        with open(json_path, "r") as fin:
-            return json.load(fin)
-    except json.JSONDecodeError:
-        return parse_json_lines(json_path)
+        tree = ast.parse(src)
+        doc = ast.get_docstring(tree.body[0])
+        return src.strip(), doc.strip()
+    except SyntaxError:
+        return None, None
 
 
-def load(code_json_path, nl_path):
-    code = parse_json(code_json_path)
-    with open(nl_path) as fin:
-        nl = fin.readlines()
+def load(json_path):
+    with open(json_path, "r") as fin:
+        data = json.load(fin)
     obs = []
-    for code, nl in tqdm.tqdm(zip(code, nl)):
-        obs.append({"code": code.strip(), "nl": nl.strip()})
+    for entry in tqdm.tqdm(data):
+        code, nl = get_code_and_nl(entry)
+        if code is None or nl is None:
+            continue
+        obs.append({"code": code, "nl": nl})
     return obs
 
 
 def get_args():
     parser = argparse.ArgumentParser(description="Github to canonical")
-    parser.add_argument("-c", "--code", type=str, help="Path to code json")
-    parser.add_argument("-n", "--nl", type=str, help="Path to NL text")
+    parser.add_argument("-i", "--input", type=str, help="Path to input json")
     parser.add_argument(
         "-o",
         "--output",
@@ -50,7 +43,7 @@ def get_args():
 
 def main():
     args = get_args()
-    data = load(args.code, args.nl)
+    data = load(args.input)
     corpus = CanonicalInput(data)
     with open(args.output, "wb") as fout:
         pickle.dump(corpus, fout)
