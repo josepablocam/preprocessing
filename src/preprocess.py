@@ -25,6 +25,9 @@ class AbstractAstTokenCollector(ast.NodeVisitor):
             self.visit(ast.parse(src))
             return list(self.tokens)
         except:
+            if getattr(self, "debug", None) is not None:
+                import pdb
+                pdb.post_mortem()
             print("Parse failed")
             return []
 
@@ -50,11 +53,49 @@ class NameCollector(AbstractAstTokenCollector):
 
 
 class DefinitionNameCollector(AbstractAstTokenCollector):
+    def visit_ClassDef(self, node):
+        name = node.name.strip()
+        name = name.replace("\n", " ")
+        self.tokens.append(name)
+        self.generic_visit(node)
+
     def visit_FunctionDef(self, node):
         name = node.name.strip()
         name = name.replace("\n", " ")
         self.tokens.append(name)
         self.generic_visit(node)
+
+
+class QualifiedDefinitionNameCollector(AbstractAstTokenCollector):
+    def __init__(self):
+        super().__init__()
+        self.context = []
+
+    def qualify_name(self, name):
+        if len(self.context) == 0:
+            return name
+        prefix = ".".join(self.context)
+        return prefix + "." + name
+
+    def visit_ClassDef(self, node):
+        name = node.name
+        name = name.replace("\n", " ")
+        full_name = self.qualify_name(name)
+        self.tokens.append(full_name)
+
+        self.context.append(name)
+        self.generic_visit(node)
+        self.context.pop()
+
+    def visit_FunctionDef(self, node):
+        name = node.name.strip()
+        name = name.replace("\n", " ")
+        full_name = self.qualify_name(name)
+        self.tokens.append(full_name)
+
+        self.context.append(name)
+        self.generic_visit(node)
+        self.context.pop()
 
 
 def extract_call_tokens(src):
@@ -70,6 +111,11 @@ def extract_name_tokens(src):
 def extract_def_name(src):
     assert isinstance(src, str)
     return DefinitionNameCollector().run(src)
+
+
+def extract_qualified_def_name(src):
+    assert isinstance(src, str)
+    return QualifiedDefinitionNameCollector().run(src)
 
 
 def remove_code_from_nl(nl):
@@ -131,6 +177,12 @@ def stem_english_words(_input):
     if isinstance(_input, str):
         _input = split_on_whitespace(_input)
     return [ENGLISH_STEMMER.stem(t) for t in _input]
+
+
+def naive_docstring_summary(nl):
+    # take the first "sentence" based on a period
+    assert isinstance(nl, str)
+    return nl.split(".")[0]
 
 
 def sequence(*fs):
