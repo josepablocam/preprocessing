@@ -32,6 +32,11 @@ class AbstractAstTokenCollector(ast.NodeVisitor):
 class CallCollector(AbstractAstTokenCollector):
     def visit_Call(self, node):
         func = astunparse.unparse(node.func).strip()
+        # do arguments first so that order of execution
+        # matches order of collection
+        args = node.args + node.keywords
+        for arg in args:
+            self.visit(arg)
         func = func.replace("\n", " ")
         self.tokens.append(func)
 
