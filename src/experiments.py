@@ -29,7 +29,7 @@ DIMENSION = 100
 TEST_PIPELINE = preprocess.sequence(
     preprocess.split_on_code_characters,
     preprocess.lower_case,
-    preprocess.remove_english_stopwords.
+    preprocess.remove_english_stopwords,
     preprocess.stem_english_words,
 )
 
