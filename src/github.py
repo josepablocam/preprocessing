@@ -9,6 +9,8 @@ import pickle
 from .preprocess import CanonicalInput
 
 
+PASS = ast.parse("pass").body[0]
+
 def get_code_and_nl(src):
     try:
         tree = ast.parse(src)
@@ -19,7 +21,12 @@ def get_code_and_nl(src):
         if (isinstance(first_elem, ast.Str)
                 or (isinstance(first_elem, ast.Constant)
                     and isinstance(first_elem.value, str))):
-            func.body = func.body[1:]
+            if len(func.body) > 1:
+                # if there are other statements, take the rest
+                func.body = func.body[1:]
+            else:
+                # otherwise add a dummy pass statement
+                func.body = [PASS]
         return astunparse.unparse(func).strip(), doc.strip()
     except SyntaxError:
         return None, None
