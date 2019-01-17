@@ -1,6 +1,7 @@
 # Convert the Github files into canonical format
 import argparse
 import ast
+import astunparse
 import json
 import tqdm
 import pickle
@@ -11,8 +12,15 @@ from .preprocess import CanonicalInput
 def get_code_and_nl(src):
     try:
         tree = ast.parse(src)
-        doc = ast.get_docstring(tree.body[0])
-        return src.strip(), doc.strip()
+        func = tree.body[0]
+        doc = ast.get_docstring(func)
+        # strip the docstring from the code body
+        first_elem = func.body[0].value
+        if (isinstance(first_elem, ast.Str)
+                or (isinstance(first_elem, ast.Constant)
+                    and isinstance(first_elem.value, str))):
+            func.body = func.body[1:]
+        return astunparse.unparse(func).strip(), doc.strip()
     except SyntaxError:
         return None, None
 
