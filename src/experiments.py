@@ -25,6 +25,14 @@ TARGET_LEN = 50
 # dimension of embeddings produced
 DIMENSION = 100
 
+# Test data is always modified with the same pipeline
+TEST_PIPELINE = preprocess.sequence(
+    preprocess.split_on_code_characters,
+    preprocess.lower_case,
+    preprocess.remove_english_stopwords.
+    preprocess.stem_english_words,
+)
+
 
 def produce_embeddings(train_data, min_vocab_count, dim, output_dir):
     """
@@ -75,7 +83,6 @@ def generate_experiment_folder(
         * Extracts vocabulary from embeddings file
         * Writes out encoded version of training/test data using vocabulary
     """
-
     if seed is not None:
         np.random.seed(seed)
 
@@ -87,8 +94,7 @@ def generate_experiment_folder(
     train_data.apply_pipeline(nl_pipeline, which="nl")
 
     print("Transforming test data")
-    test_data.apply_pipeline(code_pipeline, which="code")
-    test_data.apply_pipeline(nl_pipeline, which="nl")
+    test_data.apply_pipeline(TEST_PIPELINE, which="both")
 
     utils.create_dir(output_dir)
     print("Producing embeddings")
@@ -172,43 +178,46 @@ def generate_experiments(
     }
 
     # pipelines
-    lower_case_pipeline = preprocess.sequence(
+    simplest_pipeline = preprocess.sequence(
         preprocess.split_on_code_characters,
         preprocess.lower_case,
     )
-
     # Experiments
     experiments = []
 
-    # No process
+    # Simplest process (tokenize and lower case)
     exp0 = dict(empty_experiment)
-    exp0["code"] = lower_case_pipeline
-    exp0["nl"] = lower_case_pipeline
+    exp0["code"] = simplest_pipeline
+    exp0["nl"] = simplest_pipeline
     exp0["output_dir"] = os.path.join(output_dir, "exp0")
     experiments.append(exp0)
 
-    # Split on code characters
+    # Split code characters but only method name
     exp1 = dict(empty_experiment)
     exp1["code"] = preprocess.sequence(
-        preprocess.split_on_code_characters,
-        preprocess.lower_case,
-    )
-    exp1["nl"] = lower_case_pipeline
-    exp1["output_dir"] = os.path.join(output_dir, "exp1")
-    experiments.append(exp1)
-
-    # Split code characters but only method name
-    exp2 = dict(empty_experiment)
-    exp2["code"] = preprocess.sequence(
         preprocess.extract_qualified_def_name,
         preprocess.split_on_code_characters,
         preprocess.lower_case,
     )
-    exp2["nl"] = lower_case_pipeline
+    exp1["nl"] = simplest_pipeline
+    exp1["output_dir"] = os.path.join(output_dir, "exp1")
+    experiments.append(exp1)
+
+    # Split code characters, method name and calls
+    exp2 = dict(empty_experiment)
+    exp2["code"] = preprocess.sequence(
+        preprocess.plus(
+            preprocess.extract_qualified_def_name,
+            preprocess.extract_call_tokens,
+        ),
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    exp2["nl"] = simplest_pipeline
     exp2["output_dir"] = os.path.join(output_dir, "exp2")
     experiments.append(exp2)
 
-    # Split code characters, method name and calls
+    # Remove stop words and stem
     exp3 = dict(empty_experiment)
     exp3["code"] = preprocess.sequence(
         preprocess.plus(
@@ -217,42 +226,34 @@ def generate_experiments(
         ),
         preprocess.split_on_code_characters,
         preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+        preprocess.stem_english_words,
     )
-    exp3["nl"] = lower_case_pipeline
+    exp3["nl"] = simplest_pipeline
     exp3["output_dir"] = os.path.join(output_dir, "exp3")
     experiments.append(exp3)
 
-    # Remove stop words and stem
+    # Removal of stopwords/stemming but for all tokens in code
     exp4 = dict(empty_experiment)
     exp4["code"] = preprocess.sequence(
-        preprocess.plus(
-            preprocess.extract_qualified_def_name,
-            preprocess.extract_call_tokens,
-        ),
         preprocess.split_on_code_characters,
         preprocess.lower_case,
         preprocess.remove_english_stopwords,
         preprocess.stem_english_words,
     )
-    exp4["nl"] = lower_case_pipeline
+    exp4["nl"] = simplest_pipeline
     exp4["output_dir"] = os.path.join(output_dir, "exp4")
     experiments.append(exp4)
 
-    # Better NL: take first sentence in docstring, split, remove stop
-    # words and stem
+    # Same treatment for NL now
     exp5 = dict(empty_experiment)
     exp5["code"] = preprocess.sequence(
-        preprocess.plus(
-            preprocess.extract_qualified_def_name,
-            preprocess.extract_call_tokens,
-        ),
         preprocess.split_on_code_characters,
         preprocess.lower_case,
         preprocess.remove_english_stopwords,
         preprocess.stem_english_words,
     )
     exp5["nl"] = preprocess.sequence(
-        preprocess.naive_docstring_summary,
         preprocess.split_on_code_characters,
         preprocess.lower_case,
         preprocess.remove_english_stopwords,
@@ -260,6 +261,26 @@ def generate_experiments(
     )
     exp5["output_dir"] = os.path.join(output_dir, "exp5")
     experiments.append(exp5)
+
+    # Better NL: take first sentence in docstring
+    exp6 = dict(empty_experiment)
+    exp6["code"] = preprocess.sequence(
+        preprocess.plus(
+            preprocess.extract_qualified_def_name,
+            preprocess.extract_call_tokens,
+        ),
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+        preprocess.stem_english_words,
+    )
+    exp6["nl"] = preprocess.sequence(
+        preprocess.naive_docstring_summary,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    exp6["output_dir"] = os.path.join(output_dir, "exp6")
+    experiments.append(exp6)
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
