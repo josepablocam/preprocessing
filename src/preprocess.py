@@ -270,5 +270,5 @@ class CanonicalInput(object):
 
         with open(code_output, "w") as code, open(nl_output, "w") as nl:
             for obs in dataset:
-                code.write(obs["code"] + "\n")
-                nl.write(obs["nl"] + "\n")
+                code.write(obs["code"].encode("ascii", "ignore") + "\n")
+                nl.write(obs["nl"].encode("ascii", "ignore") + "\n")
