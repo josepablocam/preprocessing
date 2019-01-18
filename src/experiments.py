@@ -324,7 +324,7 @@ def run_experiments(base_dir, force=False):
             embeddings_path,
             encoder_path,
             print_every=1000,
-            save_every=1,
+            save_every=10,
             output_folder=experiment,
         )
 
