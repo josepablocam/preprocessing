@@ -242,7 +242,6 @@ class CanonicalInput(object):
         for obs in tqdm.tqdm(dataset):
             code = obs["code"]
             nl = obs["nl"]
-
             if which == "code":
                 code = " ".join(pipeline(code))
             elif which == "nl":

@@ -190,7 +190,7 @@ def generate_experiments(
     exp0["code"] = simplest_pipeline
     exp0["nl"] = simplest_pipeline
     exp0["output_dir"] = os.path.join(output_dir, "exp0")
-    experiments.append(exp0)
+    #experiments.append(exp0)
 
     # Split code characters but only method name
     exp1 = dict(empty_experiment)
@@ -201,7 +201,7 @@ def generate_experiments(
     )
     exp1["nl"] = simplest_pipeline
     exp1["output_dir"] = os.path.join(output_dir, "exp1")
-    experiments.append(exp1)
+    #experiments.append(exp1)
 
     # Split code characters, method name and calls
     exp2 = dict(empty_experiment)
@@ -215,7 +215,7 @@ def generate_experiments(
     )
     exp2["nl"] = simplest_pipeline
     exp2["output_dir"] = os.path.join(output_dir, "exp2")
-    experiments.append(exp2)
+    #experiments.append(exp2)
 
     # Remove stop words and stem
     exp3 = dict(empty_experiment)
@@ -231,7 +231,7 @@ def generate_experiments(
     )
     exp3["nl"] = simplest_pipeline
     exp3["output_dir"] = os.path.join(output_dir, "exp3")
-    experiments.append(exp3)
+    #experiments.append(exp3)
 
     # Removal of stopwords/stemming but for all tokens in code
     exp4 = dict(empty_experiment)
@@ -243,7 +243,7 @@ def generate_experiments(
     )
     exp4["nl"] = simplest_pipeline
     exp4["output_dir"] = os.path.join(output_dir, "exp4")
-    experiments.append(exp4)
+    #experiments.append(exp4)
 
 
     ##### Experiment on NL #####
@@ -265,7 +265,7 @@ def generate_experiments(
         preprocess.stem_english_words,
     )
     exp5["output_dir"] = os.path.join(output_dir, "exp5")
-    experiments.append(exp5)
+    #experiments.append(exp5)
 
     # NL: take description, remove param etc.
     exp6 = dict(empty_experiment)
@@ -278,7 +278,7 @@ def generate_experiments(
         preprocess.stem_english_words,
     )
     exp6["output_dir"] = os.path.join(output_dir, "exp6")
-    experiments.append(exp6)
+    #experiments.append(exp6)
 
     # NL: take first sentence in docstring
     exp7 = dict(empty_experiment)
