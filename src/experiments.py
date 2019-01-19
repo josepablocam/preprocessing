@@ -66,6 +66,8 @@ def generate_experiment_folder(
         test_data,
         code_pipeline,
         nl_pipeline,
+        code_test_pipeline,
+        nl_test_pipeline,
         min_vocab_count,
         output_dir,
         target_len=TARGET_LEN,
@@ -94,7 +96,9 @@ def generate_experiment_folder(
     train_data.apply_pipeline(nl_pipeline, which="nl")
 
     print("Transforming test data")
-    test_data.apply_pipeline(TEST_PIPELINE, which="both")
+    test_data.apply_pipeline(code_test_pipeline, which="code")
+    test_data.apply_pipeline(nl_test_pipeline, which="nl")
+
 
     utils.create_dir(output_dir)
     print("Producing embeddings")
@@ -189,8 +193,10 @@ def generate_experiments(
     exp0 = dict(empty_experiment)
     exp0["code"] = simplest_pipeline
     exp0["nl"] = simplest_pipeline
+    exp0["code_test"] = simplest_pipeline
+    exp0["nl_test"] = simplest_pipeline
     exp0["output_dir"] = os.path.join(output_dir, "exp0")
-    #experiments.append(exp0)
+    experiments.append(exp0)
 
     # Split code characters but only method name
     exp1 = dict(empty_experiment)
@@ -200,8 +206,10 @@ def generate_experiments(
         preprocess.lower_case,
     )
     exp1["nl"] = simplest_pipeline
+    exp1["code_test"] = simplest_pipeline
+    exp1["nl_test"] = simplest_pipeline
     exp1["output_dir"] = os.path.join(output_dir, "exp1")
-    #experiments.append(exp1)
+    experiments.append(exp1)
 
     # Split code characters, method name and calls
     exp2 = dict(empty_experiment)
@@ -214,8 +222,10 @@ def generate_experiments(
         preprocess.lower_case,
     )
     exp2["nl"] = simplest_pipeline
+    exp2["code_test"] = simplest_pipeline
+    exp2["nl_test"] = simplest_pipeline
     exp2["output_dir"] = os.path.join(output_dir, "exp2")
-    #experiments.append(exp2)
+    experiments.append(exp2)
 
     # Remove stop words and stem
     exp3 = dict(empty_experiment)
@@ -230,8 +240,10 @@ def generate_experiments(
         preprocess.stem_english_words,
     )
     exp3["nl"] = simplest_pipeline
+    exp3["code_test"] = TEST_PIPELINE
+    exp3["nl_test"] = simplest_pipeline
     exp3["output_dir"] = os.path.join(output_dir, "exp3")
-    #experiments.append(exp3)
+    experiments.append(exp3)
 
     # Removal of stopwords/stemming but for all tokens in code
     exp4 = dict(empty_experiment)
@@ -242,8 +254,10 @@ def generate_experiments(
         preprocess.stem_english_words,
     )
     exp4["nl"] = simplest_pipeline
+    exp4["code_test"] = TEST_PIPELINE
+    exp4["nl_test"] = simplest_pipeline
     exp4["output_dir"] = os.path.join(output_dir, "exp4")
-    #experiments.append(exp4)
+    experiments.append(exp4)
 
 
     ##### Experiment on NL #####
@@ -264,8 +278,10 @@ def generate_experiments(
         preprocess.remove_english_stopwords,
         preprocess.stem_english_words,
     )
+    exp5["code_test"] = best_sequence_for_code
+    exp5["nl_test"] = TEST_PIPELINE
     exp5["output_dir"] = os.path.join(output_dir, "exp5")
-    #experiments.append(exp5)
+    experiments.append(exp5)
 
     # NL: take description, remove param etc.
     exp6 = dict(empty_experiment)
@@ -277,8 +293,10 @@ def generate_experiments(
         preprocess.remove_english_stopwords,
         preprocess.stem_english_words,
     )
+    exp6["code_test"] = best_sequence_for_code
+    exp6["nl_test"] = TEST_PIPELINE
     exp6["output_dir"] = os.path.join(output_dir, "exp6")
-    #experiments.append(exp6)
+    experiments.append(exp6)
 
     # NL: take first sentence in docstring
     exp7 = dict(empty_experiment)
@@ -291,6 +309,8 @@ def generate_experiments(
         preprocess.remove_english_stopwords,
         preprocess.stem_english_words,
     )
+    exp7["code_test"] = best_sequence_for_code
+    exp7["nl_test"] = TEST_PIPELINE
     exp7["output_dir"] = os.path.join(output_dir, "exp7")
     experiments.append(exp7)
 
@@ -309,6 +329,8 @@ def generate_experiments(
             test_data,
             code_pipeline=exp["code"],
             nl_pipeline=exp["nl"],
+            code_test_pipeline=exp["code_test"],
+            nl_test_pipeline=exp["nl_test"],
             min_vocab_count=exp["min_count"],
             output_dir=exp["output_dir"],
             downsample_n=exp["downsample_n"],
