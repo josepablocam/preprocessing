@@ -182,7 +182,7 @@ def stem_english_words(_input):
 def remove_params_and_returns(nl):
     assert isinstance(nl, str)
     # Remove params and returns in docstring
-    indicate_regex = "param:|Param:|params:|Params:|PARAM:|PARAMS:|return:|returns:|Return:|Returns:|RETURN:|RETURNS:"
+    indicate_regex = "\nparam|\nParam|\nparams|\nParams|\nPARAM|\nPARAMS|\nreturn|\nreturns|\nReturn|\nReturns|\nRETURN|\nRETURNS|:param|:Param|:params|:Params|:PARAM|:PARAMS|:return|:returns|:Return|:Returns|:RETURN|:RETURNS"
     result = re.search(indicate_regex, nl)
     if result is not None:
         truncated = nl[:result.span()[0]]
