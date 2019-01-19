@@ -179,11 +179,24 @@ def stem_english_words(_input):
     return [ENGLISH_STEMMER.stem(t) for t in _input]
 
 
-def naive_docstring_summary(nl):
-    # take the first "sentence" based on a period
+def remove_params_and_returns(nl):
+    assert isinstance(nl, str)
+    # Remove params and returns in docstring
+    indicate_regex = "param:|Param:|params:|Params:|PARAM:|PARAMS:|return:|returns:|Return:|Returns:|RETURN:|RETURNS:"
+    result = re.search(indicate_regex, nl)
+    if result is not None:
+        truncated = nl[:result.span()[0]]
+        if len(truncated)>0:
+            return truncated
+        else:
+            return nl
+    else:
+        return nl
+
+def take_first_sentence(nl):
+    # take the first "sentence"
     assert isinstance(nl, str)
     return nl.split(".")[0]
-
 
 def sequence(*fs):
     return lambda _input: reduce(lambda _in, f: f(_in), fs, _input)

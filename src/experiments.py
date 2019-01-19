@@ -245,14 +245,19 @@ def generate_experiments(
     exp4["output_dir"] = os.path.join(output_dir, "exp4")
     experiments.append(exp4)
 
-    # Same treatment for NL now
-    exp5 = dict(empty_experiment)
-    exp5["code"] = preprocess.sequence(
+
+    ##### Experiment on NL #####
+    # Best sequence for code (need update)
+    best_sequence_for_code = preprocess.sequence(
         preprocess.split_on_code_characters,
         preprocess.lower_case,
         preprocess.remove_english_stopwords,
         preprocess.stem_english_words,
     )
+
+    # NL: remove stopwords and stemming
+    exp5 = dict(empty_experiment)
+    exp5["code"] = best_sequence_for_code
     exp5["nl"] = preprocess.sequence(
         preprocess.split_on_code_characters,
         preprocess.lower_case,
@@ -262,25 +267,33 @@ def generate_experiments(
     exp5["output_dir"] = os.path.join(output_dir, "exp5")
     experiments.append(exp5)
 
-    # Better NL: take first sentence in docstring
+    # NL: take description, remove param etc.
     exp6 = dict(empty_experiment)
-    exp6["code"] = preprocess.sequence(
-        preprocess.plus(
-            preprocess.extract_qualified_def_name,
-            preprocess.extract_call_tokens,
-        ),
+    exp6["code"] = best_sequence_for_code
+    exp6["nl"] = preprocess.sequence(
+        preprocess.remove_params_and_returns,
         preprocess.split_on_code_characters,
         preprocess.lower_case,
         preprocess.remove_english_stopwords,
         preprocess.stem_english_words,
     )
-    exp6["nl"] = preprocess.sequence(
-        preprocess.naive_docstring_summary,
-        preprocess.split_on_code_characters,
-        preprocess.lower_case,
-    )
     exp6["output_dir"] = os.path.join(output_dir, "exp6")
     experiments.append(exp6)
+
+    # NL: take first sentence in docstring
+    exp7 = dict(empty_experiment)
+    exp7["code"] = best_sequence_for_code
+    exp7["nl"] = preprocess.sequence(
+        preprocess.remove_params_and_returns,
+        preprocess.take_first_sentence,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+        preprocess.stem_english_words,
+    )
+    exp7["output_dir"] = os.path.join(output_dir, "exp7")
+    experiments.append(exp7)
+
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
