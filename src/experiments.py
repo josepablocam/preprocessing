@@ -36,6 +36,17 @@ TEST_PIPELINE = preprocess.sequence(
     preprocess.stem_english_words,
 )
 
+EMPTY_EXPERIMENT = {
+    "code": None,
+    "nl": None,
+    "code_test": None,
+    "nl_test": None,
+    "min_count": 5,
+    "downsample_train": 10000,
+    "downsample_valid": 500,
+    "seeds": [10, 20, 30, 40, 50],
+}
+
 
 def produce_embeddings(train_data, min_vocab_count, dim, output_dir):
     """
@@ -94,8 +105,7 @@ def generate_experiment_folder(
         if not isinstance(seeds, list):
             seeds = [seeds]
         assert VALID_SEED not in seeds, "{} reserved for internal seed".format(
-            VALID_SEED
-        )
+            VALID_SEED)
         np.random.seed(seeds[0])
 
     train_data.reset()
@@ -184,13 +194,11 @@ def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
     paths = [code_path, nl_path]
     for input_path in paths:
         output_path = os.path.splitext(input_path)[0] + ".npy"
-        print(
-            "Encoding {} w/ {} to {}".format(
-                input_path,
-                encoder_path,
-                output_path,
-            )
-        )
+        print("Encoding {} w/ {} to {}".format(
+            input_path,
+            encoder_path,
+            output_path,
+        ))
         apply_encoder(
             input_path,
             encoder_path,
@@ -200,34 +208,8 @@ def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
         )
 
 
-def generate_experiments(
-        train_data_path,
-        test_data_path,
-        output_dir,
-        train_downsample=None,
-        seed=None,
-        force=False,
-):
-    """
-    Generates subfolders for experiments
-    """
-    with open(train_data_path, "rb") as fin:
-        train_data = pickle.load(fin)
-
-    with open(test_data_path, "rb") as fin:
-        test_data = pickle.load(fin)
-
-    utils.create_dir(output_dir)
-
-    empty_experiment = {
-        "code": None,
-        "nl": None,
-        "min_count": 5,
-        "downsample_train": 10000,
-        "downsample_valid": 500,
-        "seeds": [10, 20, 30, 40, 50],
-    }
-
+def initial_experiments():
+    """Experiments used at the start to figure out what made sense to try"""
     # pipelines
     simplest_pipeline = preprocess.sequence(
         preprocess.split_on_code_characters,
@@ -359,13 +341,138 @@ def generate_experiments(
     exp7["nl_test"] = TEST_PIPELINE
     exp7["output_dir"] = os.path.join(output_dir, "exp7")
     experiments.append(exp7)
+    return experiments
+
+
+def paper_experiments():
+    """After discussion, the experiments we are running for paper"""
+    experiments = []
+    # base NL used for code experiments
+    base_nl_pipeline = preprocess.sequence(
+        preprocess.remove_params_and_returns,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    # base code used for NL experiments
+    base_code_pipeline = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+
+    # Base experiment configurations
+    code = dict(EMPTY_EXPERIMENT)
+    code["nl"] = base_nl_pipeline
+    code["nl_test"] = code["nl"]
+
+    nl = dict(EMPTY_EXPERIMENT)
+    nl["code"] = base_code_pipeline
+    nl["code_test"] = nl["code"]
+
+    # Code experiments
+    code1 = dict(code)
+    code1["code"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    code1["code_test"] = code1["code"]
+    code1["output_dir"] = os.path.join(output_dir, "code-1")
+    experiments.append(code1)
+
+    code2 = dict(code)
+    code2["code"] = preprocess.sequence(
+        preprocess.extract_def_name_and_call_tokens_resilient,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    code2["code_test"] = code2["code"]
+    code2["output_dir"] = os.path.join(output_dir, "code-2")
+    experiments.append(code2)
+
+    code3 = dict(code)
+    code3["code"] = preprocess.sequence(
+        code2["code"],
+        preprocess.remove_english_stopwords,
+    )
+    code3["code_test"] = code3["code"]
+    code3["output_dir"] = os.path.join(output_dir, "code-3")
+    experiments.append(code3)
+
+    code4 = dict(code)
+    code4["code"] = preprocess.sequence(
+        code3["code"],
+        preprocess.stem_english_words,
+    )
+    code4["code_test"] = code4["code"]
+    code4["output_dir"] = os.path.join(output_dir, "code-4")
+    experiments.append(code4)
+
+    # NL experiments
+    nl1 = dict(nl)
+    nl1["nl"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    nl1["nl_test"] = nl1["nl"]
+    nl1["output_dir"] = os.path.join(output_dir, "nl-1")
+    experiments.append(nl1)
+
+    nl2 = dict(nl)
+    nl2["nl"] = preprocess.sequence(
+        preprocess.remove_params_and_returns,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    nl2["nl_test"] = nl2["nl"]
+    nl2["output_dir"] = os.path.join(output_dir, "nl-2")
+    experiments.append(nl2)
+
+    nl3 = dict(nl)
+    nl3["nl"] = preprocess.sequence(
+        nl2["nl"],
+        preprocess.remove_english_stopwords,
+    )
+    nl3["nl_test"] = nl3["nl"]
+    nl3["output_dir"] = os.path.join(output_dir, "nl-3")
+    experiments.append(nl3)
+
+    nl4 = dict(nl)
+    nl4["nl"] = preprocess.sequence(
+        nl3["nl"],
+        preprocess.stem_english_words,
+    )
+    nl4["nl_test"] = nl4["nl"]
+    nl4["output_dir"] = os.path.join(output_dir, "nl-4")
+    experiments.append(nl4)
+
+    return experiments
+
+
+def generate_experiments(
+        train_data_path,
+        test_data_path,
+        output_dir,
+        train_downsample=None,
+        seed=None,
+        force=False,
+):
+    """
+    Generates subfolders for experiments
+    """
+    with open(train_data_path, "rb") as fin:
+        train_data = pickle.load(fin)
+
+    with open(test_data_path, "rb") as fin:
+        test_data = pickle.load(fin)
+
+    utils.create_dir(output_dir)
+
+    experiments = paper_experiments()
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
         if os.path.exists(exp["output_dir"]) and not force:
-            print(
-                "Skipping {}, output folder exists".format(exp["output_dir"])
-            )
+            print("Skipping {}, output folder exists".format(
+                exp["output_dir"]))
             print("Use --force if re-run is desired")
             continue
 
@@ -391,10 +498,8 @@ def run_experiments(base_dir, force=False):
     for experiment_root in experiment_folders:
         experiment_subfolders = glob.glob(experiment_root + "/seed*")
         if len(experiment_subfolders) == 0:
-            print(
-                "No seed folders used, data must be at: {}".
-                format(experiment_root)
-            )
+            print("No seed folders used, data must be at: {}".format(
+                experiment_root))
             experiment_subfolders = [experiment_root]
 
         # Embeddings, encoder, test and validation data are seed independent
@@ -478,8 +583,7 @@ def run_single_experiment(
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="Setup and run preprocessing experiments"
-    )
+        description="Setup and run preprocessing experiments")
     subparsers = parser.add_subparsers(help="Actions")
     gen_parser = subparsers.add_parser("generate")
     gen_parser.add_argument(
@@ -521,8 +625,7 @@ def get_args():
         "-d",
         "--data",
         type=str,
-        help="Root directory with experiment subfolders generated"
-    )
+        help="Root directory with experiment subfolders generated")
     run_parser.add_argument(
         "-f",
         "--force",
