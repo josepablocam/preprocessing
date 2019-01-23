@@ -130,6 +130,89 @@ class CodeDocstringModel(nn.Module):
         losses = bad_sim + self.margin - good_sim
         return losses.clamp(min=0.0)
 
+class DANModel(nn.Module):
+    """DAN (deep averaging network) Model"""
+    def __init__(
+        self,
+        margin,
+        code_vocab_size,
+        nl_vocab_size,
+        emb_size,
+        hidden_size,
+        fixed_embeddings=False,
+        num_layers=2,
+    ):
+        super().__init__()
+        self.margin = margin
+        self.num_layers = num_layers
+        self.emb_size = emb_size
+        self.hidden_size = hidden_size
+        self.code_embeddings = nn.Embedding(
+            code_vocab_size,
+            emb_size,
+            padding_idx=data.PAD_TOKEN_ID,
+        )
+        self.nl_embeddings = nn.Embedding(
+            nl_vocab_size,
+            emb_size,
+            padding_idx=data.PAD_TOKEN_ID,
+        )
+        self.code_nn = nn.Sequential()
+        for i in range(self.num_layers):
+            n_in = self.hidden_size if i>0 else self.emb_size
+            n_out = self.hidden_size
+            self.code_nn.add_module('linear-{}'.format(i),
+                nn.Linear(n_in, n_out)
+            )
+            self.code_nn.add_module('activation-{}'.format(i),
+                nn.Tanh()
+            )
+        self.nl_nn = nn.Sequential()
+        for i in range(self.num_layers):
+            n_in = self.hidden_size if i>0 else self.emb_size
+            n_out = self.hidden_size
+            self.nl_nn.add_module('linear-{}'.format(i),
+                nn.Linear(n_in, n_out)
+            )
+            self.nl_nn.add_module('activation-{}'.format(i),
+                nn.Tanh()
+            )
+            
+        if fixed_embeddings:
+            self.code_embeddings.weight.requires_grad = False
+            self.nl_embeddings.weight.requires_grad = False
+
+        self.output_size = self.hidden_size
+
+    def _embed(self, _input, emb_layer, nn_layer):
+        embedded = emb_layer(_input)  # (batch_size, num_tokens, emb_dim)
+        # Average embeddings
+        avg_emb = avg_ignore_padding(embedded, _input) # (batch_size, emb_dim)
+        return nn_layer(avg_emb) # (batch_size, output_dim)
+
+    def embed_code(self, code):
+        # code: (batch_size, num_tokens)
+        # return: (batch_size, out_dim)
+        embs = self._embed(code, self.code_embeddings, self.code_nn)
+        return embs
+
+    def embed_nl(self, nl):
+        # nl: (batch_size, num_tokens)
+        # return: (batch_size, out_dim)
+        embs = self._embed(nl, self.nl_embeddings, self.nl_nn)
+        return embs
+
+    def forward(self, code, nl, fake_nl):
+        return self.embed_code(code), self.embed_nl(nl), self.embed_nl(fake_nl)
+
+    def losses(self, code, nl, fake_nl):
+        code_emb, nl_emb, fake_nl_emb = self.forward(code, nl, fake_nl)
+        good_sim = F.cosine_similarity(code_emb, nl_emb, dim=1)
+        bad_sim = F.cosine_similarity(code_emb, fake_nl_emb, dim=1)
+        losses = bad_sim + self.margin - good_sim
+        return losses.clamp(min=0.0)
+
+
 
 class LSTMModel(nn.Module):
     """LSTM model"""
