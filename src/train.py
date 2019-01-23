@@ -1,5 +1,6 @@
 import argparse
 from collections import defaultdict
+import copy
 import datetime
 import json
 import os
@@ -116,6 +117,8 @@ def train(
         num_epochs=NUM_EPOCHS,
         hidden_size=HIDDEN_SIZE,
         fixed_embeddings=True,
+        valid_code_path=None,
+        valid_docstrings_path=None,
 ):
     embeddings = precomputed_embeddings.read_embeddings(embeddings_path)
     emb_size = list(embeddings.values())[0].shape[0]
@@ -146,15 +149,15 @@ def train(
         "margin": margin,
         "num_epochs": num_epochs,
         "fixed_embeddings": fixed_embeddings,
+        "valid_code_path": valid_code_path,
+        "valid_docstrings_path": valid_docstrings_path,
     }
     with open(os.path.join(model_folder, "config.json"), "w") as fout:
         json.dump(config, fout)
 
     log_dir = os.path.join(run_folder, "runs")
     utils.create_dir(log_dir)
-    tensorboard_writer = SummaryWriter(
-        log_dir=log_dir
-    )
+    tensorboard_writer = SummaryWriter(log_dir=log_dir)
     global outputManager
     outputManager = utils.OutputManager(log_dir)
 
@@ -163,6 +166,16 @@ def train(
         code_path,
         docstrings_path,
     )
+    use_validation = (
+        valid_code_path is not None and valid_docstrings_path is not None
+    )
+    if use_validation:
+        valid_dl = load_data(
+            batch_size,
+            valid_code_path,
+            valid_docstrings_path,
+        )
+
     sim_model = code_search_model.LSTMModel(
         margin,
         vocab_size,  # same vocab for both code/NL
@@ -191,6 +204,10 @@ def train(
     batch_count = 0
     losses = defaultdict(lambda: [])
 
+    if use_validation:
+        best_valid_loss = None
+        best_valid_model = None
+
     start_time = datetime.datetime.now()
     for epoch in range(num_epochs):
         outputManager.say("Epoch:{}".format(epoch))
@@ -211,10 +228,49 @@ def train(
             )
             batch_count += 1
 
+        if use_validation:
+            loss = evaluate_loss(sim_model, valid_dl)
+            if best_valid_loss is None or loss < best_valid_loss:
+                print(
+                    "Found better model ({} < {}) @ epoch {}".format(
+                        loss,
+                        best_valid_loss,
+                        epoch,
+                    )
+                )
+                best_valid_loss = loss
+                best_valid_model = copy.deepcopy(sim_model)
+
         if batch_count % save_every == 0:
             current_time = datetime.datetime.now()
             amt_time_seconds = (current_time - start_time).total_seconds()
             log_models(models, model_folder, epoch, amt_time_seconds)
+
+    # final log if any
+    log_models(models, model_folder, "final", amt_time_seconds)
+
+    if use_validation:
+        log_models(
+            {
+                "best_valid_model": best_valid_model
+            },
+            model_folder,
+            "best",
+            amt_time_seconds,
+        )
+
+
+def evaluate_loss(model, dl):
+    model.eval()
+
+    valid_losses = []
+    for code, docstring, fake_docstrings in dl:
+        losses = model.losses(code, docstring, fake_docstrings)
+        valid_losses.extend(losses.tolist())
+
+    # turn back on training
+    model.train()
+    return np.mean(valid_losses)
 
 
 def get_args():
