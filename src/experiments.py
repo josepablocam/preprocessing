@@ -44,7 +44,7 @@ EMPTY_EXPERIMENT = {
     "min_count": 5,
     "downsample_train": 10000,
     "downsample_valid": 500,
-    "seeds": [10, 20, 30, 40, 50],
+    "seeds": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 }
 
 
