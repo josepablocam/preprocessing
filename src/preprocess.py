@@ -27,8 +27,9 @@ class AbstractAstTokenCollector(ast.NodeVisitor):
         except:
             if getattr(self, "debug", None) is not None:
                 import pdb
-                pdb.post_mortem()
+                pdb.set_trace()
             print("Parse failed")
+            import pdb; pdb.set_trace()
             return []
 
 
@@ -186,17 +187,19 @@ def remove_params_and_returns(nl):
     result = re.search(indicate_regex, nl)
     if result is not None:
         truncated = nl[:result.span()[0]]
-        if len(truncated)>0:
+        if len(truncated) > 0:
             return truncated
         else:
             return nl
     else:
         return nl
 
+
 def take_first_sentence(nl):
     # take the first "sentence"
     assert isinstance(nl, str)
     return nl.split(".")[0]
+
 
 def sequence(*fs):
     return lambda _input: reduce(lambda _in, f: f(_in), fs, _input)
@@ -207,25 +210,14 @@ def plus(*fs):
 
 
 class CanonicalInput(object):
-    def __init__(self, corpus):
+    def __init__(self, corpus, transformed=None):
         self.corpus = corpus
 
         # only if transformed at some point
-        self.is_transformed = False
-        self.transformed = None
-
-        # only set if downsampled at some point
-        self.is_downsampled = False
-        self.full_corpus = None
+        self.is_transformed = transformed is not None
+        self.transformed = transformed
 
     def reset(self):
-        if self.is_downsampled:
-            assert self.full_corpus is not None
-            self.corpus = self.full_corpus
-
-        self.is_downsampled = False
-        self.full_corpus = None
-
         self.is_transformed = False
         self.transformed = None
 
@@ -261,17 +253,14 @@ class CanonicalInput(object):
     def downsample(self, n, seed=None):
         if seed is not None:
             np.random.seed(seed)
-        # back up before downsampling
-        self.downsampled = True
-        self.full_corpus = list(self.corpus)
-
         if self.is_transformed:
             assert self.is_transformed is not None
-            np.random.shuffle(self.transformed)
-            self.transformed = self.transformed[:n]
+            chosen = np.random.choice(self.transformed, size=n)
+            return CanonicalInput(self.corpus, transformed=chosen)
         else:
-            np.random.shuffle(self.corpus)
-            self.corpus = self.corpus[:n]
+            assert self.is_transformed is None
+            chosen = np.random.choice(self.corpus, size=n)
+            return CanonicalInput(chosen, transformed=None)
 
     def to_text(self, code_output, nl_output):
         if self.is_transformed:
@@ -284,7 +273,8 @@ class CanonicalInput(object):
             for obs in dataset:
                 # Some observations can be empty after we strip all
                 # non-ascii characters
-                code_txt = obs["code"].encode("ascii", "ignore").decode().strip()
+                code_txt = obs["code"].encode("ascii",
+                                              "ignore").decode().strip()
                 nl_txt = obs["nl"].encode("ascii", "ignore").decode().strip()
                 if len(code_txt) == 0 or len(nl_txt) == 0:
                     continue

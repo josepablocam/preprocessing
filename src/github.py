@@ -8,8 +8,8 @@ import pickle
 
 from .preprocess import CanonicalInput
 
-
 PASS = ast.parse("pass").body[0]
+
 
 def get_code_and_nl(src):
     try:
@@ -33,14 +33,22 @@ def get_code_and_nl(src):
 
 
 def load(json_path):
+    failed_count = 0
+    total_count = 0
     with open(json_path, "r") as fin:
         data = json.load(fin)
     obs = []
     for entry in tqdm.tqdm(data):
+        total_count += 1
         code, nl = get_code_and_nl(entry)
         if code is None or nl is None:
+            failed_count += 1
             continue
+        # remove any zero bytes (otherwise parsing can fail)
+        code = code.replace(chr(0), '')
+        nl = nl.replace(chr(0), '')
         obs.append({"code": code, "nl": nl})
+    print("{}/{} failed to parse".format(failed_count, total_count))
     return obs
 
 
