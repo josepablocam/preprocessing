@@ -36,6 +36,17 @@ TEST_PIPELINE = preprocess.sequence(
     preprocess.stem_english_words,
 )
 
+EMPTY_EXPERIMENT = {
+    "code": None,
+    "nl": None,
+    "code_test": None,
+    "nl_test": None,
+    "min_count": 5,
+    "downsample_train": 10000,
+    "downsample_valid": 500,
+    "seeds": [10, 20, 30, 40, 50],
+}
+
 
 def produce_embeddings(train_data, min_vocab_count, dim, output_dir):
     """
@@ -94,8 +105,7 @@ def generate_experiment_folder(
         if not isinstance(seeds, list):
             seeds = [seeds]
         assert VALID_SEED not in seeds, "{} reserved for internal seed".format(
-            VALID_SEED
-        )
+            VALID_SEED)
         np.random.seed(seeds[0])
 
     train_data.reset()
@@ -152,10 +162,11 @@ def generate_experiment_folder(
 
     # Generate new train data for each seed in our experiments
     if seeds is None:
+        # if no seeds provided, we will create data at the root of the
+        # experiment folder
         seeds = [None]
 
     for train_seed in seeds:
-        # create directory for seed
         if train_seed is None:
             train_seed = 0  # random
             seed_dir = output_dir
@@ -184,13 +195,11 @@ def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
     paths = [code_path, nl_path]
     for input_path in paths:
         output_path = os.path.splitext(input_path)[0] + ".npy"
-        print(
-            "Encoding {} w/ {} to {}".format(
-                input_path,
-                encoder_path,
-                output_path,
-            )
-        )
+        print("Encoding {} w/ {} to {}".format(
+            input_path,
+            encoder_path,
+            output_path,
+        ))
         apply_encoder(
             input_path,
             encoder_path,
@@ -219,15 +228,136 @@ def generate_experiments(
 
     utils.create_dir(output_dir)
 
-    empty_experiment = {
-        "code": None,
-        "nl": None,
-        "min_count": 5,
-        "downsample_train": 10000,
-        "downsample_valid": 500,
-        "seeds": [10, 20, 30, 40, 50],
-    }
+    experiments = paper_experiments(output_dir)
 
+    for exp in experiments:
+        print("Generating experiment: {}".format(exp["output_dir"]))
+        if os.path.exists(exp["output_dir"]) and not force:
+            print("Skipping {}, output folder exists".format(
+                exp["output_dir"]))
+            print("Use --force if re-run is desired")
+            continue
+
+        generate_experiment_folder(
+            train_data,
+            test_data,
+            code_pipeline=exp["code"],
+            nl_pipeline=exp["nl"],
+            code_test_pipeline=exp["code_test"],
+            nl_test_pipeline=exp["nl_test"],
+            min_vocab_count=exp["min_count"],
+            output_dir=exp["output_dir"],
+            downsample_train=exp["downsample_train"],
+            downsample_valid=exp["downsample_valid"],
+            seeds=exp.get("seeds", seed),
+        )
+
+def run_experiments(base_dir, model, test_setting, force=False):
+    experiment_folders = [
+        os.path.join(base_dir, p) for p in os.listdir(base_dir)
+    ]
+    for experiment_root in experiment_folders:
+        test_code_paths = {}
+        test_nl_paths = {}
+        if test_setting == "conala":
+            test_code_paths['conala'] = os.path.join(experiment_root, "test-code.npy")
+            test_nl_paths['conala'] = os.path.join(experiment_root, "test-nl.npy")
+        elif test_setting == "github":
+            test_code_paths['github'] = os.path.join(experiment_root, "test-code-github.npy")
+            test_nl_paths['github'] = os.path.join(experiment_root, "test-nl-github.npy")
+        else:
+            test_code_paths['conala'] = os.path.join(experiment_root, "test-code.npy")
+            test_nl_paths['conala'] = os.path.join(experiment_root, "test-nl.npy")
+            test_code_paths['github'] = os.path.join(experiment_root, "test-code-github.npy")
+            test_nl_paths['github'] = os.path.join(experiment_root, "test-nl-github.npy")
+
+        # Models to run
+        models = []
+        if model == "lstm":
+            models.append('lstm')
+        elif model == 'dan':
+            models.append('dan')
+        else:
+            models.append('lstm')
+            models.append('dan')
+
+        experiment_subfolders = glob.glob(experiment_root + "/seed*")
+        if len(experiment_subfolders) == 0:
+            print(
+                "No seed folders used, data must be at: {}".
+                format(experiment_root)
+            )
+            experiment_subfolders = [experiment_root]
+
+        for seed_folder in experiment_subfolders:
+            code_path = os.path.join(seed_folder, "train-code.npy")
+            nl_path = os.path.join(seed_folder, "train-nl.npy")
+            for test_option in test_code_paths.keys():
+                for model_option in models:
+                    exp_folder = os.path.join(seed_folder, model_option+'-'+test_option)
+                    utils.create_dir(exp_folder)
+
+                    run_single_experiment(
+                        exp_folder,
+                        code_path,
+                        nl_path,
+                        valid_code_path,
+                        valid_nl_path,
+                        test_code_paths[test_option],
+                        test_nl_paths[test_option],
+                        embeddings_path,
+                        encoder_path,
+                        model_option,
+                        force=force,
+                    )
+
+def run_single_experiment(
+        folder,
+        code_path,
+        nl_path,
+        valid_code_path,
+        valid_nl_path,
+        test_code_path,
+        test_nl_path,
+        embeddings_path,
+        encoder_path,
+        model_option,
+        force=False,
+):
+    eval_results_path = os.path.join(folder, "results.json")
+    if os.path.exists(eval_results_path) and not force:
+        print("Skipping {}, results.json exists".format(folder))
+        print("Use --force if re-run is desired")
+        return
+
+        train(
+            code_path,
+            nl_path,
+            embeddings_path,
+            encoder_path,
+            model_option,
+            print_every=1000,
+            save_every=2000,
+            output_folder=folder,
+            valid_code_path=valid_code_path,
+            valid_docstrings_path=valid_nl_path,
+        )
+        test_code, test_queries = load_evaluation_data(
+            test_code_path,
+            test_nl_path,
+        )
+
+        eval_results = evaluate_with_known_answer(
+            model,
+            test_code,
+            test_queries,
+        )
+        with open(eval_results_path, "w") as fout:
+            json.dump(eval_results, fout)
+
+
+def initial_experiments(output_dir):
+    """Experiments used at the start to figure out what made sense to try"""
     # pipelines
     simplest_pipeline = preprocess.sequence(
         preprocess.split_on_code_characters,
@@ -359,153 +489,125 @@ def generate_experiments(
     exp7["nl_test"] = TEST_PIPELINE
     exp7["output_dir"] = os.path.join(output_dir, "exp7")
     experiments.append(exp7)
-
-    for exp in experiments:
-        print("Generating experiment: {}".format(exp["output_dir"]))
-        if os.path.exists(exp["output_dir"]) and not force:
-            print(
-                "Skipping {}, output folder exists".format(exp["output_dir"])
-            )
-            print("Use --force if re-run is desired")
-            continue
-
-        generate_experiment_folder(
-            train_data,
-            test_data,
-            code_pipeline=exp["code"],
-            nl_pipeline=exp["nl"],
-            code_test_pipeline=exp["code_test"],
-            nl_test_pipeline=exp["nl_test"],
-            min_vocab_count=exp["min_count"],
-            output_dir=exp["output_dir"],
-            downsample_train=exp["downsample_train"],
-            downsample_valid=exp["downsample_valid"],
-            seeds=exp.get("seeds", seed),
-        )
+    return experiments
 
 
-def run_experiments(base_dir, model, test_setting, force=False):
-    experiment_folders = [
-        os.path.join(base_dir, p) for p in os.listdir(base_dir)
-    ]
-    for experiment_root in experiment_folders:
-        experiment_subfolders = glob.glob(experiment_root + "/seed*")
-        if len(experiment_subfolders) == 0:
-            print(
-                "No seed folders used, data must be at: {}".
-                format(experiment_root)
-            )
-            experiment_subfolders = [experiment_root]
+def paper_experiments(output_dir):
+    """After discussion, the experiments we are running for paper"""
+    experiments = []
+    # base NL used for code experiments
+    base_nl_pipeline = preprocess.sequence(
+        preprocess.remove_params_and_returns,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    # base code used for NL experiments
+    base_code_pipeline = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    # Base experiment configurations
+    code = dict(EMPTY_EXPERIMENT)
+    code["nl"] = base_nl_pipeline
+    code["nl_test"] = code["nl"]
 
-        # Embeddings, encoder, test and validation data are seed independent
-        embeddings_path = os.path.join(experiment_root, "embeddings.vec")
-        encoder_path = os.path.join(experiment_root, "encoder.pkl")
+    nl = dict(EMPTY_EXPERIMENT)
+    nl["code"] = base_code_pipeline
+    nl["code_test"] = nl["code"]
 
-        test_code_paths = {}
-        test_nl_paths = {}
-        if test_setting == "conala":
-            test_code_paths['conala'] = os.path.join(experiment_root, "test-code.npy")
-            test_nl_paths['conala'] = os.path.join(experiment_root, "test-nl.npy")
-        elif test_setting == "github":
-            test_code_paths['github'] = os.path.join(experiment_root, "test-code-github.npy")
-            test_nl_paths['github'] = os.path.join(experiment_root, "test-nl-github.npy")
-        else:
-            test_code_paths['conala'] = os.path.join(experiment_root, "test-code.npy")
-            test_nl_paths['conala'] = os.path.join(experiment_root, "test-nl.npy")
-            test_code_paths['github'] = os.path.join(experiment_root, "test-code-github.npy")
-            test_nl_paths['github'] = os.path.join(experiment_root, "test-nl-github.npy")
+    # Code experiments
+    code1 = dict(code)
+    code1["code"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    code1["code_test"] = code1["code"]
+    code1["output_dir"] = os.path.join(output_dir, "code-1")
+    experiments.append(code1)
 
-        valid_code_path = os.path.join(experiment_root, "valid-code.npy")
-        valid_nl_path = os.path.join(experiment_root, "valid-nl.npy")
+    code2 = dict(code)
+    code2["code"] = preprocess.sequence(
+        preprocess.extract_def_name_and_call_tokens_resilient,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    code2["code_test"] = code2["code"]
+    code2["output_dir"] = os.path.join(output_dir, "code-2")
+    experiments.append(code2)
 
-        # Models to run
-        models = []
-        if model == "lstm":
-            models.append('lstm')
-        elif model == 'dan':
-            models.append('dan')
-        else:
-            models.append('lstm')
-            models.append('dan')
+    code3 = dict(code)
+    code3["code"] = preprocess.sequence(
+        code2["code"],
+        preprocess.remove_english_stopwords,
+    )
+    code3["code_test"] = code3["code"]
+    code3["output_dir"] = os.path.join(output_dir, "code-3")
+    experiments.append(code3)
 
-        for seed_folder in experiment_subfolders:
-            code_path = os.path.join(seed_folder, "train-code.npy")
-            nl_path = os.path.join(seed_folder, "train-nl.npy")
-            for test_option in test_code_paths.keys():
-                for model_option in models:
-                    exp_folder = os.path.join(seed_folder, model_option+'-'+test_option)
-                    utils.create_dir(exp_folder)
+    code4 = dict(code)
+    code4["code"] = preprocess.sequence(
+        code3["code"],
+        preprocess.stem_english_words,
+    )
+    code4["code_test"] = code4["code"]
+    code4["output_dir"] = os.path.join(output_dir, "code-4")
+    experiments.append(code4)
 
-                    run_single_experiment(
-                        exp_folder,
-                        code_path,
-                        nl_path,
-                        valid_code_path,
-                        valid_nl_path,
-                        test_code_paths[test_option],
-                        test_nl_paths[test_option],
-                        embeddings_path,
-                        encoder_path,
-                        model_option,
-                        force=force,
-                    )
+    # NL experiments
+    nl1 = dict(nl)
+    nl1["nl"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    nl1["nl_test"] = nl1["nl"]
+    nl1["output_dir"] = os.path.join(output_dir, "nl-1")
+    experiments.append(nl1)
 
+    nl2 = dict(nl)
+    nl2["nl"] = preprocess.sequence(
+        preprocess.remove_params_and_returns,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    nl2["nl_test"] = nl2["nl"]
+    nl2["output_dir"] = os.path.join(output_dir, "nl-2")
+    experiments.append(nl2)
 
-def run_single_experiment(
-        folder,
-        code_path,
-        nl_path,
-        valid_code_path,
-        valid_nl_path,
-        test_code_path,
-        test_nl_path,
-        embeddings_path,
-        encoder_path,
-        model_option,
-        force=False,
-):
-    eval_results_path = os.path.join(folder, "results.json")
-    if os.path.exists(eval_results_path) and not force:
-        print("Skipping {}, results.json exists".format(folder))
-        print("Use --force if re-run is desired")
-        return
+    nl3 = dict(nl)
+    nl3["nl"] = preprocess.sequence(
+        nl2["nl"],
+        preprocess.remove_english_stopwords,
+    )
+    nl3["nl_test"] = nl3["nl"]
+    nl3["output_dir"] = os.path.join(output_dir, "nl-3")
+    experiments.append(nl3)
 
-        train(
-            code_path,
-            nl_path,
-            embeddings_path,
-            encoder_path,
-            model_option,
-            print_every=1000,
-            save_every=2000,
-            output_folder=folder,
-            valid_code_path=valid_code_path,
-            valid_docstrings_path=valid_nl_path,
-        )
-        test_code, test_queries = load_evaluation_data(
-            test_code_path,
-            test_nl_path,
-        )
+    nl4 = dict(nl)
+    nl4["nl"] = preprocess.sequence(
+        nl3["nl"],
+        preprocess.stem_english_words,
+    )
+    nl4["nl_test"] = nl4["nl"]
+    nl4["output_dir"] = os.path.join(output_dir, "nl-4")
+    experiments.append(nl4)
 
-        # load the best model based on validation loss
-        model_paths = glob.glob(os.path.join(folder, "models", "*best"))
-        assert len(model_paths) == 1, "Should only have 1 symlinked best model"
+    nl5 = dict(nl)
+    nl5["nl"] = preprocess.sequence(
+        preprocess.remove_params_and_returns,
+        preprocess.take_first_sentence,
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+    )
+    nl5["nl_test"] = nl5["nl"]
+    nl5["output_dir"] = os.path.join(output_dir, "nl-5")
+    experiments.append(nl5)
 
-        model = load_model(model_paths[0])
-
-        eval_results = evaluate_with_known_answer(
-            model,
-            test_code,
-            test_queries,
-        )
-        with open(eval_results_path, "w") as fout:
-            json.dump(eval_results, fout)
+    return experiments
 
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="Setup and run preprocessing experiments"
-    )
+        description="Setup and run preprocessing experiments")
     subparsers = parser.add_subparsers(help="Actions")
     gen_parser = subparsers.add_parser("generate")
     gen_parser.add_argument(
@@ -547,8 +649,7 @@ def get_args():
         "-d",
         "--data",
         type=str,
-        help="Root directory with experiment subfolders generated"
-    )
+        help="Root directory with experiment subfolders generated")
     run_parser.add_argument(
         "-f",
         "--force",

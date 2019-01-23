@@ -29,7 +29,6 @@ class AbstractAstTokenCollector(ast.NodeVisitor):
                 import pdb
                 pdb.set_trace()
             print("Parse failed")
-            import pdb; pdb.set_trace()
             return []
 
 
@@ -112,6 +111,19 @@ def extract_name_tokens(src):
 def extract_def_name(src):
     assert isinstance(src, str)
     return DefinitionNameCollector().run(src)
+
+
+def extract_def_name_and_call_tokens_resilient(src):
+    """
+    tries to extract def-name etc but if no name (i.e. conala snippet), just
+    returns original source to be further processed
+    """
+
+    name_tokens = NameCollector().run(src)
+    if len(name_tokens) == 0:
+        return src
+    call_tokens = CallCollector().run(src)
+    return name_tokens + call_tokens
 
 
 def extract_qualified_def_name(src):
