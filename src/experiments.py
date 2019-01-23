@@ -25,6 +25,9 @@ TARGET_LEN = 50
 # dimension of embeddings produced
 DIMENSION = 100
 
+# validation seed
+VALID_SEED = 123123
+
 # Test data is always modified with the same pipeline
 TEST_PIPELINE = preprocess.sequence(
     preprocess.split_on_code_characters,
@@ -72,8 +75,9 @@ def generate_experiment_folder(
         output_dir,
         target_len=TARGET_LEN,
         dim=DIMENSION,
-        downsample_n=None,
-        seed=None,
+        downsample_train=None,
+        downsample_valid=None,
+        seeds=None,
 ):
     """
     Produces experiment subfolder with all necessary data.
@@ -85,8 +89,14 @@ def generate_experiment_folder(
         * Extracts vocabulary from embeddings file
         * Writes out encoded version of training/test data using vocabulary
     """
-    if seed is not None:
-        np.random.seed(seed)
+    if seeds is not None:
+        # set initial seed in case tranformations in pipeline have randomness
+        if not isinstance(seeds, list):
+            seeds = [seeds]
+        assert VALID_SEED not in seeds, "{} reserved for internal seed".format(
+            VALID_SEED
+        )
+        np.random.seed(seeds[0])
 
     train_data.reset()
     test_data.reset()
@@ -99,7 +109,6 @@ def generate_experiment_folder(
     test_data.apply_pipeline(code_test_pipeline, which="code")
     test_data.apply_pipeline(nl_test_pipeline, which="nl")
 
-
     utils.create_dir(output_dir)
     print("Producing embeddings")
     embeddings_path = produce_embeddings(
@@ -109,34 +118,71 @@ def generate_experiment_folder(
         output_dir,
     )
 
-    if downsample_n is not None:
-        train_data.downsample(downsample_n, seed=seed)
-
-    train_code_path = os.path.join(output_dir, "train-code.txt")
-    train_nl_path = os.path.join(output_dir, "train-nl.txt")
-    train_data.to_text(
-        train_code_path,
-        train_nl_path,
-    )
-
-    test_code_path = os.path.join(output_dir, "test-code.txt")
-    test_nl_path = os.path.join(output_dir, "test-nl.txt")
-    test_data.to_text(
-        test_code_path,
-        test_nl_path,
-    )
-
     # vocabulary encoder from embeddings file
     encoder_path = os.path.join(output_dir, "encoder.pkl")
     print("Building encoder to {}.pkl".format(encoder_path))
     encoder_from_embeddings(embeddings_path, encoder_path)
 
-    text_files = [
-        "train-code.txt", "train-nl.txt", "test-code.txt", "test-nl.txt"
-    ]
-    text_files = [os.path.join(output_dir, p) for p in text_files]
+    # Test data: shared across all seeds
+    test_code_path = os.path.join(output_dir, "test-code.txt")
+    test_nl_path = os.path.join(output_dir, "test-nl.txt")
+    encode_dataset(
+        test_data,
+        test_code_path,
+        test_nl_path,
+        encoder_path,
+        target_len,
+    )
 
-    for input_path in text_files:
+    # held out downsampled data, shared by all seeds
+    valid_downsampled = train_data.downsample(
+        downsample_valid,
+        seed=VALID_SEED,
+    )
+
+    valid_code_path = os.path.join(output_dir, "valid-code.txt")
+    valid_nl_path = os.path.join(output_dir, "valid-nl.txt")
+    encode_dataset(
+        valid_downsampled,
+        valid_code_path,
+        valid_nl_path,
+        encoder_path,
+        target_len,
+    )
+
+    # Generate new train data for each seed in our experiments
+    if seeds is None:
+        seeds = [None]
+
+    for train_seed in seeds:
+        # create directory for seed
+        if train_seed is None:
+            train_seed = 0  # random
+            seed_dir = output_dir
+        else:
+            seed_dir = os.path.join(output_dir, "seed-{}".format(train_seed))
+            os.makedirs(seed_dir, exist_ok=True)
+
+        train_downsampled = train_data.downsample(
+            downsample_train,
+            seed=train_seed,
+        )
+
+        train_code_path = os.path.join(seed_dir, "train-code.txt")
+        train_nl_path = os.path.join(seed_dir, "train-nl.txt")
+        encode_dataset(
+            train_downsampled,
+            train_code_path,
+            train_nl_path,
+            encoder_path,
+            target_len,
+        )
+
+
+def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
+    ds.to_text(code_path, nl_path)
+    paths = [code_path, nl_path]
+    for input_path in paths:
         output_path = os.path.splitext(input_path)[0] + ".npy"
         print(
             "Encoding {} w/ {} to {}".format(
@@ -177,8 +223,9 @@ def generate_experiments(
         "code": None,
         "nl": None,
         "min_count": 5,
-        "downsample_n": 10000,
-        "seed": 42,
+        "downsample_train": 10000,
+        "downsample_valid": 500,
+        "seeds": [10, 20, 30, 40, 50],
     }
 
     # pipelines
@@ -259,7 +306,6 @@ def generate_experiments(
     exp4["output_dir"] = os.path.join(output_dir, "exp4")
     experiments.append(exp4)
 
-
     ##### Experiment on NL #####
     # Best sequence for code (need update)
     best_sequence_for_code = preprocess.sequence(
@@ -314,7 +360,6 @@ def generate_experiments(
     exp7["output_dir"] = os.path.join(output_dir, "exp7")
     experiments.append(exp7)
 
-
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
         if os.path.exists(exp["output_dir"]) and not force:
@@ -333,8 +378,9 @@ def generate_experiments(
             nl_test_pipeline=exp["nl_test"],
             min_vocab_count=exp["min_count"],
             output_dir=exp["output_dir"],
-            downsample_n=exp["downsample_n"],
-            seed=exp.get("seed", seed),
+            downsample_train=exp["downsample_train"],
+            downsample_valid=exp["downsample_valid"],
+            seeds=exp.get("seeds", seed),
         )
 
 
@@ -342,36 +388,82 @@ def run_experiments(base_dir, force=False):
     experiment_folders = [
         os.path.join(base_dir, p) for p in os.listdir(base_dir)
     ]
-    for experiment in experiment_folders:
-        eval_results_path = os.path.join(experiment, "results.json")
-        if os.path.exists(eval_results_path) and not force:
-            print("Skipping {}, results.json exists".format(experiment))
-            print("Use --force if re-run is desired")
-            continue
+    for experiment_root in experiment_folders:
+        experiment_subfolders = glob.glob(experiment_root + "/seed*")
+        if len(experiment_subfolders) == 0:
+            print(
+                "No seed folders used, data must be at: {}".
+                format(experiment_root)
+            )
+            experiment_subfolders = [experiment_root]
 
-        code_path = os.path.join(experiment, "train-code.npy")
-        nl_path = os.path.join(experiment, "train-nl.npy")
-        embeddings_path = os.path.join(experiment, "embeddings.vec")
-        encoder_path = os.path.join(experiment, "encoder.pkl")
+        # Embeddings, encoder, test and validation data are seed independent
+        embeddings_path = os.path.join(experiment_root, "embeddings.vec")
+        encoder_path = os.path.join(experiment_root, "encoder.pkl")
+
+        test_code_path = os.path.join(experiment_root, "test-code.npy")
+        test_nl_path = os.path.join(experiment_root, "test-nl.npy")
+
+        valid_code_path = os.path.join(experiment_root, "valid-code.npy")
+        valid_nl_path = os.path.join(experiment_root, "valid-nl.npy")
+
+        for seed_folder in experiment_subfolders:
+            code_path = os.path.join(seed_folder, "train-code.npy")
+            nl_path = os.path.join(seed_folder, "train-nl.npy")
+
+            run_single_experiment(
+                seed_folder,
+                code_path,
+                nl_path,
+                valid_code_path,
+                valid_nl_path,
+                test_code_path,
+                test_nl_path,
+                embeddings_path,
+                encoder_path,
+                force=force,
+            )
+
+
+def run_single_experiment(
+        folder,
+        code_path,
+        nl_path,
+        valid_code_path,
+        valid_nl_path,
+        test_code_path,
+        test_nl_path,
+        embeddings_path,
+        encoder_path,
+        force=False,
+):
+    eval_results_path = os.path.join(folder, "results.json")
+    if os.path.exists(eval_results_path) and not force:
+        print("Skipping {}, results.json exists".format(folder))
+        print("Use --force if re-run is desired")
+        return
+
         train(
             code_path,
             nl_path,
+            test_code_path,
+            test_nl_path,
             embeddings_path,
             encoder_path,
             print_every=1000,
             save_every=10,
-            output_folder=experiment,
+            output_folder=folder,
+            valid_code_path=valid_code_path,
+            valid_docstrings_path=valid_nl_path,
         )
-
         test_code, test_queries = load_evaluation_data(
-            os.path.join(experiment, "test-code.npy"),
-            os.path.join(experiment, "test-nl.npy"),
+            test_code_path,
+            test_nl_path,
         )
 
-        model_paths = glob.glob(os.path.join(experiment, "models", "*latest"))
-        assert len(
-            model_paths
-        ) == 1, "Should only have 1 symlinked latest model"
+        # load the best model based on validation loss
+        model_paths = glob.glob(os.path.join(folder, "models", "*best"))
+        assert len(model_paths) == 1, "Should only have 1 symlinked best model"
 
         model = load_model(model_paths[0])
 
