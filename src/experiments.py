@@ -162,10 +162,11 @@ def generate_experiment_folder(
 
     # Generate new train data for each seed in our experiments
     if seeds is None:
+        # if no seeds provided, we will create data at the root of the
+        # experiment folder
         seeds = [None]
 
     for train_seed in seeds:
-        # create directory for seed
         if train_seed is None:
             train_seed = 0  # random
             seed_dir = output_dir
@@ -208,7 +209,7 @@ def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
         )
 
 
-def initial_experiments():
+def initial_experiments(output_dir):
     """Experiments used at the start to figure out what made sense to try"""
     # pipelines
     simplest_pipeline = preprocess.sequence(
@@ -344,7 +345,7 @@ def initial_experiments():
     return experiments
 
 
-def paper_experiments():
+def paper_experiments(output_dir):
     """After discussion, the experiments we are running for paper"""
     experiments = []
     # base NL used for code experiments
@@ -466,7 +467,7 @@ def generate_experiments(
 
     utils.create_dir(output_dir)
 
-    experiments = paper_experiments()
+    experiments = paper_experiments(output_dir)
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
@@ -496,12 +497,6 @@ def run_experiments(base_dir, force=False):
         os.path.join(base_dir, p) for p in os.listdir(base_dir)
     ]
     for experiment_root in experiment_folders:
-        experiment_subfolders = glob.glob(experiment_root + "/seed*")
-        if len(experiment_subfolders) == 0:
-            print("No seed folders used, data must be at: {}".format(
-                experiment_root))
-            experiment_subfolders = [experiment_root]
-
         # Embeddings, encoder, test and validation data are seed independent
         embeddings_path = os.path.join(experiment_root, "embeddings.vec")
         encoder_path = os.path.join(experiment_root, "encoder.pkl")
@@ -511,6 +506,12 @@ def run_experiments(base_dir, force=False):
 
         valid_code_path = os.path.join(experiment_root, "valid-code.npy")
         valid_nl_path = os.path.join(experiment_root, "valid-nl.npy")
+
+        experiment_subfolders = glob.glob(experiment_root + "/seed*")
+        if len(experiment_subfolders) == 0:
+            print("No seed folders used, data must be at: {}".format(
+                experiment_root))
+            experiment_subfolders = [experiment_root]
 
         for seed_folder in experiment_subfolders:
             code_path = os.path.join(seed_folder, "train-code.npy")
@@ -561,16 +562,15 @@ def run_single_experiment(
             valid_code_path=valid_code_path,
             valid_docstrings_path=valid_nl_path,
         )
+        # load the best model based on validation loss
+        model_paths = glob.glob(os.path.join(folder, "models", "*best"))
+        assert len(model_paths) == 1, "Should only have 1 best model"
+        model = load_model(model_paths[0])
+
         test_code, test_queries = load_evaluation_data(
             test_code_path,
             test_nl_path,
         )
-
-        # load the best model based on validation loss
-        model_paths = glob.glob(os.path.join(folder, "models", "*best"))
-        assert len(model_paths) == 1, "Should only have 1 symlinked best model"
-
-        model = load_model(model_paths[0])
 
         eval_results = evaluate_with_known_answer(
             model,
