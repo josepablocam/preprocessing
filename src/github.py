@@ -62,10 +62,9 @@ def get_args():
     parser = argparse.ArgumentParser(description="Github to canonical")
     parser.add_argument("-i", "--input", type=str, help="Path to input json")
     parser.add_argument(
-        "-o",
         "--output",
         type=str,
-        help="Output path for pickled",
+        help="Output path for pickled data",
     )
     return parser.parse_args()
 

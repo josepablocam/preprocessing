@@ -330,30 +330,36 @@ def run_single_experiment(
         print("Use --force if re-run is desired")
         return
 
-        train(
-            code_path,
-            nl_path,
-            embeddings_path,
-            encoder_path,
-            model_option,
-            print_every=1000,
-            save_every=2000,
-            output_folder=folder,
-            valid_code_path=valid_code_path,
-            valid_docstrings_path=valid_nl_path,
-        )
-        test_code, test_queries = load_evaluation_data(
-            test_code_path,
-            test_nl_path,
-        )
+    train(
+        code_path,
+        nl_path,
+        embeddings_path,
+        encoder_path,
+        model_option,
+        print_every=1000,
+        save_every=50,
+        num_epochs=100,
+        output_folder=folder,
+        valid_code_path=valid_code_path,
+        valid_docstrings_path=valid_nl_path,
+    )
+    # load the best model based on validation loss
+    model_paths = glob.glob(os.path.join(folder, "models", "*best.pth"))
+    assert len(model_paths) == 1, "Should only have 1 best model"
+    model = load_model(model_paths[0])
 
-        eval_results = evaluate_with_known_answer(
-            model,
-            test_code,
-            test_queries,
-        )
-        with open(eval_results_path, "w") as fout:
-            json.dump(eval_results, fout)
+    test_code, test_queries = load_evaluation_data(
+        test_code_path,
+        test_nl_path,
+    )
+
+    eval_results = evaluate_with_known_answer(
+        model,
+        test_code,
+        test_queries,
+    )
+    with open(eval_results_path, "w") as fout:
+        json.dump(eval_results, fout)
 
 
 def initial_experiments(output_dir):
