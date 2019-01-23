@@ -241,7 +241,7 @@ def train(
                 best_valid_loss = loss
                 best_valid_model = copy.deepcopy(sim_model)
 
-        if batch_count % save_every == 0:
+        if epoch % save_every == 0:
             current_time = datetime.datetime.now()
             amt_time_seconds = (current_time - start_time).total_seconds()
             log_models(models, model_folder, epoch, amt_time_seconds)
@@ -252,7 +252,7 @@ def train(
     if use_validation:
         log_models(
             {
-                "best_valid_model": best_valid_model
+                "sim_model": best_valid_model
             },
             model_folder,
             "best",
