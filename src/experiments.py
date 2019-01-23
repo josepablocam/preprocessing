@@ -384,7 +384,7 @@ def generate_experiments(
         )
 
 
-def run_experiments(base_dir, force=False):
+def run_experiments(base_dir, model, test_setting, force=False):
     experiment_folders = [
         os.path.join(base_dir, p) for p in os.listdir(base_dir)
     ]
@@ -401,28 +401,54 @@ def run_experiments(base_dir, force=False):
         embeddings_path = os.path.join(experiment_root, "embeddings.vec")
         encoder_path = os.path.join(experiment_root, "encoder.pkl")
 
-        test_code_path = os.path.join(experiment_root, "test-code.npy")
-        test_nl_path = os.path.join(experiment_root, "test-nl.npy")
+        test_code_paths = {}
+        test_nl_paths = {}
+        if test_setting == "conala":
+            test_code_paths['conala'] = os.path.join(experiment_root, "test-code.npy")
+            test_nl_paths['conala'] = os.path.join(experiment_root, "test-nl.npy")
+        elif test_setting == "github":
+            test_code_paths['github'] = os.path.join(experiment_root, "test-code-github.npy")
+            test_nl_paths['github'] = os.path.join(experiment_root, "test-nl-github.npy")
+        else:
+            test_code_paths['conala'] = os.path.join(experiment_root, "test-code.npy")
+            test_nl_paths['conala'] = os.path.join(experiment_root, "test-nl.npy")
+            test_code_paths['github'] = os.path.join(experiment_root, "test-code-github.npy")
+            test_nl_paths['github'] = os.path.join(experiment_root, "test-nl-github.npy")
 
         valid_code_path = os.path.join(experiment_root, "valid-code.npy")
         valid_nl_path = os.path.join(experiment_root, "valid-nl.npy")
 
+        # Models to run
+        models = []
+        if model == "lstm":
+            models.append('lstm')
+        elif model == 'dan':
+            models.append('dan')
+        else:
+            models.append('lstm')
+            models.append('dan')
+
         for seed_folder in experiment_subfolders:
             code_path = os.path.join(seed_folder, "train-code.npy")
             nl_path = os.path.join(seed_folder, "train-nl.npy")
+            for test_option in test_code_paths.keys():
+                for model_option in models:
+                    exp_folder = os.path.join(seed_folder, model_option+'-'+test_option)
+                    utils.create_dir(exp_folder)
 
-            run_single_experiment(
-                seed_folder,
-                code_path,
-                nl_path,
-                valid_code_path,
-                valid_nl_path,
-                test_code_path,
-                test_nl_path,
-                embeddings_path,
-                encoder_path,
-                force=force,
-            )
+                    run_single_experiment(
+                        exp_folder,
+                        code_path,
+                        nl_path,
+                        valid_code_path,
+                        valid_nl_path,
+                        test_code_paths[test_option],
+                        test_nl_paths[test_option],
+                        embeddings_path,
+                        encoder_path,
+                        model_option,
+                        force=force,
+                    )
 
 
 def run_single_experiment(
@@ -435,6 +461,7 @@ def run_single_experiment(
         test_nl_path,
         embeddings_path,
         encoder_path,
+        model_option,
         force=False,
 ):
     eval_results_path = os.path.join(folder, "results.json")
@@ -446,12 +473,11 @@ def run_single_experiment(
         train(
             code_path,
             nl_path,
-            test_code_path,
-            test_nl_path,
             embeddings_path,
             encoder_path,
+            model_option,
             print_every=1000,
-            save_every=10,
+            save_every=2000,
             output_folder=folder,
             valid_code_path=valid_code_path,
             valid_docstrings_path=valid_nl_path,
@@ -529,6 +555,18 @@ def get_args():
         action="store_true",
         help="Force rerun of subdirectories with results (else skips)",
     )
+    run_parser.add_argument(
+        "--model",
+        type=str,
+        help="Model you want to run experiment with, can be lstm, dan, both",
+        default='both',
+    )
+    run_parser.add_argument(
+        "--test",
+        type=str,
+        help="Test setting you want to run on. Can be github, conala, both",
+        default='conala',
+    )
     run_parser.set_defaults(which="run")
     return parser.parse_args()
 
@@ -545,7 +583,7 @@ def main():
             force=args.force,
         )
     elif args.which == "run":
-        run_experiments(args.data, force=args.force)
+        run_experiments(args.data, args.model, args.test, force=args.force)
     else:
         raise ValueError("Unknown action: {}".format(args.which))
 

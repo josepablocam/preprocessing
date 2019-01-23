@@ -24,6 +24,7 @@ MARGIN = 0.25
 NUM_EPOCHS = 100
 LR = 5e-4
 HIDDEN_SIZE = 300
+NUM_LAYERS = 2 # For DAN
 
 
 def load_data(batch_size, code_path, docstring_path):
@@ -108,6 +109,7 @@ def train(
         docstrings_path,
         embeddings_path,
         vocab_encoder_path,
+        model_option,
         print_every=10,
         save_every=1,
         output_folder=None,
@@ -116,6 +118,7 @@ def train(
         margin=MARGIN,
         num_epochs=NUM_EPOCHS,
         hidden_size=HIDDEN_SIZE,
+        num_layers=NUM_LAYERS, # for dan
         fixed_embeddings=True,
         valid_code_path=None,
         valid_docstrings_path=None,
@@ -151,6 +154,7 @@ def train(
         "fixed_embeddings": fixed_embeddings,
         "valid_code_path": valid_code_path,
         "valid_docstrings_path": valid_docstrings_path,
+        "model": model_option,
     }
     with open(os.path.join(model_folder, "config.json"), "w") as fout:
         json.dump(config, fout)
@@ -175,17 +179,27 @@ def train(
             valid_code_path,
             valid_docstrings_path,
         )
-
-    sim_model = code_search_model.LSTMModel(
-        margin,
-        vocab_size,  # same vocab for both code/NL
-        vocab_size,
-        emb_size,
-        hidden_size=hidden_size,
-        bidirectional=True,
-        fixed_embeddings=fixed_embeddings,
-        same_embedding_fun=False,
-    )
+    if model_option == 'lstm':
+        sim_model = code_search_model.LSTMModel(
+            margin,
+            vocab_size,  # same vocab for both code/NL
+            vocab_size,
+            emb_size,
+            hidden_size=hidden_size,
+            bidirectional=True,
+            fixed_embeddings=fixed_embeddings,
+            same_embedding_fun=False,
+        )
+    else:
+        sim_model = code_search_model.DANModel(
+            margin,
+            vocab_size, # same vocab for both code/NL
+            vocab_size,
+            emb_size,
+            hidden_size=hidden_size,
+            fixed_embeddings=fixed_embeddings,
+            num_layers=num_layers,
+        )
     code_search_model.setup_precomputed_embeddings(
         sim_model,
         vocab_encoder_path,
