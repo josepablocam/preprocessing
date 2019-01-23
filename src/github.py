@@ -8,8 +8,8 @@ import pickle
 
 from .preprocess import CanonicalInput
 
-
 PASS = ast.parse("pass").body[0]
+
 
 def get_code_and_nl(src):
     try:
@@ -27,20 +27,34 @@ def get_code_and_nl(src):
             else:
                 # otherwise add a dummy pass statement
                 func.body = [PASS]
-        return astunparse.unparse(func).strip(), doc.strip()
+        # remove any zero bytes (otherwise parsing can fail)
+        code_str = astunparse.unparse(func).strip().replace(chr(0), '')
+        doc_str = doc.strip().replace(chr(0), '')
+        try:
+            # make sure the modified version parses as expected
+            # unparse can sometimes mess things up (rarely)
+            ast.parse(code_str)
+            return code_str, doc_str
+        except:
+            return None, None
     except SyntaxError:
         return None, None
 
 
 def load(json_path):
+    failed_count = 0
+    total_count = 0
     with open(json_path, "r") as fin:
         data = json.load(fin)
     obs = []
     for entry in tqdm.tqdm(data):
+        total_count += 1
         code, nl = get_code_and_nl(entry)
         if code is None or nl is None:
+            failed_count += 1
             continue
         obs.append({"code": code, "nl": nl})
+    print("{}/{} failed to parse".format(failed_count, total_count))
     return obs
 
 
@@ -48,10 +62,9 @@ def get_args():
     parser = argparse.ArgumentParser(description="Github to canonical")
     parser.add_argument("-i", "--input", type=str, help="Path to input json")
     parser.add_argument(
-        "-o",
         "--output",
         type=str,
-        help="Output path for pickled",
+        help="Output path for pickled data",
     )
     return parser.parse_args()
 
