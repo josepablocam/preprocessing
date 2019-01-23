@@ -247,14 +247,20 @@ class CanonicalInput(object):
             code = obs["code"]
             nl = obs["nl"]
             if which == "code":
-                code = " ".join(pipeline(code))
+                code = pipeline(code)
             elif which == "nl":
-                nl = " ".join(pipeline(nl))
+                nl = pipeline(nl)
             elif which == "both":
-                code = " ".join(pipeline(code))
-                nl = " ".join(pipeline(nl))
+                code = pipeline(code)
+                nl = pipeline(nl)
             else:
                 raise ValueError("Unknown member name")
+
+            if not isinstance(code, str):
+                code = " ".join(code)
+
+            if not isinstance(nl, str):
+                nl = " ".join(nl)
 
             if len(code) > 0 and len(nl) > 0:
                 new_dataset.append({"code": code, "nl": nl})
