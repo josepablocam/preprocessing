@@ -27,7 +27,16 @@ def get_code_and_nl(src):
             else:
                 # otherwise add a dummy pass statement
                 func.body = [PASS]
-        return astunparse.unparse(func).strip(), doc.strip()
+        # remove any zero bytes (otherwise parsing can fail)
+        code_str = astunparse.unparse(func).strip().replace(chr(0), '')
+        doc_str = doc.strip().replace(chr(0), '')
+        try:
+            # make sure the modified version parses as expected
+            # unparse can sometimes mess things up (rarely)
+            ast.parse(code_str)
+            return code_str, doc_str
+        except:
+            return None, None
     except SyntaxError:
         return None, None
 
@@ -44,9 +53,6 @@ def load(json_path):
         if code is None or nl is None:
             failed_count += 1
             continue
-        # remove any zero bytes (otherwise parsing can fail)
-        code = code.replace(chr(0), '')
-        nl = nl.replace(chr(0), '')
         obs.append({"code": code, "nl": nl})
     print("{}/{} failed to parse".format(failed_count, total_count))
     return obs
