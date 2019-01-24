@@ -77,7 +77,7 @@ def produce_embeddings(train_data, min_vocab_count, dim, output_dir):
 
 def generate_experiment_folder(
         train_data,
-        test_data,
+        test_data_dict,
         code_pipeline,
         nl_pipeline,
         code_test_pipeline,
@@ -110,15 +110,17 @@ def generate_experiment_folder(
         np.random.seed(seeds[0])
 
     train_data.reset()
-    test_data.reset()
+    for ds in test_data_dict.values():
+        ds.reset()
 
     print("Transforming training data")
     train_data.apply_pipeline(code_pipeline, which="code")
     train_data.apply_pipeline(nl_pipeline, which="nl")
 
     print("Transforming test data")
-    test_data.apply_pipeline(code_test_pipeline, which="code")
-    test_data.apply_pipeline(nl_test_pipeline, which="nl")
+    for ds in test_data_dict.values():
+        ds.apply_pipeline(code_test_pipeline, which="code")
+        ds.apply_pipeline(nl_test_pipeline, which="nl")
 
     utils.create_dir(output_dir)
     print("Producing embeddings")
@@ -135,15 +137,18 @@ def generate_experiment_folder(
     encoder_from_embeddings(embeddings_path, encoder_path)
 
     # Test data: shared across all seeds
-    test_code_path = os.path.join(output_dir, "test-code.txt")
-    test_nl_path = os.path.join(output_dir, "test-nl.txt")
-    encode_dataset(
-        test_data,
-        test_code_path,
-        test_nl_path,
-        encoder_path,
-        target_len,
-    )
+    for name, ds in test_data_dict.items():
+        test_code_path = os.path.join(
+            output_dir, "test-code-{}.txt".format(name)
+        )
+        test_nl_path = os.path.join(output_dir, "test-nl-{}.txt".format(name))
+        encode_dataset(
+            ds,
+            test_code_path,
+            test_nl_path,
+            encoder_path,
+            target_len,
+        )
 
     # held out downsampled data, shared by all seeds
     valid_downsampled = train_data.downsample(
@@ -214,7 +219,8 @@ def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
 
 def generate_experiments(
         train_data_path,
-        test_data_path,
+        test_data_names,
+        test_data_paths,
         output_dir,
         train_downsample=None,
         seed=None,
@@ -226,8 +232,10 @@ def generate_experiments(
     with open(train_data_path, "rb") as fin:
         train_data = pickle.load(fin)
 
-    with open(test_data_path, "rb") as fin:
-        test_data = pickle.load(fin)
+    test_data = {}
+    for name, path in zip(test_data_names, test_data_paths):
+        with open(path, "rb") as fin:
+            test_data[name] = pickle.load(fin)
 
     utils.create_dir(output_dir)
 
@@ -260,8 +268,8 @@ def generate_experiments(
 def get_test_data_paths(folder):
     paths = {
         "conala": {
-            "nl": os.path.join(folder, "test-nl.npy"),
-            "code": os.path.join(folder, "test-code.npy"),
+            "nl": os.path.join(folder, "test-nl-conala.npy"),
+            "code": os.path.join(folder, "test-code-conala.npy"),
         },
         "github": {
             "nl": os.path.join(folder, "test-nl-github.npy"),
@@ -661,9 +669,16 @@ def get_args():
         help="Path to train data in canonical input form",
     )
     gen_parser.add_argument(
-        "--test",
+        "--test_names",
         type=str,
-        help="Path to test data in canonical input form",
+        nargs="+",
+        help="Names for test data sets (used as suffix in generated data)",
+    )
+    gen_parser.add_argument(
+        "--test_paths",
+        type=str,
+        nargs="+",
+        help="Paths to test datasets in canonical input form",
     )
     gen_parser.add_argument(
         "--output",
@@ -725,7 +740,8 @@ def main():
     if args.which == "generate":
         generate_experiments(
             args.train,
-            args.test,
+            args.test_names,
+            args.test_paths,
             args.output,
             train_downsample=args.downsample,
             seed=args.seed,
