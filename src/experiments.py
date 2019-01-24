@@ -257,55 +257,55 @@ def generate_experiments(
         )
 
 
-def run_experiments(base_dir, model, test_setting, force=False):
+def get_test_data_paths(folder):
+    paths = {
+        "conala": {
+            "nl": os.path.join(folder, "test-nl.npy"),
+            "code": os.path.join(folder, "test-code.npy"),
+        },
+        "github": {
+            "nl": os.path.join(folder, "test-nl-github.npy"),
+            "code": os.path.join(folder, "test-code-github.npy"),
+        },
+    }
+    return paths
+
+
+def run_experiments(base_dir, model_option, test_option, force=False):
     experiment_folders = [
         os.path.join(base_dir, p) for p in os.listdir(base_dir)
     ]
     for experiment_root in experiment_folders:
-        test_code_paths = {}
-        test_nl_paths = {}
-        if test_setting == "conala":
-            test_code_paths['conala'] = os.path.join(
-                experiment_root, "test-code.npy"
-            )
-            test_nl_paths['conala'] = os.path.join(
-                experiment_root, "test-nl.npy"
-            )
-        elif test_setting == "github":
-            test_code_paths['github'] = os.path.join(
-                experiment_root, "test-code-github.npy"
-            )
-            test_nl_paths['github'] = os.path.join(
-                experiment_root, "test-nl-github.npy"
-            )
-        else:
-            test_code_paths['conala'] = os.path.join(
-                experiment_root, "test-code.npy"
-            )
-            test_nl_paths['conala'] = os.path.join(
-                experiment_root, "test-nl.npy"
-            )
-            test_code_paths['github'] = os.path.join(
-                experiment_root, "test-code-github.npy"
-            )
-            test_nl_paths['github'] = os.path.join(
-                experiment_root, "test-nl-github.npy"
-            )
-
+        # shared across seeds
         valid_code_path = os.path.join(experiment_root, "valid-code.npy")
         valid_nl_path = os.path.join(experiment_root, "valid-nl.npy")
         embeddings_path = os.path.join(experiment_root, "embeddings.vec")
         encoder_path = os.path.join(experiment_root, "encoder.pkl")
+        test_paths = get_test_data_paths(experiment_root)
+
+        test_paths = {
+            k: v
+            for k, v in test_paths.items()
+            if (k == test_option) or (test_option == "all")
+        }
+
+        if len(test_paths) == 0:
+            raise Exception("Unknown test option: {}".format(test_option))
+
         # Models to run
         models = []
-        if model == "lstm":
-            models.append('lstm')
-        elif model == 'dan':
-            models.append('dan')
+        if model_option == "lstm":
+            models.append("lstm")
+        elif model_option == "dan":
+            models.append("dan")
+        elif model_option == "all":
+            models.append("lstm")
+            models.append("dan")
         else:
-            models.append('lstm')
-            models.append('dan')
+            raise Exception("Uknown model option: {}".format(model_option))
 
+        # each seed produces a new subfolder, where we train using
+        # a new sample of the training data
         experiment_subfolders = glob.glob(experiment_root + "/seed*")
         if len(experiment_subfolders) == 0:
             print(
@@ -317,26 +317,33 @@ def run_experiments(base_dir, model, test_setting, force=False):
         for seed_folder in experiment_subfolders:
             code_path = os.path.join(seed_folder, "train-code.npy")
             nl_path = os.path.join(seed_folder, "train-nl.npy")
-            for test_option in test_code_paths.keys():
-                for model_option in models:
-                    exp_folder = os.path.join(
-                        seed_folder, model_option + '-' + test_option
-                    )
-                    utils.create_dir(exp_folder)
+            for model_option in models:
+                # each model gets own folder where it is evaluated
+                # on chosen test datasets
+                exp_folder = os.path.join(seed_folder, model_option)
+                utils.create_dir(exp_folder)
+                run_single_experiment(
+                    exp_folder,
+                    code_path,
+                    nl_path,
+                    valid_code_path,
+                    valid_nl_path,
+                    test_paths,
+                    embeddings_path,
+                    encoder_path,
+                    model_option,
+                    force=force,
+                )
 
-                    run_single_experiment(
-                        exp_folder,
-                        code_path,
-                        nl_path,
-                        valid_code_path,
-                        valid_nl_path,
-                        test_code_paths[test_option],
-                        test_nl_paths[test_option],
-                        embeddings_path,
-                        encoder_path,
-                        model_option,
-                        force=force,
-                    )
+
+def get_trained_model_path(folder):
+    model_paths = glob.glob(os.path.join(folder, "models", "*best.pth"))
+    if len(model_paths) > 1:
+        raise Exception("Can only have 1 best model from validation")
+    elif len(model_paths) == 0:
+        return None
+    else:
+        return model_paths[0]
 
 
 def run_single_experiment(
@@ -345,49 +352,52 @@ def run_single_experiment(
         nl_path,
         valid_code_path,
         valid_nl_path,
-        test_code_path,
-        test_nl_path,
+        test_paths_dict,
         embeddings_path,
         encoder_path,
         model_option,
         force=False,
 ):
-    eval_results_path = os.path.join(folder, "results.json")
-    if os.path.exists(eval_results_path) and not force:
-        print("Skipping {}, results.json exists".format(folder))
-        print("Use --force if re-run is desired")
-        return
 
-    train(
-        code_path,
-        nl_path,
-        embeddings_path,
-        encoder_path,
-        model_option,
-        print_every=1000,
-        save_every=50,
-        num_epochs=100,
-        output_folder=folder,
-        valid_code_path=valid_code_path,
-        valid_docstrings_path=valid_nl_path,
-    )
-    # load the best model based on validation loss
-    model_paths = glob.glob(os.path.join(folder, "models", "*best.pth"))
-    assert len(model_paths) == 1, "Should only have 1 best model"
-    model = load_model(model_paths[0])
+    if get_trained_model_path(folder) is not None and not force:
+        print("Skipping training in {}, model exists".format(folder))
+        print("Use --force if re-training is desired")
+    else:
+        train(
+            code_path,
+            nl_path,
+            embeddings_path,
+            encoder_path,
+            model_option,
+            print_every=1000,
+            save_every=50,
+            num_epochs=100,
+            output_folder=folder,
+            valid_code_path=valid_code_path,
+            valid_docstrings_path=valid_nl_path,
+        )
 
-    test_code, test_queries = load_evaluation_data(
-        test_code_path,
-        test_nl_path,
-    )
+    model = load_model(get_trained_model_path(folder))
 
-    eval_results = evaluate_with_known_answer(
-        model,
-        test_code,
-        test_queries,
-    )
-    with open(eval_results_path, "w") as fout:
-        json.dump(eval_results, fout)
+    results = []
+    for dataset_name, test_paths in test_paths_dict.items():
+        print("Evaluating {} on {}".format(model_option, dataset_name))
+        test_code, test_queries = load_evaluation_data(
+            test_paths["code"],
+            test_paths["nl"],
+        )
+        dataset_results = evaluate_with_known_answer(
+            model,
+            test_code,
+            test_queries,
+        )
+        dataset_results["dataset"] = dataset_name
+        dataset_results["model"] = model_option
+        results.append(dataset_results)
+
+    results_path = os.path.join(folder, "results.json")
+    with open(results_path, "w") as fout:
+        json.dump(results, fout)
 
 
 def initial_experiments(output_dir):
@@ -695,14 +705,16 @@ def get_args():
     run_parser.add_argument(
         "--model",
         type=str,
-        help="Model you want to run experiment with, can be lstm, dan, both",
-        default='both',
+        help="Model you want to run experiment with, can be lstm, dan, all",
+        default="both",
+        choices=["lstm", "dan", "all"],
     )
     run_parser.add_argument(
         "--test",
         type=str,
-        help="Test setting you want to run on. Can be github, conala, both",
-        default='conala',
+        help="Test setting you want to run on. Can be github, conala, all",
+        default="conala",
+        choices=["github", "conala", "all"],
     )
     run_parser.set_defaults(which="run")
     return parser.parse_args()
