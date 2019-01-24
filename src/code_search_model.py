@@ -213,13 +213,13 @@ class DANModel(nn.Module):
         embs = self._embed(nl, self.nl_embeddings, self.nl_nn)
         return embs
 
-    def forward(self, code, nl, fake_nl):
-        return self.embed_code(code), self.embed_nl(nl), self.embed_nl(fake_nl)
+    def forward(self, code, nl, fake_code):
+        return self.embed_code(code), self.embed_nl(nl), self.embed_code(fake_code)
 
-    def losses(self, code, nl, fake_nl):
-        code_emb, nl_emb, fake_nl_emb = self.forward(code, nl, fake_nl)
+    def losses(self, code, nl, fake_code):
+        code_emb, nl_emb, fake_code_emb = self.forward(code, nl, fake_code)
         good_sim = F.cosine_similarity(code_emb, nl_emb, dim=1)
-        bad_sim = F.cosine_similarity(code_emb, fake_nl_emb, dim=1)
+        bad_sim = F.cosine_similarity(nl_emb, fake_code_emb, dim=1)
         losses = bad_sim + self.margin - good_sim
         return losses.clamp(min=0.0)
 
@@ -314,13 +314,13 @@ class LSTMModel(nn.Module):
         embs = self._embed(nl, self.nl_embeddings, self.nl_lstm)
         return embs
 
-    def forward(self, code, nl, fake_nl):
-        return self.embed_code(code), self.embed_nl(nl), self.embed_nl(fake_nl)
+    def forward(self, code, nl, fake_code):
+        return self.embed_code(code), self.embed_nl(nl), self.embed_code(fake_code)
 
-    def losses(self, code, nl, fake_nl):
-        code_emb, nl_emb, fake_nl_emb = self.forward(code, nl, fake_nl)
+    def losses(self, code, nl, fake_code):
+        code_emb, nl_emb, fake_code_emb = self.forward(code, nl, fake_code)
         good_sim = F.cosine_similarity(code_emb, nl_emb, dim=1)
-        bad_sim = F.cosine_similarity(code_emb, fake_nl_emb, dim=1)
+        bad_sim = F.cosine_similarity(nl_emb, fake_code_emb, dim=1)
         losses = bad_sim + self.margin - good_sim
         return losses.clamp(min=0.0)
 

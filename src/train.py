@@ -228,10 +228,10 @@ def train(
     start_time = datetime.datetime.now()
     for epoch in range(num_epochs):
         outputManager.say("Epoch:{}".format(epoch))
-        for code, docstrings, fake_docstrings in tqdm.tqdm(paired_dl):
+        for code, docstrings, fake_code in tqdm.tqdm(paired_dl):
             sim_optimizer.zero_grad()
 
-            sim_losses = sim_model.losses(code, docstrings, fake_docstrings)
+            sim_losses = sim_model.losses(code, docstrings, fake_code)
             total_loss = sim_losses.mean()
             losses["total_loss"].append(total_loss.item())
             total_loss.backward()
@@ -281,8 +281,8 @@ def evaluate_loss(model, dl):
     model.eval()
 
     valid_losses = []
-    for code, docstring, fake_docstrings in dl:
-        losses = model.losses(code, docstring, fake_docstrings)
+    for code, docstring, fake_code in dl:
+        losses = model.losses(code, docstring, fake_code)
         valid_losses.extend(losses.tolist())
 
     # turn back on training

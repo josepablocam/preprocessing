@@ -139,5 +139,5 @@ class CodeSearchDataset(torch.utils.data.Dataset):
         code = self.code[ix]
         docstring = self.docstrings[ix]
         randix = get_random_ix(self.num_obs, ix)
-        fake_docstring = self.docstrings[randix]
-        return code, docstring, fake_docstring
+        fake_code = self.code[randix]
+        return code, docstring, fake_code
