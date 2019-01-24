@@ -20,12 +20,6 @@
     "original_nl": "Backend cleanup. Is run by\n:class:`celery.task.DeleteExpiredTaskMetaTask`."
   },
   {
-    "code": "@staticmethod\ndef _search_cases(test_case_path, case_filter=None):\n    with open(test_case_path, 'r') as f:\n        raw_data = yaml.load(f)\n    test_cases = raw_data['test cases']\n    if case_filter:\n        for key in case_filter:\n            filtered_cases = []\n            for case in test_cases:\n                try:\n                    if isinstance(case[key], str):\n                        _value = case[key].lower()\n                    else:\n                        _value = case[key]\n                    if (_value in case_filter[key]):\n                        filtered_cases.append(case)\n                except KeyError:\n                    filtered_cases.append(case)\n            test_cases = filtered_cases\n    return test_cases",
-    "nl": "For unit test case, we don't search for test functions.\nThe unit test cases is stored in a yaml file which is created in job build-idf-test.",
-    "original_nl": "For unit test case, we don't search for test functions.\nThe unit test cases is stored in a yaml file which is created in job build-idf-test."
-  },
-
-  {
     "code": "def txp_bin_counter_callback(self, counter):\n    self.log.info('Mcast address %s packets %u', counter.mcast, counter.tx_packets[0])",
     "nl": "Counters callback.",
     "original_nl": "Counters callback."
@@ -170,11 +164,6 @@
     "original_nl": "load all data files from Ice Cat. \nthis test check that data is parsed correctly to the dictionary\nproduct details are tested. parallel download tested\nit's normal for this test to run long, several minutes"
   },
   {
-    "code": "def Main():\n    argument_parser = argparse.ArgumentParser(description='Extracts information from timezone information files.')\n    argument_parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False, help='enable debug output.')\n    argument_parser.add_argument('source', nargs='?', action='store', metavar='PATH', default=None, help='path of the timezone information file.')\n    options = argument_parser.parse_args()\n    if (not options.source):\n        print('Source file missing.')\n        print('')\n        argument_parser.print_help()\n        print('')\n        return False\n    logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')\n    output_writer = output_writers.StdoutWriter()\n    try:\n        output_writer.Open()\n    except IOError as exception:\n        print('Unable to open output writer with error: {0!s}'.format(exception))\n        print('')\n        return False\n    tzif_file = tzif.TimeZoneInformationFile(debug=options.debug, output_writer=output_writer)\n    tzif_file.Open(options.source)\n    output_writer.WriteText('Timezone information:\\n')\n    tzif_file.Close()\n    output_writer.Close()\n    return True",
-    "nl": "The main program function.\n",
-    "original_nl": "The main program function.\n\nReturns:\n  bool: True if successful or False if not."
-  },
-  {
     "code": "def defuse_xml_libs():\n    from defusedxml import defuse_stdlib\n    defuse_stdlib()\n    import lxml\n    import lxml.etree\n    from . import etree as safe_etree\n    lxml.etree = safe_etree",
     "nl": "Monkey patch and defuse all stdlib xml packages and lxml.",
     "original_nl": "Monkey patch and defuse all stdlib xml packages and lxml."
@@ -302,7 +291,7 @@
   },
   {
     "code": "def GetMessages(self, unused_formatter_mediator, event):\n    if (self.DATA_TYPE != event.data_type):\n        raise errors.WrongFormatter('Unsupported data type: {0:s}.'.format(event.data_type))\n    event_values = event.CopyToDict()\n    file_reference = event_values.get('file_reference', None)\n    if file_reference:\n        event_values['file_reference'] = '{0:d}-{1:d}'.format((file_reference & 281474976710655), (file_reference >> 48))\n    parent_file_reference = event_values.get('parent_file_reference', None)\n    if parent_file_reference:\n        event_values['parent_file_reference'] = '{0:d}-{1:d}'.format((parent_file_reference & 281474976710655), (parent_file_reference >> 48))\n    update_reason_flags = event_values.get('update_reason_flags', 0)\n    update_reasons = []\n    for (bitmask, description) in sorted(self._USN_REASON_FLAGS.items()):\n        if (bitmask & update_reason_flags):\n            update_reasons.append(description)\n    event_values['update_reason'] = ', '.join(update_reasons)\n    update_source_flags = event_values.get('update_source_flags', 0)\n    update_sources = []\n    for (bitmask, description) in sorted(self._USN_SOURCE_FLAGS.items()):\n        if (bitmask & update_source_flags):\n            update_sources.append(description)\n    event_values['update_source'] = ', '.join(update_sources)\n    return self._ConditionalFormatMessages(event_values)",
-    "nl": "Determines the formatted message strings for an event object.\n\nArgs:\n  formatter_mediator (FormatterMediator): mediates the interactions between\n      formatters and other components, such as storage and Windows EventLog\n      resources.\n  event (EventObject): event.\n",
+    "nl": "Determines the formatted message strings for an event object.",
     "original_nl": "Determines the formatted message strings for an event object.\n\nArgs:\n  formatter_mediator (FormatterMediator): mediates the interactions between\n      formatters and other components, such as storage and Windows EventLog\n      resources.\n  event (EventObject): event.\n\nReturns:\n  tuple(str, str): formatted message string and short message string.\n\nRaises:\n  WrongFormatter: if the event object cannot be formatted by the formatter."
   },
   {
@@ -401,11 +390,6 @@
     "original_nl": "Return Jedi script object suitable to AutoComplete and ShowCallTip"
   },
   {
-    "code": "def file_convert(mib_txt_path, mib_py_path):\n    mod_logger_snmp = loggers.module_logger(name=__name__)\n    smidump = Popen(['smidump', '-k', '-f', 'python', mib_txt_path], stdout=PIPE)\n    list_stdout = smidump.communicate()[0]\n    if (len(list_stdout) == 0):\n        return 'Fail'\n    mib_path_tmp = os.path.join(mib_py_path, 'tmp')\n    if (not os.path.exists(mib_path_tmp)):\n        os.makedirs(mib_path_tmp)\n    sys.path.append(mib_path_tmp)\n    file_name = os.path.splitext(os.path.basename(mib_txt_path))[0]\n    temp_file_name = '{0}.py'.format(file_name)\n    temp_file_path = os.path.join(mib_path_tmp, temp_file_name)\n    with open(temp_file_path, 'ab') as a:\n        a.write(list_stdout)\n    temp_module = __import__(os.path.splitext(os.path.basename(mib_txt_path))[0])\n    if (('moduleName' in list(temp_module.MIB.keys())) and ('nodes' in list(temp_module.MIB.keys()))):\n        helpers.MIBS_DICT.update({\n            temp_module.MIB['moduleName']: list(temp_module.MIB['nodes'].keys()),\n        })\n    sys.path.remove(mib_path_tmp)\n    os.remove(temp_file_path)\n    pipe = Popen(['libsmi2pysnmp', '--no-text'], stdout=PIPE, stdin=PIPE)\n    stdout = pipe.communicate(input=list_stdout)\n    mib_name = '{0}.py'.format(temp_module.MIB['moduleName'])\n    mib_py_path = os.path.join(mib_py_path, mib_name)\n    mod_logger_snmp.debug(('Convert %s to %s' % (file_name, temp_file_name)))\n    with open(mib_py_path, 'a') as py_file:\n        for string in stdout:\n            if (string is not None):\n                str_dict = string.decode('utf-8').split('\\n')\n                for each_str in str_dict:\n                    if ('ModuleCompliance' in each_str):\n                        if ('ObjectGroup' in each_str):\n                            py_file.write((each_str + '\\n'))\n                    elif ('Compliance)' in each_str):\n                        pass\n                    else:\n                        py_file.write((each_str + '\\n'))\n    return mib_name",
-    "nl": "Convert .txt MIB to .py.\n\nArgs:\n    mib_txt_path(str):  Full path to .txt MIB.\n    mib_py_path(str):  Full path to .py MIB\n\nExamples::\n\n    file_convert(mib_txt_path, mib_py_path)",
-    "original_nl": "Convert .txt MIB to .py.\n\nArgs:\n    mib_txt_path(str):  Full path to .txt MIB.\n    mib_py_path(str):  Full path to .py MIB\n\nExamples::\n\n    file_convert(mib_txt_path, mib_py_path)"
-  },
-  {
     "code": "def _modify_command(command):\n    if isinstance(command, list):\n        for i in xrange(len(command)):\n            if (command[i] == 'configtest'):\n                command[i] = '-t'\n    else:\n        command = command.replace('configtest', '-t')\n    return command",
     "nl": "Modifies command so configtest works inside the docker image",
     "original_nl": "Modifies command so configtest works inside the docker image"
@@ -417,7 +401,7 @@
   },
   {
     "code": "def replace_nodes(self, node1, node2):\n    (node1[PARENT][DIRECTION1], node2[PARENT][DIRECTION2]) = (node2[PARENT][DIRECTION2], node1[PARENT][DIRECTION1])\n    (node1[PARENT], node2[PARENT]) = (node2[PARENT], node1[PARENT])\n    for direction in [LEFT, RIGHT]:\n        (node1[direction][PARENT], node2[direction][PARENT]) = (node2[direction][PARENT], node1[direction][PARENT])\n        (node1[direction], node2[direction]) = (node2[direction], node1[direction])",
-    "nl": "Replaces node1 and node2 by rewiring the pointers (parent, left\nand right) of the two nodes.\n\nArgs:\n    node1: list, structure contains a node with format:\n        [PARENT, KEY, LEFT, RIGHT, SIZE]\n    node2: list, structure contains a node with format:\n        [PARENT, KEY, LEFT, RIGHT, SIZE]",
+    "nl": "Replaces node1 and node2 by rewiring the pointers (parent, left\nand right) of the two nodes.",
     "original_nl": "Replaces node1 and node2 by rewiring the pointers (parent, left\nand right) of the two nodes.\n\nArgs:\n    node1: list, structure contains a node with format:\n        [PARENT, KEY, LEFT, RIGHT, SIZE]\n    node2: list, structure contains a node with format:\n        [PARENT, KEY, LEFT, RIGHT, SIZE]"
   },
   {
@@ -527,7 +511,7 @@
   },
   {
     "code": "def CompileReport(self, mediator):\n    lines_of_text = ['Listing file paths and hashes']\n    for (pathspec, hashes) in sorted(self._paths_with_hashes.items(), key=(lambda tuple: tuple[0].comparable)):\n        path_string = self._GeneratePathString(mediator, pathspec, hashes)\n        lines_of_text.append(path_string)\n    lines_of_text.append('')\n    report_text = '\\n'.join(lines_of_text)\n    return reports.AnalysisReport(plugin_name=self.NAME, text=report_text)",
-    "nl": "Compiles an analysis report.\n\nArgs:\n  mediator (AnalysisMediator): mediates interactions between analysis\n      plugins and other components, such as storage and dfvfs.\n",
+    "nl": "Compiles an analysis report.",
     "original_nl": "Compiles an analysis report.\n\nArgs:\n  mediator (AnalysisMediator): mediates interactions between analysis\n      plugins and other components, such as storage and dfvfs.\n\nReturns:\n  AnalysisReport: report."
   },
   {
@@ -627,7 +611,7 @@
   },
   {
     "code": "def computeRMS(v):\n    v = numpy.array(v)\n    assert (len(v) > 0)\n    return math.sqrt(((v ** 2).sum() / len(v)))",
-    "nl": "The root mean square (RMS) of a list of values\n\nArgs:\n    `v` (array-like)\n        Values for which we compute the RMS.\n        ",
+    "nl": "The root mean square (RMS) of a list of values",
     "original_nl": "The root mean square (RMS) of a list of values\n\nArgs:\n    `v` (array-like)\n        Values for which we compute the RMS.\n        \nReturns:\n    The RMS of the values.\n\n>>> v = [1.2, 3.5, 6.8, 1.1]\n>>> numpy.allclose(computeRMS(v), 3.9096, atol=1e-4)\nTrue"
   },
   {
@@ -639,11 +623,6 @@
     "code": "@atomic.action_timer('zaqar.create_queue')\ndef _queue_create(self, **kwargs):\n    name = self.generate_random_name()\n    return self.clients('zaqar').queue(name, **kwargs)",
     "nl": "Create a Zaqar queue with random name.\n\n",
     "original_nl": "Create a Zaqar queue with random name.\n\n:param kwargs: other optional parameters to create queues like\n               \"metadata\"\n:returns: Zaqar queue instance"
-  },
-  {
-    "code": "def update(self):\n    self._logger.info('{\"event\":\"updating_updater\"}')\n    self._pull_products()",
-    "nl": "Update should be called before any firmware loading is done, to ensure the\nmost up-to-date information is being used.",
-    "original_nl": "Update should be called before any firmware loading is done, to ensure the\nmost up-to-date information is being used."
   },
   {
     "code": "def _include_paths_from_environ(env_prefix=''):\n    paths = os.environ.get((env_prefix + 'WSGI_AUTH_PATHS'))\n    if (not paths):\n        return []\n    return paths.split(';')",
@@ -782,7 +761,7 @@
   },
   {
     "code": "def error_message(self, error):\n    if (error == QProcess.FailedToStart):\n        self.message(_('Could not start {program}.\\nPlease check path and permissions.').format(program=self.command[0]), FAILURE)\n    elif (error == QProcess.ReadError):\n        self.message(_('Could not read from the process.'), FAILURE)\n    elif (self._process.state() == QProcess.NotRunning):\n        self.message(_('An unknown error occurred.'), FAILURE)",
-    "nl": "Called when there is an error (by _error()).\n\nOutputs a message describing the given QProcess.Error.",
+    "nl": "Outputs a message describing the given QProcess.Error.",
     "original_nl": "Called when there is an error (by _error()).\n\nOutputs a message describing the given QProcess.Error."
   },
   {
@@ -847,18 +826,13 @@
   },
   {
     "code": "def check_network_connection(server='www.baidu.com'):\n    logger = logging.getLogger(__name__)\n    logger.debug(\"Checking network connection to server '%s'...\", server)\n    try:\n        host = socket.gethostbyname(server)\n        socket.create_connection((host, 80), 2)\n    except Exception:\n        logger.debug('Network connection not working')\n        return False\n    else:\n        logger.debug('Network connection working')\n        return True",
-    "nl": "@Brief:\n    Checks if pi can connect a network server.\n\n@Arguments:\n    server -- (optional) the server to connect with (Default:\n              \"www.baidu.com\")\n\n@Returns:\n    True or False",
+    "nl": "Checks if pi can connect a network server.\n\n@Arguments:\n    server -- (optional) the server to connect with (Default:\n              \"www.baidu.com\")\n\n@Returns:\n    True or False",
     "original_nl": "@Brief:\n    Checks if pi can connect a network server.\n\n@Arguments:\n    server -- (optional) the server to connect with (Default:\n              \"www.baidu.com\")\n\n@Returns:\n    True or False"
   },
   {
     "code": "def __getattr__(self, item):\n    return getattr(self.desc, item)",
     "nl": "Redirects unknown attribute lookups to the wrapped descriptor\n",
     "original_nl": "Redirects unknown attribute lookups to the wrapped descriptor\n:param item: attribute being looked up"
-  },
-  {
-    "code": "def _get_item_from_module(module_name, item_name):\n    try:\n        module = __import__(module_name, fromlist=[item_name])\n        klass = getattr(module, item_name)\n    except ImportError as error:\n        message = 'Module \"{modulename}\" could not be loaded: {e}'\n        raise Exception(message.format(modulename=module_name, e=error))\n    except AttributeError as error:\n        message = 'No item \"{itemname}\" in module \"{modulename}\": {e}'\n        raise Exception(message.format(modulename=module_name, itemname=item_name, e=error))\n    return klass",
-    "nl": "Load classes/modules/functions/... from given config",
-    "original_nl": "Load classes/modules/functions/... from given config"
   },
   {
     "code": "@QtCore.pyqtSlot(QgsVectorLayer)\ndef _vlayer_modified(self, vlayer):\n    logger.debug('Vector layer {v} was modified'.format(v=vlayer.id()))\n    idx = self.combox_vector.findData(vlayer.id())\n    if (idx == self.combox_vector.currentIndex()):\n        self._vlayer_changed(idx)",
@@ -937,7 +911,7 @@
   },
   {
     "code": "@templatefilter('hex')\ndef hexfilter(text):\n    return node.hex(text)",
-    "nl": "Any text. Convert a binary Mercurial node identifier into\nits long hexadecimal representation.",
+    "nl": "Convert a binary Mercurial node identifier into\nits long hexadecimal representation.",
     "original_nl": "Any text. Convert a binary Mercurial node identifier into\nits long hexadecimal representation."
   },
   {
@@ -952,7 +926,7 @@
   },
   {
     "code": "def create_session(self, item=None):\n    return ItemCreateSessionRequestBuilder(self.append_to_request_url('upload.createSession'), self._client, item=item)",
-    "nl": "Executes the createSession method\n\nArgs:\n    item (:class:`ChunkedUploadSessionDescriptor<onedrivesdk.model.chunked_upload_session_descriptor.ChunkedUploadSessionDescriptor>`):\n        Defaults to None, The item to use in the method request\n",
+    "nl": "Executes the createSession method",
     "original_nl": "Executes the createSession method\n\nArgs:\n    item (:class:`ChunkedUploadSessionDescriptor<onedrivesdk.model.chunked_upload_session_descriptor.ChunkedUploadSessionDescriptor>`):\n        Defaults to None, The item to use in the method request\n\nReturns:\n    :class:`ItemCreateSessionRequestBuilder<onedrivesdk.request.item_create_session.ItemCreateSessionRequestBuilder>`:\n        A ItemCreateSessionRequestBuilder for the method"
   },
   {
@@ -1047,7 +1021,7 @@
   },
   {
     "code": "def _mount_coord_to_skycoord(self, mount_coords):\n    if isinstance(mount_coords, dict):\n        ra = mount_coords['ra']\n        dec = mount_coords['dec']\n    else:\n        (ra, dec) = mount_coords.split(' ')\n    ra = (float(ra) * u.hourangle).to(u.degree)\n    dec = (float(dec) * u.deg)\n    coords = SkyCoord(ra, dec)\n    return coords",
-    "nl": "Converts between iOptron RA/Dec format and a SkyCoord\n\nArgs:\n    mount_coords (str): Coordinates as returned by mount\n",
+    "nl": "Converts between iOptron RA/Dec format and a SkyCoord",
     "original_nl": "Converts between iOptron RA/Dec format and a SkyCoord\n\nArgs:\n    mount_coords (str): Coordinates as returned by mount\n\nReturns:\n    astropy.SkyCoord:   Mount coordinates as astropy SkyCoord with\n        EarthLocation included."
   },
   {
@@ -1082,7 +1056,7 @@
   },
   {
     "code": "@staticmethod\ndef ping_from_remotehost(session_object, ip_type, dest_address, prompt, count):\n    ping_cmd = 'ping'\n    if (ip_type == 'ipv6'):\n        ping_cmd = 'ping6'\n    command = (ping_cmd + ' -c {} {}'.format(count, dest_address))\n    (_, output) = session_object.send_command('.*', prompt, command)\n    if ((' 0% packet loss' in output) or ('alive' in output)):\n        pNote('ping successfully completed')\n        status = True\n    else:\n        pNote('ping command failed')\n        status = False\n    return status",
-    "nl": "ping  to dest_system from remote host\n\n:Arguments:\n    1. session_object(string)  = expect session object\n    2. command(string) = command to be executed\n    3. ip_type = ip/ipv6/dns\n    4. dest_address(string) = ip or dns name\n    3. prompt(string) = prompt\n\n",
+    "nl": "ping  to dest_system from remote host.\n\n:Arguments:\n    1. session_object(string)  = expect session object\n    2. command(string) = command to be executed\n    3. ip_type = ip/ipv6/dns\n    4. dest_address(string) = ip or dns name\n    3. prompt(string) = prompt\n\n",
     "original_nl": "ping  to dest_system from remote host\n\n:Arguments:\n    1. session_object(string)  = expect session object\n    2. command(string) = command to be executed\n    3. ip_type = ip/ipv6/dns\n    4. dest_address(string) = ip or dns name\n    3. prompt(string) = prompt\n\n:Returns:\n    1. bool (True/False)"
   },
   {
@@ -1137,7 +1111,7 @@
   },
   {
     "code": "@asyncio.coroutine\ndef update_async(self, tag):\n    entity = (yield from self.request().update_async(tag))\n    return entity",
-    "nl": "Updates the specified Tag in async\n\nArgs:\n    tag (:class:`Tag<onedrivesdk.model.tag.Tag>`):\n        The Tag to update.\n",
+    "nl": "Updates the specified Tag in async.\n\nArgs:\n    tag (:class:`Tag<onedrivesdk.model.tag.Tag>`):\n        The Tag to update.\n",
     "original_nl": "Updates the specified Tag in async\n\nArgs:\n    tag (:class:`Tag<onedrivesdk.model.tag.Tag>`):\n        The Tag to update.\n\nReturns:\n    :class:`Tag<onedrivesdk.model.tag.Tag>`:\n        The updated Tag."
   },
   {
@@ -1189,11 +1163,6 @@
     "code": "def test_handle_update(self):\n    test_stack = self.create_stack(template=alarm_template)\n    update_mock = self.patchobject(self.fa.alarm, 'update')\n    test_stack.create()\n    rsrc = test_stack['cps_alarm']\n    self.assertEqual((rsrc.CREATE, rsrc.COMPLETE), rsrc.state)\n    after_props = copy.deepcopy(rsrc.properties.data)\n    update_props = {\n        'enabled': False,\n        'repeat_actions': False,\n        'insufficient_data_actions': [],\n        'ok_actions': ['signal_handler'],\n    }\n    after_props.update(update_props)\n    snippet = rsrc_defn.ResourceDefinition(rsrc.name, rsrc.type(), after_props)\n    scheduler.TaskRunner(rsrc.update, snippet)()\n    self.assertEqual((rsrc.UPDATE, rsrc.COMPLETE), rsrc.state)\n    self.assertEqual(1, update_mock.call_count)",
     "nl": "Test update the composite alarm.",
     "original_nl": "Test update the composite alarm."
-  },
-  {
-    "code": "def _plotGaussianKDE(axes, plot_config, data, label):\n    style = plot_config.histogramStyle()\n    if (data.dtype == 'object'):\n        try:\n            data = pd.to_numeric(data, errors='coerce')\n        except AttributeError:\n            data = data.convert_objects(convert_numeric=True)\n    if (data.dtype == 'object'):\n        pass\n    else:\n        sample_range = (data.max() - data.min())\n        indexes = numpy.linspace((data.min() - (0.5 * sample_range)), (data.max() + (0.5 * sample_range)), 1000)\n        gkde = gaussian_kde(data.values)\n        evaluated_gkde = gkde.evaluate(indexes)\n        lines = axes.plot(indexes, evaluated_gkde, linewidth=style.width, color=style.color, alpha=style.alpha)\n        if (len(lines) > 0):\n            plot_config.addLegendItem(label, lines[0])",
-    "nl": "@type axes: matplotlib.axes.Axes\n@type plot_config: PlotConfig\n@type data: DataFrame\n@type label: Str",
-    "original_nl": "@type axes: matplotlib.axes.Axes\n@type plot_config: PlotConfig\n@type data: DataFrame\n@type label: Str"
   },
   {
     "code": "def _do_edit_config(self, target, config, default_operation, test_option, error_option):\n    try:\n        log.debug('edit-config', target=target, config=config)\n        response = self._session.edit_config(target=target, config=config)\n        log.debug('response', response=response)\n    except RPCError as e:\n        log.exception('do_edit_config', e=e)\n        raise\n    return response",
@@ -1387,7 +1356,7 @@
   },
   {
     "code": "def eval_instance(self, best_path, gold):\n    total_labels = len(best_path)\n    correct_labels = np.sum(np.equal(best_path, gold))\n    gold_chunks = utils.iobes_to_spans(gold, self.r_l_map)\n    gold_count = len(gold_chunks)\n    guess_chunks = utils.iobes_to_spans(best_path, self.r_l_map)\n    guess_count = len(guess_chunks)\n    overlap_chunks = (gold_chunks & guess_chunks)\n    overlap_count = len(overlap_chunks)\n    return (correct_labels, total_labels, gold_count, guess_count, overlap_count)",
-    "nl": "update statics for one instance\n\nargs: \n    best_path (seq_len): predicted\n    gold (seq_len): ground-truth",
+    "nl": "update statics for one instance.\n\nargs: \n    best_path (seq_len): predicted\n    gold (seq_len): ground-truth",
     "original_nl": "update statics for one instance\n\nargs: \n    best_path (seq_len): predicted\n    gold (seq_len): ground-truth"
   },
   {
@@ -1537,7 +1506,7 @@
   },
   {
     "code": "def admins(self):\n    return self.root_admins",
-    "nl": "Returns the list of admins accounts\n@rtype: List\n",
+    "nl": "Returns the list of admins accounts.\n@rtype: List\n",
     "original_nl": "Returns the list of admins accounts\n@rtype: List\n@return: list of admin accounts"
   },
   {
@@ -1637,7 +1606,7 @@
   },
   {
     "code": "def build_tables(target, source, env):\n    builder_attributes = {\n        'name': 'Tablefill',\n        'valid_extensions': ['.lyx', '.tex'],\n        'exec_opts': '-interaction nonstopmode -jobname',\n    }\n    builder = TableBuilder(target, source, env, **builder_attributes)\n    builder.execute_system_call()\n    return None",
-    "nl": "Build a SCons target by filling a table\n\nThis function uses the tablefill function from gslab_fill to produced a \nfilled table from (i) an empty table in a LyX/Tex file and (ii) text files \ncontaining data to be used in filling the table. \n",
+    "nl": "Build a SCons target by filling a table.\n\nThis function uses the tablefill function from gslab_fill to produced a \nfilled table from (i) an empty table in a LyX/Tex file and (ii) text files \ncontaining data to be used in filling the table. \n",
     "original_nl": "Build a SCons target by filling a table\n\nThis function uses the tablefill function from gslab_fill to produced a \nfilled table from (i) an empty table in a LyX/Tex file and (ii) text files \ncontaining data to be used in filling the table. \n\nParameters\n----------\ntarget: string or list \n    The target(s) of the SCons command.\nsource: string or list\n    The source(s) of the SCons command. The first source specified\n    should be the LyX/Tex file specifying the table format. The subsequent \n    sources should be the text files containing the data with which the\n    tables are to be filled. \nenv: SCons construction environment, see SCons user guide 7.2"
   },
   {
@@ -1832,7 +1801,7 @@
   },
   {
     "code": "def update_list(client, list_id, revision, title=None, public=None):\n    if (title is not None):\n        _check_title_length(title, client.api)\n    data = {\n        'revision': revision,\n        'title': title,\n        'public': public,\n    }\n    data = {key: value for (key, value) in data.iteritems() if (value is not None)}\n    endpoint = '/'.join([client.api.Endpoints.LISTS, str(list_id)])\n    response = client.authenticated_request(endpoint, 'PATCH', data=data)\n    return response.json()",
-    "nl": "Updates the list with the given ID to have the given properties\n\nSee https://developer.wunderlist.com/documentation/endpoints/list for detailed parameter information",
+    "nl": "Updates the list with the given ID to have the given properties.\n\nSee https://developer.wunderlist.com/documentation/endpoints/list for detailed parameter information",
     "original_nl": "Updates the list with the given ID to have the given properties\n\nSee https://developer.wunderlist.com/documentation/endpoints/list for detailed parameter information"
   },
   {
@@ -1992,7 +1961,7 @@
   },
   {
     "code": "def post(self, request, bot_id, format=None):\n    return super(MessengerChatStateList, self).post(request, bot_id, format)",
-    "nl": "Add a new chat state\n---\nserializer: MessengerChatStateSerializer\nresponseMessages:\n    - code: 401\n      message: Not authenticated\n    - code: 400\n      message: Not valid request",
+    "nl": "Add a new chat state.\n---\nserializer: MessengerChatStateSerializer\nresponseMessages:\n    - code: 401\n      message: Not authenticated\n    - code: 400\n      message: Not valid request",
     "original_nl": "Add a new chat state\n---\nserializer: MessengerChatStateSerializer\nresponseMessages:\n    - code: 401\n      message: Not authenticated\n    - code: 400\n      message: Not valid request"
   },
   {
@@ -2087,7 +2056,7 @@
   },
   {
     "code": "def parse_requirements(requirements, ignore=('setuptools',)):\n    with open(requirements) as f:\n        packages = set()\n        for line in f:\n            line = line.strip()\n            if line.startswith(('#', '-r', '--')):\n                continue\n            if ('#egg=' in line):\n                line = line.split('#egg=')[1]\n            pkg = line.strip()\n            if (pkg not in ignore):\n                packages.add(pkg)\n        return packages",
-    "nl": "Read dependencies from requirements file (with version numbers if any)\n\nNotes:\n    - this implementation does not support requirements files with extra\n      requirements\n    - this implementation has been taken from TailorDev/Watson's setup file",
+    "nl": "Read dependencies from requirements file (with version numbers if any).\n\nNotes:\n    - this implementation does not support requirements files with extra\n      requirements\n    - this implementation has been taken from TailorDev/Watson's setup file",
     "original_nl": "Read dependencies from requirements file (with version numbers if any)\n\nNotes:\n    - this implementation does not support requirements files with extra\n      requirements\n    - this implementation has been taken from TailorDev/Watson's setup file"
   },
   {
@@ -2102,7 +2071,7 @@
   },
   {
     "code": "def subs(d, **kwargs):\n    if d:\n        return top_down(do_one(*map(rl.subs, *zip(*d.items()))), **kwargs)\n    else:\n        return (lambda x: x)",
-    "nl": "Full simultaneous exact substitution\n\nExamples\n========\n\n>>> from sympy.strategies.tools import subs\n>>> from sympy import Basic\n>>> mapping = {1: 4, 4: 1, Basic(5): Basic(6, 7)}\n>>> expr = Basic(1, Basic(2, 3), Basic(4, Basic(5)))\n>>> subs(mapping)(expr)\nBasic(4, Basic(2, 3), Basic(1, Basic(6, 7)))",
+    "nl": "Full simultaneous exact substitution.\n\nExamples\n========\n\n>>> from sympy.strategies.tools import subs\n>>> from sympy import Basic\n>>> mapping = {1: 4, 4: 1, Basic(5): Basic(6, 7)}\n>>> expr = Basic(1, Basic(2, 3), Basic(4, Basic(5)))\n>>> subs(mapping)(expr)\nBasic(4, Basic(2, 3), Basic(1, Basic(6, 7)))",
     "original_nl": "Full simultaneous exact substitution\n\nExamples\n========\n\n>>> from sympy.strategies.tools import subs\n>>> from sympy import Basic\n>>> mapping = {1: 4, 4: 1, Basic(5): Basic(6, 7)}\n>>> expr = Basic(1, Basic(2, 3), Basic(4, Basic(5)))\n>>> subs(mapping)(expr)\nBasic(4, Basic(2, 3), Basic(1, Basic(6, 7)))"
   },
   {
@@ -2342,7 +2311,7 @@
   },
   {
     "code": "def add_heat(self, heatmap, bbox_list):\n    for box in bbox_list:\n        heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1\n    return heatmap",
-    "nl": "Add heat according to bounding box list\nAttr:\n    heatmap: heat map initiliazed to image size\n    bbox_list: bounding boxes",
+    "nl": "Add heat according to bounding box list.\nAttr:\n    heatmap: heat map initiliazed to image size\n    bbox_list: bounding boxes",
     "original_nl": "Add heat according to bounding box list\nAttr:\n    heatmap: heat map initiliazed to image size\n    bbox_list: bounding boxes\nReturns:\n    resulted heat map image"
   },
   {
@@ -2627,7 +2596,7 @@
   },
   {
     "code": "def timerfd_gettime(fd):\n    if hasattr(fd, 'fileno'):\n        fd = fd.fileno()\n    assert isinstance(fd, int), 'fd must be an integer'\n    curr_val = ffi.new('struct itimerspec *')\n    ret = C.timerfd_gettime(fd, curr_val)\n    if (ret < 0):\n        err = ffi.errno\n        if (err == errno.EBADF):\n            raise ValueError('fd is not a valid file descriptor')\n        elif (err == errno.EFAULT):\n            raise InternalError('curr_val is not a valid pointer (internal/bug, let us know)')\n        elif (err == errno.EINVAL):\n            raise ValueError('fd is not a valid timerfd')\n        else:\n            raise UnknownError(err)\n    curr_val = TimerVal(timerspec=curr_val)\n    return curr_val",
-    "nl": "Get the current expiry time of a timerfd\n\nArguments\n----------\n",
+    "nl": "Get the current expiry time of a timerfd.\n\nArguments\n----------\n",
     "original_nl": "Get the current expiry time of a timerfd\n\nArguments\n----------\n:param int fd: File descriptor representing the timerfd\n\nReturns\n--------\n:return: The file descriptor representing the timerfd\n:rtype: int\n\nExceptions\n-----------\n:raises ValueError: Invalid value in flags\n:raises OSError: Max per process FD limit reached\n:raises OSError: Max system FD limit reached\n:raises OSError: Could not mount (internal) anonymous inode device\n:raises MemoryError: Insufficient kernel memory"
   },
   {
@@ -2772,19 +2741,9 @@
     "original_nl": "Compile new requirements-*.txt"
   },
   {
-    "code": "def get_id(self, conn_looker=None):\n    account_name = 'None'\n    player_name = 'None'\n    if self.account:\n        account_name = self.account.name\n    if self.player:\n        player_name = self.player.code\n    if ((not conn_looker) or (conn_looker and conn_looker.account and (conn_looker.account.trust >= TRUST.IMPLEMENTOR))):\n        return ('%s %s.%s' % (self.ip, account_name, player_name))\n    else:\n        (ip_number, port) = self.ip.split(':')\n        return ('*.*.*.%s:%s %s.%s' % (ip_number.split('.')[3], port, account_name, player_name))",
-    "nl": "Ritorna una o tutte tra le seguenti informazioni: l'ip della\nconnessione, il nome dell'account e il nome del personaggio.\nMolto utile da utilizzare nei messaggi di log.\nQuesto metodo fa a coppia con quello nella classe Account.",
-    "original_nl": "Ritorna una o tutte tra le seguenti informazioni: l'ip della\nconnessione, il nome dell'account e il nome del personaggio.\nMolto utile da utilizzare nei messaggi di log.\nQuesto metodo fa a coppia con quello nella classe Account."
-  },
-  {
     "code": "def __new__(cls, distro_type, **kwargs):\n    kwargs.update({\n        'distro': distro_type,\n        'pkgsys': LinuxLocalInfo.PACKAGE_SYSTEMS[distro_type],\n        'installation': 'local',\n    })\n    return DistroInfo.__new__(cls, create_func=create, get_func=container_for_directory, match_func=match, enumerate_func=enumerate_all, kwargs=kwargs)",
     "nl": "Create DistroInfo tuple using provided arguments.",
     "original_nl": "Create DistroInfo tuple using provided arguments."
-  },
-  {
-    "code": "def glob_to_path_regex(glob):\n    canonical_glob = str(PurePosixPath(glob))\n    regex = '^'\n    components = canonical_glob.split('/')\n    for (i, component) in enumerate(components):\n        if (component == '**'):\n            if (i == (len(components) - 1)):\n                raise GlobError(glob, '** may not be the last component in a path.')\n            else:\n                regex += '(?:[^/]+/)*'\n        elif ('**' in component):\n            raise GlobError(glob, '** must be an entire path component.')\n        else:\n            if (component == '*'):\n                regex += '[^/]+'\n            else:\n                star_parts = split_on_stars_interpreting_backslashes(component)\n                escaped_parts = map(re.escape, star_parts)\n                regex += '[^/]*'.join(escaped_parts)\n            if (i < (len(components) - 1)):\n                regex += '/'\n    regex += '$'\n    return regex",
-    "nl": "Supports * and **. Backslashes can escape stars or other backslashes. As\nin pathlib, ** may not adjoin any characters other than slash. Unlike\npathlib, because we're not talking to the actual filesystem, ** will match\nfiles as well as directories. Paths get canonicalized before they're\nconverted, so duplicate and trailing slashes get dropped. You should make\nsure the other paths you try to match are in canonical (Posix) form as\nwell.",
-    "original_nl": "Supports * and **. Backslashes can escape stars or other backslashes. As\nin pathlib, ** may not adjoin any characters other than slash. Unlike\npathlib, because we're not talking to the actual filesystem, ** will match\nfiles as well as directories. Paths get canonicalized before they're\nconverted, so duplicate and trailing slashes get dropped. You should make\nsure the other paths you try to match are in canonical (Posix) form as\nwell."
   },
   {
     "code": "def pitman_yor(min_alpha=0.1, max_alpha=100, min_d=0, max_d=0.5, alpha_count=20, d_count=10):\n    min_alpha = float(min_alpha)\n    max_alpha = float(max_alpha)\n    min_d = float(min_d)\n    max_d = float(max_d)\n    lower_triangle = [(x, y) for x in center_heavy(0, 1, alpha_count) for y in left_heavy(0, 1, d_count) if ((x + y) < 1)]\n    alpha = (lambda x: (min_alpha * ((max_alpha / min_alpha) ** x)))\n    d = (lambda y: (min_d + ((max_d - min_d) * y)))\n    grid = [{\n        'alpha': alpha(x),\n        'd': d(y),\n    } for (x, y) in lower_triangle]\n    return grid",
@@ -2842,11 +2801,6 @@
     "original_nl": "L{getProcessOutput} returns a L{Deferred} which fires with the complete\noutput of the process it runs after that process exits."
   },
   {
-    "code": "def test_extract_zip_non_verbose():\n    mox = Mox()\n\n    class MyFs(io.FileSystem):\n        stack = []\n        abspath = mox.CreateMockAnything()\n        pushd = mox.CreateMockAnything()\n        popd = mox.CreateMockAnything()\n        open_raw = mox.CreateMockAnything()\n        mkdir = mox.CreateMockAnything()\n    mox.StubOutWithMock(io, 'zipfile')\n    filename = 'modafoca.zip'\n    base_path = '../to/project'\n    full_path = '/full/path/to/project'\n    MyFs.abspath(base_path).AndReturn(full_path)\n    MyFs.pushd(full_path)\n    zip_mock = mox.CreateMockAnything()\n    io.zipfile.ZipFile(filename).AndReturn(zip_mock)\n    file_list = ['settings.yml', 'app', 'app/controllers.py']\n    zip_mock.namelist().AndReturn(file_list)\n    zip_mock.read('settings.yml').AndReturn('settings.yml content')\n    zip_mock.read('app/controllers.py').AndReturn('controllers.py content')\n    file_mock1 = mox.CreateMockAnything()\n    MyFs.open_raw('settings.yml', 'w').AndReturn(file_mock1)\n    file_mock1.write('settings.yml content')\n    file_mock1.close()\n    MyFs.open_raw('app', 'w').AndRaise(IOError('it is a directory, dumb ass!'))\n    MyFs.mkdir('app')\n    file_mock2 = mox.CreateMockAnything()\n    MyFs.open_raw('app/controllers.py', 'w').AndReturn(file_mock2)\n    file_mock2.write('controllers.py content')\n    file_mock2.close()\n    MyFs.popd()\n    mox.ReplayAll()\n    try:\n        MyFs.extract_zip('modafoca.zip', base_path)\n        mox.VerifyAll()\n    finally:\n        mox.UnsetStubs()",
-    "nl": "FileSystem.extract_zip non-verbose",
-    "original_nl": "FileSystem.extract_zip non-verbose"
-  },
-  {
     "code": "def add_signal_handler(self, signum, handler):\n    if (handler is None):\n        handler = 0\n    if (handler in (signal.SIG_IGN, 0)):\n        previous = signal.signal(signum, handler)\n        self._signal_handler_mappings[signum] = handler\n    else:\n\n        def call_signal_handler(*a):\n            self.call_from_executor(handler)\n        previous = signal.signal(signum, call_signal_handler)\n        self._signal_handler_mappings[signum] = handler\n    return self._signal_handler_mappings.get(signum, previous)",
     "nl": "Register a signal handler. Call `handler` when `signal` was received.\nThe given handler will always be called in the same thread as the\neventloop. (Like `call_from_executor`.)",
     "original_nl": "Register a signal handler. Call `handler` when `signal` was received.\nThe given handler will always be called in the same thread as the\neventloop. (Like `call_from_executor`.)"
@@ -2855,11 +2809,6 @@
     "code": "def save(self, must_create=False):\n    obj = Session(session_key=self._get_or_create_session_key(), session_data=self.encode(self._get_session(no_load=must_create)), expire_date=self.get_expiry_date())\n    using = router.db_for_write(Session, instance=obj)\n    sid = transaction.savepoint(using=using)\n    try:\n        obj.save(force_insert=must_create, using=using)\n    except IntegrityError:\n        if must_create:\n            transaction.savepoint_rollback(sid, using=using)\n            raise CreateError\n        raise",
     "nl": "Saves the current session data to the database. If 'must_create' is\nTrue, a database error will be raised if the saving operation doesn't\ncreate a *new* entry (as opposed to possibly updating an existing\nentry).",
     "original_nl": "Saves the current session data to the database. If 'must_create' is\nTrue, a database error will be raised if the saving operation doesn't\ncreate a *new* entry (as opposed to possibly updating an existing\nentry)."
-  },
-  {
-    "code": "def isRunning(self):\n    return self.__workflow.isRunning()",
-    "nl": "@rtype: bool",
-    "original_nl": "@rtype: bool"
   },
   {
     "code": "def get_channels_dict(self):\n    return self.channels",
@@ -2912,11 +2861,6 @@
     "original_nl": "register an observer to a specific event\n\n:param function: the function to observe\n:param observer: the observer function\n:return:"
   },
   {
-    "code": "def getPeer(self):\n    return self.conn.transport.getPeer()",
-    "nl": "See: L{ITransport.getPeer}\n\n",
-    "original_nl": "See: L{ITransport.getPeer}\n\n@return: The remote address of this connection.\n@rtype: L{SSHTransportAddress}."
-  },
-  {
     "code": "def load(self, polyfile):\n    ET = pg.optImport('xml.etree.cElementTree', 'read in XML files')\n    self.doc = ET.parse(polyfile)\n    self.parse()",
     "nl": "Read polygon info from XML file (see example.xml).",
     "original_nl": "Read polygon info from XML file (see example.xml)."
@@ -2942,11 +2886,6 @@
     "original_nl": "Check whether a user has owner status in the channel."
   },
   {
-    "code": "@hook.command(permissions=['op_op', 'op', 'chanop'])\ndef op(text, conn, chan, notice, nick, admin_log):\n    mode_cmd('+o', 'op', text, chan, conn, notice, nick, admin_log)",
-    "nl": "[channel] <user> - ops <user> in [channel], or in the caller's channel if no channel is specified",
-    "original_nl": "[channel] <user> - ops <user> in [channel], or in the caller's channel if no channel is specified"
-  },
-  {
     "code": "@patch('bulk_email.models.html_to_text', Mock(return_value='Mocking CourseEmail.text_message', autospec=True))\ndef test_send_to_self(self):\n    test_email = {\n        'action': 'send',\n        'send_to': 'myself',\n        'subject': 'test subject for myself',\n        'message': 'test message for myself',\n    }\n    response = self.client.post(self.send_mail_url, test_email)\n    self.assertEquals(json.loads(response.content), self.success_content)\n    self.assertEqual(len(mail.outbox), 1)\n    self.assertEqual(len(mail.outbox[0].to), 1)\n    self.assertEquals(mail.outbox[0].to[0], self.instructor.email)\n    self.assertEquals(mail.outbox[0].subject, 'test subject for myself')",
     "nl": "Make sure email send to myself goes to myself.",
     "original_nl": "Make sure email send to myself goes to myself."
@@ -2960,11 +2899,6 @@
     "code": "@click.command('switch-to-develop')\ndef switch_to_develop(upgrade=False):\n    from bench.app import switch_to_develop\n    switch_to_develop(apps=['frappe', 'erpnext'])\n    print()\n    print('Switched to develop')\n    print('Please run `bench update --patch` to be safe from any differences in database schema')",
     "nl": "Switch frappe and erpnext to develop branch",
     "original_nl": "Switch frappe and erpnext to develop branch"
-  },
-  {
-    "code": "def fetch_66ip(https):\n    proxyes = []\n    try:\n        if https:\n            url = 'http://www.66ip.cn/nmtq.php?getnum=10&isp=0&anonymoustype=3&start=&ports=&export=&ipaddress=&area=1&proxytype=1&api=66ip'\n        else:\n            url = 'http://www.66ip.cn/nmtq.php?getnum=10&isp=0&anonymoustype=3&start=&ports=&export=&ipaddress=&area=1&proxytype=0&api=66ip'\n        content = get_html(url)\n        content = str(content)\n        urls = content.split('</script>')[1].split('</div>')[0].split('<br />')\n        for u in urls:\n            u = u.split('\\\\t')[(- 1)]\n            if u.strip():\n                if https:\n                    proxyes.append(('https://' + u.strip()))\n                else:\n                    proxyes.append(('http://' + u.strip()))\n    except Exception as e:\n        logger.warning(('fail to fetch from 66ip: %s' % e))\n    return proxyes",
-    "nl": "http://www.66ip.cn/\n\u6bcf\u6b21\u6253\u5f00\u6b64\u94fe\u63a5\u90fd\u80fd\u5f97\u5230\u4e00\u6279\u4ee3\u7406, \u901f\u5ea6\u4e0d\u4fdd\u8bc1",
-    "original_nl": "http://www.66ip.cn/\n\u6bcf\u6b21\u6253\u5f00\u6b64\u94fe\u63a5\u90fd\u80fd\u5f97\u5230\u4e00\u6279\u4ee3\u7406, \u901f\u5ea6\u4e0d\u4fdd\u8bc1"
   },
   {
     "code": "@property\ndef count(self):\n    return len(self)",
