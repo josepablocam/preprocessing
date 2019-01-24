@@ -96,7 +96,7 @@ class CodeDocstringModel(nn.Module):
                 lin_name = 'lin-{}'.format(num_dan_layers)
                 self.dan_layers.add_module(lin_name, lin_layer)
                 if num_dan_layers > 1:
-                    activation = nn.ReLU()
+                    activation = nn.Tanh()
                     activation_name = 'activation-{}'.format(num_dan_layers)
                     self.dan_layers.add_module(activation_name, activation)
                 num_dan_layers -= 1
@@ -167,7 +167,7 @@ class DANModel(nn.Module):
                 nn.Linear(n_in, n_out)
             )
             self.code_nn.add_module('activation-{}'.format(i),
-                nn.ReLU()
+                nn.Tanh()
             )
             if self.dropout > 0:
                 self.code_nn.add_module('dropout-{}'.format(i),
@@ -182,7 +182,7 @@ class DANModel(nn.Module):
                 nn.Linear(n_in, n_out)
             )
             self.nl_nn.add_module('activation-{}'.format(i),
-                nn.ReLU()
+                nn.Tanh()
             )
             if self.dropout > 0:
                 self.nl_nn.add_module('dropout-{}'.format(i),

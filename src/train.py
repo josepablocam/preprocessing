@@ -26,6 +26,7 @@ LR = 5e-4
 HIDDEN_SIZE = 300
 NUM_LAYERS = 3 # For DAN
 DROPOUT = 0.0 # For DAN
+DAN_HIDDEN_SIZE = 2*HIDDEN_SIZE
 
 
 def load_data(batch_size, code_path, docstring_path):
@@ -121,6 +122,7 @@ def train(
         hidden_size=HIDDEN_SIZE,
         num_layers=NUM_LAYERS, # for dan
         dropout=DROPOUT, # for dan
+        dan_hidden_size=DAN_HIDDEN_SIZE,
         fixed_embeddings=True,
         valid_code_path=None,
         valid_docstrings_path=None,
@@ -157,6 +159,9 @@ def train(
         "valid_code_path": valid_code_path,
         "valid_docstrings_path": valid_docstrings_path,
         "model": model_option,
+        "dan_hidden_size": dan_hidden_size,
+        "num_layers": num_layers,
+        "dropout": dropout,
     }
     with open(os.path.join(model_folder, "config.json"), "w") as fout:
         json.dump(config, fout)
@@ -198,7 +203,7 @@ def train(
             vocab_size, # same vocab for both code/NL
             vocab_size,
             emb_size,
-            hidden_size=hidden_size,
+            hidden_size=dan_hidden_size,
             dropout=dropout,
             fixed_embeddings=fixed_embeddings,
             num_layers=num_layers,
