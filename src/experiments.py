@@ -44,9 +44,7 @@ EMPTY_EXPERIMENT = {
     "min_count": 5,
     "downsample_train": 10000,
     "downsample_valid": 500,
-    #"seeds": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-    # DEBUG
-    "seeds": [10, 20],
+    "seeds": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 }
 
 
@@ -234,8 +232,6 @@ def generate_experiments(
     utils.create_dir(output_dir)
 
     experiments = paper_experiments(output_dir)
-    # DEBUG
-    experiments = [experiments[0]]
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
