@@ -24,11 +24,7 @@
     "nl": "For unit test case, we don't search for test functions.\nThe unit test cases is stored in a yaml file which is created in job build-idf-test.",
     "original_nl": "For unit test case, we don't search for test functions.\nThe unit test cases is stored in a yaml file which is created in job build-idf-test."
   },
-  {
-    "code": "def init_process(self):\n    if self.cfg.reload:\n\n        def changed(fname):\n            self.log.info('Worker reloading: %s modified', fname)\n            os.kill(self.pid, signal.SIGQUIT)\n            raise SystemExit()\n        Reloader(callback=changed).start()\n    if self.cfg.env:\n        for (k, v) in self.cfg.env.items():\n            os.environ[k] = v\n    util.set_owner_process(self.cfg.uid, self.cfg.gid)\n    util.seed()\n    self.PIPE = os.pipe()\n    for p in self.PIPE:\n        util.set_non_blocking(p)\n        util.close_on_exec(p)\n    [util.close_on_exec(s) for s in self.sockets]\n    util.close_on_exec(self.tmp.fileno())\n    self.log.close_on_exec()\n    self.init_signals()\n    self.wsgi = self.app.wsgi()\n    self.cfg.post_worker_init(self)\n    self.booted = True\n    self.run()",
-    "nl": "If you override this method in a subclass, the last statement\nin the function should be to call this method with\nsuper(MyWorkerClass, self).init_process() so that the ``run()``\nloop is initiated.",
-    "original_nl": "If you override this method in a subclass, the last statement\nin the function should be to call this method with\nsuper(MyWorkerClass, self).init_process() so that the ``run()``\nloop is initiated."
-  },
+
   {
     "code": "def txp_bin_counter_callback(self, counter):\n    self.log.info('Mcast address %s packets %u', counter.mcast, counter.tx_packets[0])",
     "nl": "Counters callback.",
@@ -59,25 +55,12 @@
     "nl": "Test Case 18:\nTry creating a public/private key pair using the ED25519 algorithm.\n\nTest is passed if two files, ``filename`` and ``filename.pub`` are created during the test and the",
     "original_nl": "Test Case 18:\nTry creating a public/private key pair using the ED25519 algorithm.\n\nTest is passed if two files, ``filename`` and ``filename.pub`` are created during the test and the\nreturn value of ssh-keygen is zero."
   },
-  {
-    "code": "def find_videos_by_userid(self, user_id, orderby='published', page=1, count=20):\n    url = 'https://openapi.youku.com/v2/videos/by_user.json'\n    params = {\n        'client_id': self.client_id,\n        'user_id': user_id,\n        'orderby': orderby,\n        'page': page,\n        'count': count,\n    }\n    r = requests.get(url, params=params)\n    check_error(r)\n    return r.json()",
-    "nl": "doc: http://open.youku.com/docs/doc?id=49",
-    "original_nl": "doc: http://open.youku.com/docs/doc?id=49"
-  },
-  {
-    "code": "def report_test(cond, filename, test, captured_output, error_contents, delta):\n    time_str = ('%.2f' % (delta,))\n    pydev_runfiles_xml_rpc.notifyTest(cond, captured_output, error_contents, filename, test, time_str)",
-    "nl": "@param filename: 'D:\\src\\mod1\\hello.py'\n@param test: 'TestCase.testMet1'\n@param cond: fail, error, ok",
-    "original_nl": "@param filename: 'D:\\src\\mod1\\hello.py'\n@param test: 'TestCase.testMet1'\n@param cond: fail, error, ok"
-  },
+
+
   {
     "code": "def parse(self, html):\n    html = self.__fix_html(html)\n    self.reset()\n    try:\n        self.feed(html)\n        self.close()\n    finally:\n        for tag in self.__tag_stack[1:]:\n            self.__close_tag(tag, True)",
     "nl": "Parses the specified HTML page.",
     "original_nl": "Parses the specified HTML page."
-  },
-  {
-    "code": "def __init__(self, client, db_name):\n    self.client = client\n    self.db_name = db_name",
-    "nl": "Creates a new instance of CloudantOnlineStore.\n\n",
-    "original_nl": "Creates a new instance of CloudantOnlineStore.\n\n:param Object client: instance of Cloudant client to connect to\n:param str db_name: name of the database to use"
   },
   {
     "code": "def testGetFormatStringAttributeNames(self):\n    event_formatter = windows.WindowsVolumeCreationEventFormatter()\n    expected_attribute_names = ['device_path', 'serial_number', 'origin']\n    self._TestGetFormatStringAttributeNames(event_formatter, expected_attribute_names)",
@@ -149,21 +132,13 @@
     "nl": "Wait, retrying a predicate until it is True, or the \ntimeout value has been exceeded.",
     "original_nl": "Wait, retrying a predicate until it is True, or the \ntimeout value has been exceeded."
   },
-  {
-    "code": "def martinis_tree(domain, b):\n    clouds = b['pBLUE'].gte(0.27)\n    temp1 = b['EVI'].lte(0.3).And(b['DVEL'].lte(0.05))\n    temp2 = b['EVI'].lte(0.05).And(b['LSWI'].lte(0.0))\n    nonFlood1 = b['EVI'].gt(0.3).And(temp1.Not())\n    waterRelated1 = temp1.Or(temp2)\n    nonFlood2 = temp1.And(temp2.Not())\n    demSensor = domain.get_dem()\n    dem = demSensor.image\n    demSlopeDegrees = compute_dem_slope_degrees(demSensor.image, demSensor.band_resolutions[demSensor.band_names[0]])\n    highSlope = demSlopeDegrees.gt(10).Or(demSlopeDegrees.gt(8).And(dem.gt(2000)))\n    waterRelated2 = waterRelated1.And(highSlope.Not())\n    nonFlood3 = waterRelated1.And(highSlope).Or(nonFlood2)\n    mixture1 = waterRelated2.And(b['EVI'].gt(0.1))\n    flood1 = waterRelated2.And(b['EVI'].lte(0.1))\n    REGION_GROW_SIZE = 35\n    expansionKernel = ee.Kernel.circle(REGION_GROW_SIZE, 'pixels', False)\n    temp1 = b['EVI'].lte(0.31).And(b['DVEL'].lte(0.07))\n    temp2 = b['EVI'].lte(0.06).And(b['LSWI'].lte(0.01))\n    relaxedConditions = temp1.Or(temp2)\n    potentialExpansionArea = waterRelated2.convolve(expansionKernel).And(nonFlood3)\n    waterRelated3 = potentialExpansionArea.And(relaxedConditions)\n    mixture3 = waterRelated3.And(b['EVI'].gt(0.1))\n    flood3 = waterRelated3.And(b['EVI'].lte(0.1))\n    potentialExpansionArea = flood1.convolve(expansionKernel).And(mixture1)\n    mixture2 = potentialExpansionArea.And(b['LSWI'].lt(0.08))\n    flood2 = potentialExpansionArea.And(b['LSWI'].gte(0.08))\n    waterMask = ee.Image('MODIS/MOD44W/MOD44W_005_2000_02_24').select(['water_mask'])\n    recedingWater = nonFlood3.And(waterMask)\n    mergedFlood = flood1.Or(flood2).Or(flood3)\n    standingWater = mergedFlood.And(waterMask)\n    flood4 = mergedFlood.And(waterMask.Not())\n    badModisPixels = getModisBadPixelMask(domain.modis.image)\n    flood5 = flood4.And(badModisPixels.Not())\n    fullMixture = mixture2.Or(mixture3)\n    outputFlood = flood5.Or(standingWater)\n    return outputFlood.select(['sur_refl_b02'], ['b1'])",
-    "nl": "Based on Figure 3 from \"A Multi-Scale Flood Monitoring System Based on Fully\n Automatic MODIS and TerraSAR-X Processing Chains\" by \n Sandro Martinis, Andre Twele, Christian Strobl, Jens Kersten and Enrico Stein\n \nSome steps had to be approximated such as the cloud filtering.  The main pixel\nclassification steps are implemented as accurately as can be determined from \nthe figure.",
-    "original_nl": "Based on Figure 3 from \"A Multi-Scale Flood Monitoring System Based on Fully\n Automatic MODIS and TerraSAR-X Processing Chains\" by \n Sandro Martinis, Andre Twele, Christian Strobl, Jens Kersten and Enrico Stein\n \nSome steps had to be approximated such as the cloud filtering.  The main pixel\nclassification steps are implemented as accurately as can be determined from \nthe figure."
-  },
+
   {
     "code": "def North_East_vectors_target(ra_xallarap, dec_xallarap):\n    target_angles_in_the_sky = [((ra_xallarap * np.pi) / 180), ((dec_xallarap * np.pi) / 180)]\n    source_center_of_mass = np.array([(np.cos(target_angles_in_the_sky[1]) * np.cos(target_angles_in_the_sky[0])), (np.cos(target_angles_in_the_sky[1]) * np.sin(target_angles_in_the_sky[0])), np.sin(target_angles_in_the_sky[1])])\n    East = np.array([(- np.sin(target_angles_in_the_sky[0])), np.cos(target_angles_in_the_sky[0]), 0.0])\n    North = np.cross(source_center_of_mass, East)\n    return (North, East)",
     "nl": "This function define the North and East vectors projected on the sky plane\nperpendicular to the line\nof sight (i.e the line define by ra,dec of the center of mass of the source binary).\n\n",
     "original_nl": "This function define the North and East vectors projected on the sky plane\nperpendicular to the line\nof sight (i.e the line define by ra,dec of the center of mass of the source binary).\n\n:param float ra_xallarap : the right acsension of the source binary center of mass in degree.\n:param float dec_xallarap : the declinaision of the source binary center of mass in degree.\n:return: the North and East vectors projected in the sky plan for this trajectory\n:rtype: array_like, array_like"
   },
-  {
-    "code": "def settings_add_bool(*args, **kwargs):\n    get_script().settings_add_bool(*args, **kwargs)",
-    "nl": "see Script.settings_add_bool()",
-    "original_nl": "see Script.settings_add_bool()"
-  },
+
   {
     "code": "def test_get_licenses():\n    expected_matches = [('mit', 'mit'), ('mti', 'mit'), ('MIT', 'mit'), ('bit', 'mit'), ('nit', 'mit'), ('ics', 'isc'), ('isc', 'isc'), ('allrightsreserved', 'all-rights-reserved'), ('gpl2', 'gpl-2.0'), ('gpl-2', 'gpl-2.0'), ('apache', 'apache-2.0'), ('apache-2', 'apache-2.0'), ('mpl-2', 'mpl-2.0'), ('bsd2clause', 'bsd-2-clause'), ('agpl3', 'agpl-3.0'), ('agpl', 'agpl-3.0')]\n    for pair in expected_matches:\n        match = licenser.get_license(pair[0])\n        assert (match == pair[1]), '{a} != {b}, test: {pair}'.format(a=match, b=pair[1], pair=pair)",
     "nl": "calls get_license to test matching functionality",
@@ -198,11 +173,6 @@
     "code": "def Main():\n    argument_parser = argparse.ArgumentParser(description='Extracts information from timezone information files.')\n    argument_parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False, help='enable debug output.')\n    argument_parser.add_argument('source', nargs='?', action='store', metavar='PATH', default=None, help='path of the timezone information file.')\n    options = argument_parser.parse_args()\n    if (not options.source):\n        print('Source file missing.')\n        print('')\n        argument_parser.print_help()\n        print('')\n        return False\n    logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')\n    output_writer = output_writers.StdoutWriter()\n    try:\n        output_writer.Open()\n    except IOError as exception:\n        print('Unable to open output writer with error: {0!s}'.format(exception))\n        print('')\n        return False\n    tzif_file = tzif.TimeZoneInformationFile(debug=options.debug, output_writer=output_writer)\n    tzif_file.Open(options.source)\n    output_writer.WriteText('Timezone information:\\n')\n    tzif_file.Close()\n    output_writer.Close()\n    return True",
     "nl": "The main program function.\n",
     "original_nl": "The main program function.\n\nReturns:\n  bool: True if successful or False if not."
-  },
-  {
-    "code": "def init(param_test):\n    default_args = ['-i t2/t2_seg_manual.nii.gz -d t2/t2_seg_manual.nii.gz']\n    param_test.contrast = 't2'\n    if (not param_test.args):\n        param_test.args = default_args\n    return param_test",
-    "nl": "Initialize class: param_test",
-    "original_nl": "Initialize class: param_test"
   },
   {
     "code": "def defuse_xml_libs():\n    from defusedxml import defuse_stdlib\n    defuse_stdlib()\n    import lxml\n    import lxml.etree\n    from . import etree as safe_etree\n    lxml.etree = safe_etree",
@@ -244,11 +214,7 @@
     "nl": "MarkovNetwork initializer with bad seeded genome",
     "original_nl": "MarkovNetwork initializer with bad seeded genome"
   },
-  {
-    "code": "def check_status_code(response, verbose):\n    if ((response.status_code == 410) and response.url.startswith(('https://pypi.python.org', 'https://testpypi.python.org'))):\n        print(\"It appears you're uploading to pypi.python.org (or testpypi.python.org). You've received a 410 error response. Uploading to those sites is deprecated. The new sites are pypi.org and test.pypi.org. Try using https://upload.pypi.org/legacy/ (or https://test.pypi.org/legacy/) to upload your packages instead. These are the default URLs for Twine now. More at https://packaging.python.org/guides/migrating-to-pypi-org/ \")\n    try:\n        response.raise_for_status()\n    except HTTPError as err:\n        if response.text:\n            if verbose:\n                print('Content received from server:\\n{}'.format(response.text))\n            else:\n                print('NOTE: Try --verbose to see response content.')\n        raise err",
-    "nl": "Shouldn't happen, thanks to the UploadToDeprecatedPyPIDetected\nexception, but this is in case that breaks and it does.",
-    "original_nl": "Shouldn't happen, thanks to the UploadToDeprecatedPyPIDetected\nexception, but this is in case that breaks and it does."
-  },
+
   {
     "code": "def get_nicklist(self):\n    if (not self.nicklist):\n        self.sendLine(('NAMES %s' % self.channel))",
     "nl": "Retrieve name list from the channel. The return\nis handled by the catch methods below.",
@@ -273,16 +239,6 @@
     "code": "def bin_search(binary):\n    result = None\n    mode = (os.R_OK | os.X_OK)\n    for p in bin_search_path:\n        path = os.path.join(p, binary)\n        if (os.access(path, mode) == 1):\n            result = path\n            break\n    else:\n        raise MissingBinary(('Unable to find binary \"%s\"' % binary))\n    return result",
     "nl": "search the bin_search_path  for a given binary",
     "original_nl": "search the bin_search_path  for a given binary\nreturning its fullname or None"
-  },
-  {
-    "code": "def load_blood_data(train=True, SEED=97, scale=False, minmax=False, norm=False, nointercept=False, engineering=False):\n    from sklearn.utils import shuffle\n    from patsy import dmatrices, dmatrix\n    from sklearn.preprocessing import StandardScaler\n    from sklearn.preprocessing import MinMaxScaler\n    from sklearn.preprocessing import Normalizer\n    import numpy as np\n    import pandas as pd\n    import re\n    global scaler\n    global minmaxer\n    global normalizer\n    if (scale and minmax):\n        raise ValueError('cannot specify both scale and minmax')\n    if (scale and norm):\n        raise ValueError('cannot specify both scale and norm')\n    if (norm and minmax):\n        raise ValueError('cannot specify both norm and minmax')\n    if (type(train) is not bool):\n        raise ValueError('train must be boolean')\n    if (type(SEED) is not int):\n        raise ValueError('SEED must be int')\n    if (type(scale) is not bool):\n        raise ValueError('scale must be boolean')\n    if (type(norm) is not bool):\n        raise ValueError('norm must be boolean')\n    if (type(nointercept) is not bool):\n        raise ValueError('nointercept must be boolean')\n    if (type(engineering) is not bool):\n        raise ValueError('engineering must be boolean')\n    file_name = ('../input/train.csv' if train else '../input/test.csv')\n    data = pd.read_csv(file_name)\n    column_names = ['ID', 'moSinceLast', 'numDonations', 'volume', 'moSinceFirst', 'donated']\n    data.columns = (column_names if train else column_names[:(- 1)])\n    if engineering:\n        data['moRatio'] = pd.Series((data.moSinceLast / data.moSinceFirst), index=data.index)\n        data['avgDonation'] = pd.Series(((data.volume / data.numDonations) / data.moSinceFirst), index=data.index)\n        data['avgWait'] = pd.Series((data.moSinceFirst / data.numDonations), index=data.index)\n    if scale:\n        if train:\n            scaler = StandardScaler(copy=True, with_mean=True, with_std=True)\n            exclude = ['ID', 'donated']\n            data.ix[:, data.columns.difference(exclude)] = scaler.fit_transform(data.ix[:, data.columns.difference(exclude)].values.astype(np.float32))\n        else:\n            exclude = ['ID', 'donated']\n            data.ix[:, data.columns.difference(exclude)] = scaler.transform(data.ix[:, data.columns.difference(exclude)].values.astype(np.float32))\n    if minmax:\n        if (len(minmax) != 2):\n            raise ValueError('minmax must be a 2-tuple')\n        if train:\n            minmaxer = MinMaxScaler(feature_range=minmax)\n            exclude = ['ID', 'donated']\n            data.ix[:, data.columns.difference(exclude)] = minmaxer.fit_transform(data.ix[:, data.columns.difference(exclude)].values.astype(np.float32))\n        else:\n            exclude = ['ID', 'donated']\n            data.ix[:, data.columns.difference(exclude)] = minmaxer.transform(data.ix[:, data.columns.difference(exclude)].values.astype(np.float32))\n    if norm:\n        if train:\n            normalizer = Normalizer(norm='l2', copy=True)\n            exclude = ['ID', 'donated']\n            data.ix[:, data.columns.difference(exclude)] = normalizer.fit_transform(data.ix[:, data.columns.difference(exclude)].values.astype(np.float32))\n        else:\n            exclude = ['ID', 'donated']\n            data.ix[:, data.columns.difference(exclude)] = normalizer.transform(data.ix[:, data.columns.difference(exclude)].values.astype(np.float32))\n    formula = 'donated ~ moSinceLast * moSinceFirst +  numDonations + volume'\n    if engineering:\n        formula = (formula + ' + moRatio + avgDonation + avgWait')\n    if nointercept:\n        formula = (formula + ' -1')\n    if (not train):\n        match = re.search('~\\\\s??(.*)', formula)\n        if match:\n            formula = match.group(1)\n        else:\n            raise ValueError('Patsy formula {} does not match the expected format'.format(formula))\n    if train:\n        (y_train, X_train) = dmatrices(formula, data=data, return_type='dataframe')\n        y_train = np.ravel(y_train).astype(np.int32)\n        (X_train, y_train) = shuffle(X_train, y_train, random_state=SEED)\n        return (y_train, X_train)\n    else:\n        X_test = dmatrix(formula, data=data, return_type='dataframe')\n        IDs = data.ID.values\n        return (X_test, IDs)",
-    "nl": "Load training and test datasets\nfor DrivenData's Predict Blood Donations warmup contest\n\nThe training data is shuffled before it's returned; test data is not\n\nNote: patsy returns float64 data; Theano requires float32 so conversion\n      will be required; the y values are converted to int32, so they're OK\n\nArguments\n---------\n    train (bool) if True\n                     y_train, X_train = load_blood_data(train=True, ...\n                 if False\n                     X_test, IDs = load_blood_data(train=False, ...\n                     \n    SEED (int)   random seed\n    \n    scale (bool) if True, scale the data to mean zero, var 1; standard normal\n    \n    minmax (2-tuple) to scale the data to a specified range, provide a\n                     2-tuple (min, max)\n                     \n    norm (bool)  if True, L2 normalize for distance and similarity measures\n    \n    nointercept (bool) if True, patsy will not create an intercept\n                     \n                     \nUsage\n-----\nfrom load_blood_data import load_blood_data",
-    "original_nl": "Load training and test datasets\nfor DrivenData's Predict Blood Donations warmup contest\n\nThe training data is shuffled before it's returned; test data is not\n\nNote: patsy returns float64 data; Theano requires float32 so conversion\n      will be required; the y values are converted to int32, so they're OK\n\nArguments\n---------\n    train (bool) if True\n                     y_train, X_train = load_blood_data(train=True, ...\n                 if False\n                     X_test, IDs = load_blood_data(train=False, ...\n                     \n    SEED (int)   random seed\n    \n    scale (bool) if True, scale the data to mean zero, var 1; standard normal\n    \n    minmax (2-tuple) to scale the data to a specified range, provide a\n                     2-tuple (min, max)\n                     \n    norm (bool)  if True, L2 normalize for distance and similarity measures\n    \n    nointercept (bool) if True, patsy will not create an intercept\n                     \n                     \nUsage\n-----\nfrom load_blood_data import load_blood_data"
-  },
-  {
-    "code": "@shared_test_lib.skipUnlessHasTestFile(['\u00edmynd.dd'])\ndef testMatches(self):\n    test_path = self._GetTestFilePath(['\u00edmynd.dd'])\n    os_path_spec = path_spec_factory.Factory.NewPathSpec(dfvfs_definitions.TYPE_INDICATOR_OS, location=test_path)\n    test_filter = file_entry_filters.NamesFileEntryFilter(['passwords.txt'])\n    tsk_path_spec = path_spec_factory.Factory.NewPathSpec(dfvfs_definitions.TYPE_INDICATOR_TSK, inode=16, location='/a_directory/another_file', parent=os_path_spec)\n    file_entry = path_spec_resolver.Resolver.OpenFileEntry(tsk_path_spec)\n    self.assertFalse(test_filter.Matches(file_entry))\n    tsk_path_spec = path_spec_factory.Factory.NewPathSpec(dfvfs_definitions.TYPE_INDICATOR_TSK, inode=12, location='/a_directory', parent=os_path_spec)\n    file_entry = path_spec_resolver.Resolver.OpenFileEntry(tsk_path_spec)\n    self.assertFalse(test_filter.Matches(file_entry))\n    tsk_path_spec = path_spec_factory.Factory.NewPathSpec(dfvfs_definitions.TYPE_INDICATOR_TSK, inode=15, location='/passwords.txt', parent=os_path_spec)\n    file_entry = path_spec_resolver.Resolver.OpenFileEntry(tsk_path_spec)\n    self.assertTrue(test_filter.Matches(file_entry))\n    test_filter = file_entry_filters.NamesFileEntryFilter([])\n    self.assertFalse(test_filter.Matches(file_entry))",
-    "nl": "Tests the Matches function.",
-    "original_nl": "Tests the Matches function."
   },
   {
     "code": "def test_get_by_region_name(self):\n    for reg in list(RegionCode.Region):\n        reg_str = reg.name.replace('_', '-')\n        self.assertEquals(self.REGIONS[reg], RegionCode[reg_str])",
@@ -310,11 +266,6 @@
     "original_nl": "Fetch the results and return as a Connection element. The original\nquery is not modified.\n\n:return: generator of elements\n:rtype: :class:`.Connection`"
   },
   {
-    "code": "def rapor_turu_sec(self):\n    form = RaporTurForm(self.object, current=self.current)\n    self.form_out(form)",
-    "nl": "Se\u00e7ili olan projenin rapor t\u00fcr\u00fcn\u00fcn se\u00e7ilmesi i\u015flemlerini ger\u00e7ekle\u015ftirir.",
-    "original_nl": "Se\u00e7ili olan projenin rapor t\u00fcr\u00fcn\u00fcn se\u00e7ilmesi i\u015flemlerini ger\u00e7ekle\u015ftirir."
-  },
-  {
     "code": "def ci_width(self, alpha=0.05):\n    half_width = self.std_dev.copy()\n    n = self.num_realizations\n    if (n > 1):\n        half_width *= scipy.stats.t.ppf((1 - (alpha / 2)), (n - 1))\n    return half_width",
     "nl": "Confidence interval half-width based on a Student t distribution\n",
     "original_nl": "Confidence interval half-width based on a Student t distribution\n\nParameters\n----------\nalpha : float\n    Significance level (one minus the confidence level!)\n\nReturns\n-------\nfloat\n    Half-width of a two-sided (1 - :math:`alpha`) confidence interval"
@@ -335,24 +286,9 @@
     "original_nl": "Return all the matched usernames in the message"
   },
   {
-    "code": "def test_cleared(self):\n    message = 'the message'\n    category = RuntimeWarning\n    warnings.warn(message=message, category=category)\n    self.assertDictSubsets(self.flushWarnings(), [{\n        'category': category,\n        'message': message,\n    }])\n    self.assertEqual(self.flushWarnings(), [])",
-    "nl": "After a particular warning event has been returned by\nL{TestCase.flushWarnings}, it is not returned by subsequent calls.",
-    "original_nl": "After a particular warning event has been returned by\nL{TestCase.flushWarnings}, it is not returned by subsequent calls."
-  },
-  {
     "code": "@classmethod\ndef deserialize(cls, uid, trusted=True, registry=None, **kwargs):\n    if (registry is None):\n        raise ValueError('no registry provided')\n    if (uid not in registry):\n        raise ValueError('uid not found: {}'.format(uid))\n    if (not isinstance(registry[uid], UidModel)):\n        date_created = registry[uid]['date_created']\n        date_modified = registry[uid]['date_modified']\n        kwargs.update({\n            'verbose': False,\n        })\n        new_model = super(UidModel, cls).deserialize(value=registry[uid], registry=registry, trusted=trusted, **kwargs)\n        new_model._backend.update({\n            'uid': properties.Uuid.from_json(uid),\n            'date_created': properties.DateTime.from_json(date_created),\n            'date_modified': properties.DateTime.from_json(date_modified),\n        })\n        registry.update({\n            uid: new_model,\n        })\n    return registry[uid]",
     "nl": "Deserialize nested UidModels from flat pointer dictionary",
     "original_nl": "Deserialize nested UidModels from flat pointer dictionary"
-  },
-  {
-    "code": "def _masterClosed(self):\n    try:\n        self.master.item.sigImageChanged.disconnect(self.updateView)\n    except TypeError:\n        pass\n    self.sigRegionChanged.disconnect(self.updateView)\n    self.tool.display.stack.sigValuesChanged.disconnect(self.updateView)",
-    "nl": "roi still exists but doesnt listen to changes in the master display",
-    "original_nl": "roi still exists but doesnt listen to changes in the master display"
-  },
-  {
-    "code": "def _calc_xp(self, txt, gid):\n    spc = self.plugin_config[gid]\n    if (len(txt) < spc['low_cutoff']):\n        return 0\n    t_percent = ((len(txt) - spc['low_cutoff']) / (2000 - spc['low_cutoff']))\n    t_xp = (spc['xp_min'] + ((spc['xp_max'] - spc['xp_min']) * t_percent))\n    return int(t_xp)",
-    "nl": ":type txt:str\n",
-    "original_nl": ":type txt:str\n:param txt:message to calculate the xp for\n:return:"
   },
   {
     "code": "@home_position.setter\ndef home_position(self, value: np.ndarray) -> None:\n    self._home_position = value",
@@ -393,11 +329,6 @@
     "code": "def json_deep_search(iterable, field):\n    fields_found = []\n    if isinstance(iterable, dict):\n        for (key, value) in iterable.items():\n            if (key == field):\n                fields_found.append(value)\n            elif isinstance(value, (dict, list)):\n                fields_found.extend(json_deep_search(value, field))\n    elif isinstance(iterable, list):\n        for item in iterable:\n            fields_found.extend(json_deep_search(item, field))\n    return fields_found",
     "nl": "Takes a JSON like data-structure and search for the occurrences\nof the given field/key.",
     "original_nl": "Takes a JSON like data-structure and search for the occurrences\nof the given field/key."
-  },
-  {
-    "code": "def test_update_user_nonexistent(mailchimp_user_factory, mock_mc_client):\n    mailchimp_user = mailchimp_user_factory()\n    user = mailchimp_user.user\n    mock_mc_client.lists.members.update.side_effect = MailChimpError\n    mock_mc_client.lists.members.create.return_value = {\n        'id': 'hash',\n    }\n    with mock.patch('mailing_list.mailchimp_utils._get_client', return_value=mock_mc_client):\n        mailchimp_utils.sync_mailchimp_data('list', user)\n    expected_data = mailchimp_utils.get_member_info(user)\n    expected_data.update({\n        'status': 'subscribed',\n    })\n    assert (mock_mc_client.lists.members.create.call_count == 1)\n    assert (mock_mc_client.lists.members.create.call_args[1] == {\n        'data': expected_data,\n        'list_id': 'list',\n    })\n    assert (models.MailchimpUser.objects.count() == 1)\n    mailchimp_user.refresh_from_db()\n    assert (mailchimp_user.subscriber_hash == mock_mc_client.lists.members.create.return_value['id'])",
-    "nl": "If we have a record of a mailing list member but that member doesn't\nexist, the member should be created and the record updated.",
-    "original_nl": "If we have a record of a mailing list member but that member doesn't\nexist, the member should be created and the record updated."
   },
   {
     "code": "def make_call_side_effect(text):\n\n    def side_effect(*args, **kwargs):\n        log = kwargs['stdout']\n        log.write(text)\n    return side_effect",
@@ -520,11 +451,6 @@
     "original_nl": "Clears the sample, setting all values to zero."
   },
   {
-    "code": "def p_preprocessor_block_5(p):\n    p[0] = p[1]",
-    "nl": "preprocessor_block : interrupt_block",
-    "original_nl": "preprocessor_block : interrupt_block"
-  },
-  {
     "code": "def contained_expr(container, ast_expr):\n    res = set()\n    for elmt in container:\n        if matches_expr(elmt, ast_expr):\n            res.add(elmt)\n    return list(res)",
     "nl": "Given a container, returns structural AST expression matches.",
     "original_nl": "Given a container, returns structural AST expression matches."
@@ -550,11 +476,6 @@
     "original_nl": "Initialize the Quad Tree implementation."
   },
   {
-    "code": "def test_weighted_ilike_exception(self):\n    with pytest.raises(AssertionError):\n        ExampleTable.name.weighted_ilike('%John%', '5')",
-    "nl": "String.weighted_ilike() fails as expected",
-    "original_nl": "String.weighted_ilike() fails as expected"
-  },
-  {
     "code": "def ready(self):\n    connection_created.connect(self.activate_pragmas_per_connection)\n    self.activate_pragmas_on_start()\n    logger.info('Running Kolibri with the following settings: {settings}'.format(settings=os.environ['DJANGO_SETTINGS_MODULE']))",
     "nl": "Sets up PRAGMAs.",
     "original_nl": "Sets up PRAGMAs."
@@ -568,11 +489,6 @@
     "code": "@abc.abstractmethod\ndef get_allowed_network_types(self, agent=None):\n    pass",
     "nl": "Return the agent's or driver's allowed network types.\n\nFor example: return ('flat', ...). You can also refer to the\nconfiguration the given agent exposes.",
     "original_nl": "Return the agent's or driver's allowed network types.\n\nFor example: return ('flat', ...). You can also refer to the\nconfiguration the given agent exposes."
-  },
-  {
-    "code": "def import_module_from_string(source, name, add_to_sys_modules=True):\n    import imp\n    user_module = imp.new_module(name)\n    exec(source, user_module.__dict__)\n    if add_to_sys_modules:\n        sys.modules[name] = user_module\n    return user_module",
-    "nl": "Well this seems dangerous.",
-    "original_nl": "Well this seems dangerous."
   },
   {
     "code": "@pytest.fixture\ndef minmax_zoom():\n    path = os.path.join(TESTDATA_DIR, 'minmax_zoom.mapchete')\n    return ExampleConfig(path=path, dict=_dict_from_mapchete(path))",
@@ -620,11 +536,6 @@
     "original_nl": "Template method for handling auto-completion."
   },
   {
-    "code": "def __init__(self, url='', credentials=None, get_credentials=True, http=None, model=None, log_request=False, log_response=False, credentials_args=None, default_global_params=None, additional_http_headers=None, response_encoding=None):\n    url = (url or self.BASE_URL)\n    super(DnsV1, self).__init__(url, credentials=credentials, get_credentials=get_credentials, http=http, model=model, log_request=log_request, log_response=log_response, credentials_args=credentials_args, default_global_params=default_global_params, additional_http_headers=additional_http_headers, response_encoding=response_encoding)\n    self.changes = self.ChangesService(self)\n    self.managedZones = self.ManagedZonesService(self)\n    self.projects = self.ProjectsService(self)\n    self.resourceRecordSets = self.ResourceRecordSetsService(self)",
-    "nl": "Create a new dns handle.",
-    "original_nl": "Create a new dns handle."
-  },
-  {
     "code": "def _client_receive(self):\n    try:\n        return self._client.readline()\n    except socket.error as e:\n        raise Error(self._ad, ('Encountered socket error reading RPC response \"%s\"' % e))",
     "nl": "Receives the server's response of an Rpc message.\n",
     "original_nl": "Receives the server's response of an Rpc message.\n\nReturns:\n    Raw byte string of the response.\n\nRaises:\n    Error: a socket error occurred during the read."
@@ -638,11 +549,6 @@
     "code": "def guess_ext(code):\n    lexer = guess_lexer(code)\n    mime = lexer.mimetypes[0]\n    ext = mimetypes.guess_extension(mime)[1:]\n    return ext",
     "nl": "Guess file ext with code",
     "original_nl": "Guess file ext with code"
-  },
-  {
-    "code": "def __init__(self, path=None, start_token=START, end_token=END):\n    if ((type(path) != str) and (path != None)):\n        raise TypeError('path must be a string if provided')\n    self._chainmap = {\n        \n    }\n    self._excluded_words = []\n    self._path = path\n    self._start = start_token\n    self._end = end_token\n    if self._path:\n        try:\n            f = codecs.open(self._path, 'r', 'utf-8')\n            text = f.read()\n            for line in text.split('\\n'):\n                self.add_vocab(line, False)\n        except IOError:\n            print(((\"'\" + self._file) + \"' does not exist, creating it now.\"))\n            f = codecs.open(self._path, 'w', 'utf-8')\n        finally:\n            f.close()",
-    "nl": "path: A string, indicating the phrase file to read from and write to\nstart_token: A string, used internally for denoting the start of phrases\nend_token: A string, used internally for denoting the end of phrases",
-    "original_nl": "path: A string, indicating the phrase file to read from and write to\nstart_token: A string, used internally for denoting the start of phrases\nend_token: A string, used internally for denoting the end of phrases"
   },
   {
     "code": "def test_open_file_object(self):\n    if (not unittest.source):\n        return\n    file_object = open(unittest.source, 'rb')\n    bde_volume = pybde.volume()\n    if unittest.password:\n        bde_volume.set_password(unittest.password)\n    if unittest.recovery_password:\n        bde_volume.set_recovery_password(unittest.recovery_password)\n    bde_volume.open_file_object(file_object)\n    bde_volume.close()\n    with self.assertRaises(IOError):\n        bde_volume.open_file_object(None)\n    with self.assertRaises(ValueError):\n        bde_volume.open_file_object(file_object, mode='w')",
@@ -668,11 +574,6 @@
     "code": "def show_storing_credentials_failed(self):\n    dialog = xbmcgui.Dialog()\n    dialog.ok(self.utils.get_addon_data().get('plugin'), self.utils.get_local_string(32008))",
     "nl": "Shows \"storing credentials failed\" modal\n\n",
     "original_nl": "Shows \"storing credentials failed\" modal\n\n:returns:  bool - Dialog shown"
-  },
-  {
-    "code": "@staticmethod\ndef initializer(cls, *args):\n    global sketch_constructor\n\n    def sketch_constructor():\n        return cls(*args)",
-    "nl": "FIXME: use of global not really nice (possible root of mysterious issue for user)",
-    "original_nl": "FIXME: use of global not really nice (possible root of mysterious issue for user)"
   },
   {
     "code": "def _get_converted_filename(self, filename):\n    splitted_filename = list(os.path.splitext(filename))\n    splitted_filename.insert(1, '.converted')\n    logger.debug('converted file name')\n    return ''.join(splitted_filename)",
@@ -745,11 +646,6 @@
     "original_nl": "Update should be called before any firmware loading is done, to ensure the\nmost up-to-date information is being used."
   },
   {
-    "code": "def OnPaint(self, event):\n    dc = wx.BufferedPaintDC(self, self.buffer)",
-    "nl": "Called when the window is exposed.",
-    "original_nl": "Called when the window is exposed."
-  },
-  {
     "code": "def _include_paths_from_environ(env_prefix=''):\n    paths = os.environ.get((env_prefix + 'WSGI_AUTH_PATHS'))\n    if (not paths):\n        return []\n    return paths.split(';')",
     "nl": "Environment value via `/login;/register`",
     "original_nl": "Environment value via `/login;/register`"
@@ -775,11 +671,6 @@
     "original_nl": "This method will be called to change a users status in the db"
   },
   {
-    "code": "def __iter__(self):\n    cur = 0\n    while (cur < len(self)):\n        (yield self[cur])\n        cur += 1",
-    "nl": "@rtype: float",
-    "original_nl": "@rtype: float"
-  },
-  {
     "code": "def test_to_xml_element():\n    C = nuclide.Nuclide()\n    C.name = 'C'\n    C.half_life = 0.123\n    C.decay_modes = [nuclide.DecayTuple('beta-', 'B', 0.99), nuclide.DecayTuple('alpha', 'D', 0.01)]\n    C.reactions = [nuclide.ReactionTuple('fission', None, 200000000.0, 1.0), nuclide.ReactionTuple('(n,gamma)', 'A', 0.0, 1.0)]\n    C.yield_energies = [0.0253]\n    C.yield_data = {\n        0.0253: [('A', 0.0292737), ('B', 0.002566345)],\n    }\n    element = C.to_xml_element()\n    assert (element.get('half_life') == '0.123')\n    decay_elems = element.findall('decay')\n    assert (len(decay_elems) == 2)\n    assert (decay_elems[0].get('type') == 'beta-')\n    assert (decay_elems[0].get('target') == 'B')\n    assert (decay_elems[0].get('branching_ratio') == '0.99')\n    assert (decay_elems[1].get('type') == 'alpha')\n    assert (decay_elems[1].get('target') == 'D')\n    assert (decay_elems[1].get('branching_ratio') == '0.01')\n    rx_elems = element.findall('reaction')\n    assert (len(rx_elems) == 2)\n    assert (rx_elems[0].get('type') == 'fission')\n    assert (float(rx_elems[0].get('Q')) == 200000000.0)\n    assert (rx_elems[1].get('type') == '(n,gamma)')\n    assert (rx_elems[1].get('target') == 'A')\n    assert (float(rx_elems[1].get('Q')) == 0.0)\n    assert (element.find('neutron_fission_yields') is not None)",
     "nl": "Test writing nuclide data to an XML element.",
     "original_nl": "Test writing nuclide data to an XML element."
@@ -788,11 +679,6 @@
     "code": "def should_restart(self, config):\n    net_ids = set([net.id for net in config.networks if net.is_tenant_network])\n    try:\n        config_dict = json.load(open(CONF_PATH))\n    except:\n        return True\n    orchestrator_addr = config_dict.get('orchestrator_metadata_address')\n    orchestrator_port = config_dict.get('orchestrator_metadata_port')\n    return ((net_ids != set(config_dict.get('networks', {\n        \n    }).keys())) or (orchestrator_addr != config.metadata_address) or (orchestrator_port != config.metadata_port))",
     "nl": "This function determines if the networks have changed since <config>\nwas initialized.\n\n:type config: astara_router.models.Configuration\n",
     "original_nl": "This function determines if the networks have changed since <config>\nwas initialized.\n\n:type config: astara_router.models.Configuration\n:param config: An astara_router.models.Configuration object containing\n               the current configuration of the system's networks.\n:rtype: bool"
-  },
-  {
-    "code": "@property\ndef current_buffer(self):\n    ui_control = self.current_control\n    if isinstance(ui_control, BufferControl):\n        return ui_control.buffer",
-    "nl": "The currently focused :class:`~.Buffer` or `None`.",
-    "original_nl": "The currently focused :class:`~.Buffer` or `None`."
   },
   {
     "code": "def download_file(self, url, data='', more_headers={\n    \n}):\n    (content, headers) = self.perform_request_next(url, data, more_headers, response_headers=['Content-Disposition'])\n    if (not content):\n        from api.exceptions import FailedDownloadingSubtitleBuffer\n        raise FailedDownloadingSubtitleBuffer(('Failed downloading: %s' % url))\n    file_name = ''\n    if ((not ('Content-Disposition' in headers)) or ('filename' not in headers['Content-Disposition'])):\n        logger.debug('Failed getting the file name for the download.')\n        splitted_url = url.rsplit('/', 1)\n        if (len(splitted_url) == 2):\n            file_name = splitted_url[1]\n    else:\n        file_name = utils.take_first(utils.get_regex_results(headers['Content-Disposition'], '(?<=filename\\\\=).*(?=$)'))\n        file_name = file_name.strip('\"\\'')\n    logger.debug(('Downloaded file name is: %s' % file_name))\n    return (file_name, content)",
@@ -825,11 +711,6 @@
     "original_nl": "Execute a statement under the line-by-line profiler from the\nline_profiler module.\n\nUsage:\n  %lprun -f func1 -f func2 <statement>\n\nThe given statement (which doesn't require quote marks) is run via the\nLineProfiler. Profiling is enabled for the functions specified by the -f\noptions. The statistics will be shown side-by-side with the code through the\npager once the statement has completed.\n\nOptions:\n\n-f <function>: LineProfiler only profiles functions and methods it is told\nto profile.  This option tells the profiler about these functions. Multiple\n-f options may be used. The argument may be any expression that gives\na Python function or method object. However, one must be careful to avoid\nspaces that may confuse the option parser.\n\n-m <module>: Get all the functions/methods in a module\n\nOne or more -f or -m options are required to get any useful results.\n\n-D <filename>: dump the raw statistics out to a pickle file on disk. The\nusual extension for this is \".lprof\". These statistics may be viewed later\nby running line_profiler.py as a script.\n\n-T <filename>: dump the text-formatted statistics with the code side-by-side\nout to a text file.\n\n-r: return the LineProfiler object after it has completed profiling.\n\n-s: strip out all entries from the print-out that have zeros.\n\n-u: specify time unit for the print-out in seconds."
   },
   {
-    "code": "def check_permissions(self, group_name, permission_codenames):\n    self.assertEqual(set(permission_codenames), {p.codename for p in Group.objects.get(name=group_name).permissions.all()})",
-    "nl": "DRY helper.",
-    "original_nl": "DRY helper."
-  },
-  {
     "code": "def test_json(self):\n    self.assertEqual(self.prop.from_json(self.prop.to_json()), self.prop)",
     "nl": "Test json related methods.",
     "original_nl": "Test json related methods."
@@ -840,11 +721,6 @@
     "original_nl": "Gradient for MatrixInverse."
   },
   {
-    "code": "def __del__(self):\n    try:\n        self.cancel()\n    except AttributeError:\n        pass",
-    "nl": "Calls `cancel()`.",
-    "original_nl": "Calls `cancel()`."
-  },
-  {
     "code": "def __init__(self, contents, **kwargs):\n    super(BokehPlotBlock, self).__init__(**kwargs)\n    if (not isinstance(contents, BokehFigure)):\n        raise ValueError('Expected bokeh.plotting.figure.Figure type but got %s', type(contents))\n    self._contents = file_html(contents, INLINE, 'test')",
     "nl": "Writes out the content as raw text or HTML.\n\n",
     "original_nl": "Writes out the content as raw text or HTML.\n\n:param contents: Bokeh plotting figure.\n:param kwargs: Optional styling arguments. The `style` keyword argument has special\n               meaning in that it allows styling to be grouped as one argument.\n               It is also useful in case a styling parameter name clashes with a standard\n               block parameter."
@@ -853,16 +729,6 @@
     "code": "def register_definition_helper(self, func):\n    self._definition_helpers.append(func)",
     "nl": "Register a new definition helper. The helper **must** meet the following conditions:\n\n- Receive the `APISpec` instance as the first argument.\n- Receive the definition `name` as the second argument.\n- Include ``**kwargs`` in its signature.\n- Return a `dict` representation of the definition's Schema object.\n\nThe helper may define any named arguments after the `name` argument.\n``kwargs`` will include (among other things):\n- definition (dict): current state of the definition\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#definitionsObject\n\n",
     "original_nl": "Register a new definition helper. The helper **must** meet the following conditions:\n\n- Receive the `APISpec` instance as the first argument.\n- Receive the definition `name` as the second argument.\n- Include ``**kwargs`` in its signature.\n- Return a `dict` representation of the definition's Schema object.\n\nThe helper may define any named arguments after the `name` argument.\n``kwargs`` will include (among other things):\n- definition (dict): current state of the definition\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#definitionsObject\n\n:param callable func: The definition helper function."
-  },
-  {
-    "code": "def create_resource(options):\n    deserializer = wsgi.JSONRequestDeserializer()\n    serializer = serializers.JSONResponseSerializer()\n    return wsgi.Resource(ActionController(options), deserializer, serializer)",
-    "nl": "Actions action factory method.",
-    "original_nl": "Actions action factory method."
-  },
-  {
-    "code": "def __init__(self, iterations, track_time, stream, title, monitor, update_interval=None):\n    self.cnt = 0\n    self.title = title\n    self.max_iter = float(iterations)\n    self.track = track_time\n    self.start = time.time()\n    self.end = None\n    self.item_id = None\n    self.eta = None\n    self.total_time = 0.0\n    self.last_time = self.start\n    self.monitor = monitor\n    self.stream = stream\n    self.active = True\n    self._stream_out = self._no_stream\n    self._stream_flush = self._no_stream\n    self._check_stream()\n    self._print_title()\n    self.update_interval = update_interval\n    self._cached_output = ''\n    sys.stdout.flush()\n    sys.stderr.flush()\n    if monitor:\n        if (not psutil_import):\n            raise ValueError('psutil package is required when using the `monitor` option.')\n        else:\n            self.process = psutil.Process()\n    if self.track:\n        self.eta = 1",
-    "nl": "Initializes tracking object.",
-    "original_nl": "Initializes tracking object."
   },
   {
     "code": "def test_creating_tools_edition_panel(exopy_qtbot, edition_view, dialog_sleep):\n    edition_view.show()\n    wait_for_window_displayed(exopy_qtbot, edition_view)\n    exopy_qtbot.wait(dialog_sleep)\n    ed = edition_view.widget.dock_widget().widgets()[0]\n    btn = ed.widgets()[4]\n    btn.clicked = True\n\n    def assert_created():\n        assert (len(edition_view.area.dock_items()) == 2)\n    exopy_qtbot.wait_until(assert_created)",
@@ -908,11 +774,6 @@
     "code": "def _sfn(l, mask, myrad, bcast_var):\n    clf = bcast_var[2]\n    data = l[0][mask, :].T\n    skf = model_selection.StratifiedKFold(n_splits=bcast_var[1], shuffle=False)\n    accuracy = np.mean(model_selection.cross_val_score(clf, data, y=bcast_var[0], cv=skf, n_jobs=1))\n    return accuracy",
     "nl": "Score classifier on searchlight data using cross-validation.\n\nThe classifier is in `bcast_var[2]`. The labels are in `bast_var[0]`. The\nnumber of cross-validation folds is in `bast_var[1].",
     "original_nl": "Score classifier on searchlight data using cross-validation.\n\nThe classifier is in `bcast_var[2]`. The labels are in `bast_var[0]`. The\nnumber of cross-validation folds is in `bast_var[1]."
-  },
-  {
-    "code": "def before_start(self):\n    pass",
-    "nl": "Before the process starts",
-    "original_nl": "Before the process starts"
   },
   {
     "code": "def enumerate_fresh_vars_outside(fvs):\n    next_i = 0\n    while True:\n        next_i += 1\n        next_var = hslowlevel.HsType(('a' + str(next_i)))\n        if (next_var not in fvs):\n            (yield next_var)",
@@ -965,11 +826,6 @@
     "original_nl": "Wait until the display matches a target image\n\nfilename: an image file to read and compare against\nmaxrms: the maximum root mean square between histograms of the\n        screen and target image"
   },
   {
-    "code": "def compareVersion(ver1, ver2):\n    ver1 = ver1.split('.')\n    ver2 = ver2.split('.')\n    for i in range(3):\n        if (int(ver1[i]) > int(ver2[i])):\n            return 1\n        elif (int(ver1[i]) < int(ver2[i])):\n            return 2\n    return 0",
-    "nl": "Se compara entre dos versiones y se retorna el ganador\n",
-    "original_nl": "Se compara entre dos versiones y se retorna el ganador\n:param ver1: Versi\u00f3n actual\n:param ver2: Versi\u00f3n de sistema\n:return: ver1 or ver2"
-  },
-  {
     "code": "def test_link(self):\n    expected = 'www.example.com'\n    self.assertEqual(expected, md.gen_link('www.example.com'))",
     "nl": "Simple link generation where only the URL is provided.",
     "original_nl": "Simple link generation where only the URL is provided."
@@ -995,11 +851,6 @@
     "original_nl": "@Brief:\n    Checks if pi can connect a network server.\n\n@Arguments:\n    server -- (optional) the server to connect with (Default:\n              \"www.baidu.com\")\n\n@Returns:\n    True or False"
   },
   {
-    "code": "@property\ndef measure_number(self):\n    return self._measure_number",
-    "nl": "The scalar expression involved in the definition of\nthis DyadicMul.",
-    "original_nl": "The scalar expression involved in the definition of\nthis DyadicMul."
-  },
-  {
     "code": "def __getattr__(self, item):\n    return getattr(self.desc, item)",
     "nl": "Redirects unknown attribute lookups to the wrapped descriptor\n",
     "original_nl": "Redirects unknown attribute lookups to the wrapped descriptor\n:param item: attribute being looked up"
@@ -1023,16 +874,6 @@
     "code": "@classmethod\ndef lookup(cls, value):\n    try:\n        return cls(value)\n    except ValueError:\n        return cls[value]",
     "nl": "Look up an enumeration by name or value.",
     "original_nl": "Look up an enumeration by name or value."
-  },
-  {
-    "code": "def getDirAppSocket():\n    global SCHEME\n    global APP_HOST\n    global DIR_PORT\n    app_socket = ('%s://%s:%d' % (SCHEME, APP_HOST, DIR_PORT))\n    return app_socket",
-    "nl": "Same as getAppSocket() but for  directory service.",
-    "original_nl": "Same as getAppSocket() but for  directory service."
-  },
-  {
-    "code": "def get_logger(name=None, more_frames=0):\n    if (name is None):\n        stack = inspect.stack()[(1 + more_frames)]\n        name = stack[1]\n        if name.endswith('.py'):\n            name = name[0:(- 3)]\n        elif name.endswith('.pyc'):\n            name = name[0:(- 4)]\n        if name.startswith(PATH):\n            name = name[len(PATH):]\n        elif name.startswith(EXT_PATH):\n            name = name[len(EXT_PATH):]\n        name = name.replace('/', '.').replace('\\\\', '.')\n        if (name.find('.') != (- 1)):\n            toks = name.split('.')\n            if (len(toks) >= 2):\n                if (toks[(- 1)] == toks[(- 2)]):\n                    del toks[(- 1)]\n                    name = '.'.join(toks)\n        if name.startswith('ext.'):\n            name = name.split('ext.', 1)[1]\n        if name.endswith('.__init__'):\n            name = name.rsplit('.__init__', 1)[0]\n    return logging.getLogger(name)",
-    "nl": "Logger factory.",
-    "original_nl": "Logger factory."
   },
   {
     "code": "@pytest.mark.parametrize('kernel', KERNELS)\ndef test_centered_makekernel(self, kernel):\n    shape = kernel.array.shape\n    x = np.zeros(shape)\n    xslice = [slice((sh // 2), ((sh // 2) + 1)) for sh in shape]\n    x[xslice] = 1.0\n    c2 = convolve_fft(x, kernel, boundary='fill')\n    c1 = convolve(x, kernel, boundary='fill')\n    assert_almost_equal(c1, c2, decimal=12)",
@@ -1063,11 +904,6 @@
     "code": "def set_logger(name, level='INFO', fmt=None, datefmt=None, propagate=1, remove_handlers=False):\n    logger = logging.getLogger(name)\n    logger.setLevel(getattr(logging, level))\n    logger.propagate = propagate\n    if remove_handlers:\n        logger.handlers = []\n        return\n    handler = None\n    for h in logger.handlers:\n        if isinstance(h, logging.StreamHandler):\n            handler = h\n            break\n    if (not handler):\n        handler = logging.StreamHandler()\n        logger.addHandler(handler)\n    formatter_kwgs = {\n        \n    }\n    for i in ('fmt', 'datefmt'):\n        if (locals()[i] is not None):\n            formatter_kwgs[i] = locals()[i]\n    handler.setFormatter(BaseFormatter(**formatter_kwgs))",
     "nl": "This function will clear the previous handlers and set only one handler,\nwhich will only be StreamHandler for the logger.\n\nThis function is designed to be able to called multiple times in a context.\n\nNote that if a logger has no handlers, it will be added a handler automatically when it is used.",
     "original_nl": "This function will clear the previous handlers and set only one handler,\nwhich will only be StreamHandler for the logger.\n\nThis function is designed to be able to called multiple times in a context.\n\nNote that if a logger has no handlers, it will be added a handler automatically when it is used."
-  },
-  {
-    "code": "@httpretty.activate\n@patch('courses.presenters.engagement.CourseEngagementVideoPresenter.sections', Mock(return_value=dict()))\ndef test_missing_sections(self):\n    self.mock_course_detail(CourseSamples.DEMO_COURSE_ID)\n    response = self.client.get(self.path(course_id=CourseSamples.DEMO_COURSE_ID))\n    self.assertEqual(response.status_code, 200)",
-    "nl": "Every video page will use sections and will return 200 if sections aren't available.",
-    "original_nl": "Every video page will use sections and will return 200 if sections aren't available."
   },
   {
     "code": "@mock.patch('treadmill.cli.admin.cloud.vpc.VPC')\ndef test_list_all_vpc(self, vpc_mock):\n    result = self.runner.invoke(self.configure_cli, ['--domain=treadmill.org', 'list', 'vpc'], obj={\n        \n    })\n    self.assertEqual(result.exit_code, 0)\n    vpc_mock.all.assert_called_once()",
@@ -1145,11 +981,6 @@
     "original_nl": "Crawl the given directory."
   },
   {
-    "code": "def p_cmdexpr_rare(p):\n    p[0] = p[1]",
-    "nl": "cmdexpr : rarecmd",
-    "original_nl": "cmdexpr : rarecmd"
-  },
-  {
     "code": "def timedelta_div(t1, t2):\n    if isinstance(t2, timedelta):\n        return (t1.total_seconds() / t2.total_seconds())\n    else:\n        return timedelta(seconds=(t1.total_seconds() / t2))",
     "nl": "divides a timedelta by a timedelta or a number.\nshould be a method of timedelta...",
     "original_nl": "divides a timedelta by a timedelta or a number.\nshould be a method of timedelta..."
@@ -1158,11 +989,6 @@
     "code": "def resolve_ipv6_address(hostname):\n    for addrinfo in socket.getaddrinfo(hostname, 0):\n        (family, socktype, proto, name, sockaddr) = addrinfo\n        if (family == socket.AF_INET6):\n            sockaddr6 = sockaddr\n            (address, port, flow, scope) = sockaddr6\n            return address\n    raise LookupError(hostname)",
     "nl": "Resolve a hostname to an IP version 6 address",
     "original_nl": "Resolve a hostname to an IP version 6 address"
-  },
-  {
-    "code": "def allowScan(record):\n    pass",
-    "nl": "Return True to allow SCAN='I/O Intr'\nor False to prevent this.\n\nIf a callable object is returned then if\nwill be invoked when I/O Intr scanning\nis disabled.  A Record instance is passed\nas the first (and only) argument.",
-    "original_nl": "Return True to allow SCAN='I/O Intr'\nor False to prevent this.\n\nIf a callable object is returned then if\nwill be invoked when I/O Intr scanning\nis disabled.  A Record instance is passed\nas the first (and only) argument."
   },
   {
     "code": "def handle_endtag(self, tag_name):\n    self.__handle_data_if_exists()\n    if (self.__get_cur_tag()['name'] == tag_name):\n        self.__close_tag(self.__tag_stack.pop())\n    else:\n        for tag_id in xrange((len(self.__tag_stack) - 1), (- 1), (- 1)):\n            if (self.__tag_stack[tag_id]['name'] == tag_name):\n                for tag in reversed(self.__tag_stack[(tag_id + 1):]):\n                    self.__close_tag(tag, forced=True)\n                    self.__tag_stack.pop()\n                self.__close_tag(self.__tag_stack.pop())\n                break\n        else:\n            LOG.debug('Dropping excess end tag \"%s\"...', tag_name)",
@@ -1185,29 +1011,14 @@
     "original_nl": "Gets whether or not inner model classes are supported."
   },
   {
-    "code": "def fixup_sigterm_behaviour():\n\n    def quit_handler(sig, frame):\n        pygame.quit()\n        sys.exit((128 + sig))\n    signal.signal(signal.SIGTERM, quit_handler)",
-    "nl": "SDL registers its own signal handler for SIGTERM, which pushes a SDL_QUIT event to the event\nloop, instead of killing the process right away. This is a problem for us, because when using\nthe fbcon drivers, the process activates and locks a virtual terminal which survives after the\nprocess dies. We need to ensure that the process cleans up this virtual terminal, otherwise the\nTingbot needs a reboot.\n\nWe do this by calling the cleanup and exiting straight away on SIGTERM.",
-    "original_nl": "SDL registers its own signal handler for SIGTERM, which pushes a SDL_QUIT event to the event\nloop, instead of killing the process right away. This is a problem for us, because when using\nthe fbcon drivers, the process activates and locks a virtual terminal which survives after the\nprocess dies. We need to ensure that the process cleans up this virtual terminal, otherwise the\nTingbot needs a reboot.\n\nWe do this by calling the cleanup and exiting straight away on SIGTERM."
-  },
-  {
     "code": "def setup_course(self, default_store=None):\n    if (not default_store):\n        default_store = self.store.default_modulestore.get_modulestore_type()\n    with self.store.default_store(default_store):\n        self.course = CourseFactory.create(**self.course_options())\n        chapter = ItemFactory.create(parent=self.course, category='chapter')\n        self.html_block = ItemFactory.create(parent=chapter, category='html', data='<p>Test HTML Content<p>')",
     "nl": "Helper method to create the course.",
     "original_nl": "Helper method to create the course."
   },
   {
-    "code": "def __init__(self, context):\n    BaseStorage.__init__(self, context)\n    AwsStorage.__init__(self, context, 'TC_AWS_RESULT_STORAGE')\n    self.storage_expiration_seconds = context.config.get('RESULT_STORAGE_EXPIRATION_SECONDS', 3600)",
-    "nl": "Constructor\n",
-    "original_nl": "Constructor\n:param Context context: Thumbor's context"
-  },
-  {
     "code": "def levenshtein_distance(s1, s2):\n    if (len(s1) < len(s2)):\n        return levenshtein_distance(s2, s1)\n    if (len(s2) == 0):\n        return len(s1)\n    previous_row = range((len(s2) + 1))\n    for (i, c1) in enumerate(s1):\n        current_row = [(i + 1)]\n        for (j, c2) in enumerate(s2):\n            insertions = (previous_row[(j + 1)] + 1)\n            deletions = (current_row[j] + 1)\n            substitutions = (previous_row[j] + (c1 != c2))\n            current_row.append(min(insertions, deletions, substitutions))\n        previous_row = current_row\n    return previous_row[(- 1)]",
     "nl": "Computes the string edit distance based on the Levenshtein Distance.\n\nAll credit for implementation goes to:\nhttps://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python\nMuch appreciated.\n\n.. note::\n    If ``s1`` and ``s2`` must both be strings or both be list. Cannot mix\n    types.\n",
     "original_nl": "Computes the string edit distance based on the Levenshtein Distance.\n\nAll credit for implementation goes to:\nhttps://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python\nMuch appreciated.\n\n.. note::\n    If ``s1`` and ``s2`` must both be strings or both be list. Cannot mix\n    types.\n\nParameters\n----------\ns1 : str or list\n    String or list.\n\ns1 : str or list\n    Other string or list.\n\nReturns\n--------\nInteger equal to the number of edits to get from ``s1`` to ``s2``."
-  },
-  {
-    "code": "def __init__(self):\n    super(ChromePreferencesClearHistoryEventData, self).__init__(data_type=self.DATA_TYPE)\n    self.message = None",
-    "nl": "Initializes event data.",
-    "original_nl": "Initializes event data."
   },
   {
     "code": "def test_matrix_representation_product_to_lin_space():\n    n = 3\n    A = np.random.rand(n, n)\n    Aop = odl.MatrixOperator(A)\n    B = np.random.rand(n, n)\n    Bop = odl.MatrixOperator(B)\n    ABop = ProductSpaceOperator([[Aop, Bop]])\n    matrix_repr = matrix_representation(ABop)\n    assert (matrix_repr.shape == (1, n, 2, n))\n    assert (np.linalg.norm((A - matrix_repr[0, :, 0, :])) == pytest.approx(0))\n    assert (np.linalg.norm((B - matrix_repr[0, :, 1, :])) == pytest.approx(0))",
@@ -1240,29 +1051,9 @@
     "original_nl": "Converts between iOptron RA/Dec format and a SkyCoord\n\nArgs:\n    mount_coords (str): Coordinates as returned by mount\n\nReturns:\n    astropy.SkyCoord:   Mount coordinates as astropy SkyCoord with\n        EarthLocation included."
   },
   {
-    "code": "def isquit(self):\n    try:\n        CalcThread.isquit(self)\n    except KeyboardInterrupt:\n        raise KeyboardInterrupt",
-    "nl": "@raise KeyboardInterrupt: when the thread is interrupted",
-    "original_nl": "@raise KeyboardInterrupt: when the thread is interrupted"
-  },
-  {
-    "code": "def testInitialization(self):\n    event_formatter = winevtx.WinEVTXFormatter()\n    self.assertIsNotNone(event_formatter)",
-    "nl": "Tests the initialization.",
-    "original_nl": "Tests the initialization."
-  },
-  {
-    "code": "def find_bricks(host=None, name=None, filename=None):\n    if name:\n        matches = glob(('/dev/*%s*' % name))\n    elif filename:\n        matches = glob(filename)\n    else:\n        matches = glob('/dev/*-DevB')\n    for match in matches:\n        (yield DeviceSocket(match))",
-    "nl": "Supply either name=brickname (path will be guessed),\nfilename=absolute path to brick file, or neither. host is ignored.",
-    "original_nl": "Supply either name=brickname (path will be guessed),\nfilename=absolute path to brick file, or neither. host is ignored."
-  },
-  {
     "code": "def test_get_fields_for_model_many_to_one(self):\n    Base = declarative_base()\n\n    class Parent(Base):\n        __tablename__ = 'parent'\n        id = Column(Integer, primary_key=True)\n        child_id = Column(Integer, ForeignKey('child.id'))\n        child = relationship('Child', backref='parents')\n\n    class Child(Base):\n        __tablename__ = 'child'\n        id = Column(Integer, primary_key=True)\n    resp = _get_fields_for_model(Parent)\n    self.assertAllIn(resp, ('id', 'child.id', 'child_id'))\n    resp = _get_fields_for_model(Child)\n    self.assertAllIn(resp, ('id', 'parents.id'))",
     "nl": "Tests getting the fields for a many_to_one",
     "original_nl": "Tests getting the fields for a many_to_one"
-  },
-  {
-    "code": "@pytest.mark.xfail()\ndef test_skip_fixture(skip_fixture):\n    pass",
-    "nl": ">>> allure_report = getfixture('allure_report')\n>>> assert_that(allure_report,\n...             has_test_case('test_skip_fixture',\n...                           with_status('skipped'),\n...                           has_status_details(with_message_contains(\"Skipped: <Skipped instance>\")),\n...                           has_container(allure_report,\n...                                         has_before('skip_fixture',\n...                                                    with_status('skipped'),\n...                                                    has_status_details(with_message_contains(\"Skipped: <Skipped instance>\"),\n...                                                                       with_trace_contains(\"skip_fixture\")\n...                                                    ),\n...                                         ),\n...                           )\n...             )\n... )",
-    "original_nl": ">>> allure_report = getfixture('allure_report')\n>>> assert_that(allure_report,\n...             has_test_case('test_skip_fixture',\n...                           with_status('skipped'),\n...                           has_status_details(with_message_contains(\"Skipped: <Skipped instance>\")),\n...                           has_container(allure_report,\n...                                         has_before('skip_fixture',\n...                                                    with_status('skipped'),\n...                                                    has_status_details(with_message_contains(\"Skipped: <Skipped instance>\"),\n...                                                                       with_trace_contains(\"skip_fixture\")\n...                                                    ),\n...                                         ),\n...                           )\n...             )\n... )"
   },
   {
     "code": "def now():\n    return datetime.datetime.now(tz=pytz.utc).isoformat()",
@@ -1275,19 +1066,9 @@
     "original_nl": "The cleaned up invoke prefix. i.e. mentions are ``@name`` instead of ``<@id>``."
   },
   {
-    "code": "def testGetFileEntry(self):\n    session = sessions.Session()\n    storage_writer = fake_writer.FakeStorageWriter(session)\n    parsers_mediator = self._CreateParserMediator(storage_writer)\n    file_entry = parsers_mediator.GetFileEntry()\n    self.assertIsNone(file_entry)",
-    "nl": "Tests the GetFileEntry function.",
-    "original_nl": "Tests the GetFileEntry function."
-  },
-  {
     "code": "def op(scalars_layout, collections=None):\n    assert isinstance(scalars_layout, layout_pb2.Layout)\n    return tf.summary.tensor_summary(name=metadata.CONFIG_SUMMARY_TAG, tensor=tf.constant(scalars_layout.SerializeToString(), dtype=tf.string), collections=collections, summary_metadata=_create_summary_metadata())",
     "nl": "Creates a summary that contains a layout.\n\nWhen users navigate to the custom scalars dashboard, they will see a layout\nbased on the proto provided to this function.\n\nArgs:\n  scalars_layout: The scalars_layout_pb2.Layout proto that specifies the\n      layout.\n  collections: Optional list of graph collections keys. The new\n      summary op is added to these collections. Defaults to\n      `[Graph Keys.SUMMARIES]`.\n",
     "original_nl": "Creates a summary that contains a layout.\n\nWhen users navigate to the custom scalars dashboard, they will see a layout\nbased on the proto provided to this function.\n\nArgs:\n  scalars_layout: The scalars_layout_pb2.Layout proto that specifies the\n      layout.\n  collections: Optional list of graph collections keys. The new\n      summary op is added to these collections. Defaults to\n      `[Graph Keys.SUMMARIES]`.\n\nReturns:\n  A tensor summary op that writes the layout to disk."
-  },
-  {
-    "code": "def gatherHistoryData(self, ert, case, key):\n    if ((not self.canGatherDataForKey(key)) or (not self.hasHistoryGatherFunction())):\n        raise UserWarning(('Unable to gather history data for key: %s' % key))\n    return self._historyGatherFunc(ert, case, key)",
-    "nl": ":rtype: pandas.DataFrame",
-    "original_nl": ":rtype: pandas.DataFrame"
   },
   {
     "code": "def test100():\n    return reader_creator(paddle.dataset.common.download(CIFAR100_URL, 'cifar', CIFAR100_MD5), 'test')",
@@ -1310,11 +1091,6 @@
     "original_nl": "Test serializing a media resource category."
   },
   {
-    "code": "def __getattr__(self, name):\n    try:\n        return self._dynamic_properties[name]()\n    except KeyError:\n        msg = \"'{0}' object has no attribute '{1}'\"\n        raise AttributeError(msg.format(type(self).__name__, name))",
-    "nl": "It is not possible to create property bounded just to object\nand not class at runtime, therefore it is necessary to\noverride __getattr__ and make fake 'properties' by storing them in\nthe protected attribute _dynamic_attributes and returning result\nof the method associated with the specified attribute.\n\nThis way the feeling of having regions accessed as 'properties'\nis created, which is one of the requirement of page object pattern.",
-    "original_nl": "It is not possible to create property bounded just to object\nand not class at runtime, therefore it is necessary to\noverride __getattr__ and make fake 'properties' by storing them in\nthe protected attribute _dynamic_attributes and returning result\nof the method associated with the specified attribute.\n\nThis way the feeling of having regions accessed as 'properties'\nis created, which is one of the requirement of page object pattern."
-  },
-  {
     "code": "def set_point_coordinate(self, name, x, y, z):\n    try:\n        pt = self.session.query(Point).filter_by(name=name).first()\n        if (pt is None):\n            raise Exception(\"Point doesn't exists.\")\n        scale = self.scale()\n        pt.x = (x * scale['L'])\n        pt.y = (y * scale['L'])\n        pt.z = (z * scale['L'])\n        self.session.add(pt)\n        return True\n    except Exception as e:\n        logger.info(str(e))\n        self.session.rollback()\n        return False",
     "nl": "Set point coordinate.\nif a point in same location exists, the name of the point will be returned.\n        ",
     "original_nl": "Set point coordinate.\nif a point in same location exists, the name of the point will be returned.\n        \nparam:\n    x,y,z: float-like, coordinates in current unit.\n    [name]: str, name, optional.\nreturn:\n    str, the new point's name."
@@ -1335,24 +1111,9 @@
     "original_nl": "Apply the action to this state to produce a new state.\nIf monotone, ignore the delete list (for A* heuristic)"
   },
   {
-    "code": "def __init__(self):\n    super(list, self).__init__()",
-    "nl": "Contains a collection of MemoryMapped objects\nWhen a system is defined with numerous modules connect via a\nmemory-mapped bus this object is used to manage the complete\ncollection.",
-    "original_nl": "Contains a collection of MemoryMapped objects\nWhen a system is defined with numerous modules connect via a\nmemory-mapped bus this object is used to manage the complete\ncollection."
-  },
-  {
     "code": "def run(self, package, body, operation='replace'):\n    package_path = self._zip_package(package)\n    try:\n        package = self._import_package(package_path)\n        self._update_package(package, body, operation)\n        self._delete_package(package)\n    finally:\n        os.remove(package_path)",
     "nl": "Import Murano package, modify it and then delete it.\n\nMeasure the Murano import, update and delete package\ncommands performance.\nIt imports Murano package from \"package\" (if it is not a zip archive\nthen zip archive will be prepared), modifies it (using data from\n\"body\") and deletes.\n\n",
     "original_nl": "Import Murano package, modify it and then delete it.\n\nMeasure the Murano import, update and delete package\ncommands performance.\nIt imports Murano package from \"package\" (if it is not a zip archive\nthen zip archive will be prepared), modifies it (using data from\n\"body\") and deletes.\n\n:param package: path to zip archive that represents Murano\n                application package or absolute path to folder with\n                package components\n:param body: dict object that defines what package property will be\n             updated, e.g {\"tags\": [\"tag\"]} or {\"enabled\": \"true\"}\n:param operation: string object that defines the way of how package\n                  property will be updated, allowed operations are\n                  \"add\", \"replace\" or \"delete\".\n                  Default value is \"replace\"."
-  },
-  {
-    "code": "def test_get_size(self):\n    self.assertEqual(self.char1.get_size(), 3)\n    self.assertEqual(self.char2.get_size(), 5)",
-    "nl": "[Foundation/BasicTypes/Char] - get_size.",
-    "original_nl": "[Foundation/BasicTypes/Char] - get_size."
-  },
-  {
-    "code": "def delete_single_preprocessor(instance_id=None, **kw):\n    pass",
-    "nl": "Accepts a single argument, `instance_id`, which is the primary key\nof the instance which will be deleted.",
-    "original_nl": "Accepts a single argument, `instance_id`, which is the primary key\nof the instance which will be deleted."
   },
   {
     "code": "@classmethod\ndef from_response(cls, response_data):\n    identity = (lambda x: x)\n    return Mail(**_transform_dict(response_data, {\n        'guid': ('mail_id', identity),\n        'subject': ('mail_subject', identity),\n        'sender': ('mail_from', identity),\n        'datetime': ('mail_timestamp', (lambda x: datetime.utcfromtimestamp(int(x)).replace(tzinfo=utc))),\n        'read': ('mail_read', int),\n        'excerpt': ('mail_excerpt', identity),\n        'body': ('mail_body', identity),\n    }))",
@@ -1365,24 +1126,9 @@
     "original_nl": "Connect to the MPD."
   },
   {
-    "code": "def dehydrate(self, bundle):\n    return bundle.obj.get_name_display()",
-    "nl": "only need the name of the service",
-    "original_nl": "only need the name of the service"
-  },
-  {
-    "code": "def _unstack(obj):\n    if ('temp_dim' in obj.dims):\n        obj_unstacked = obj.unstack('temp_dim')\n    else:\n        obj_unstacked = obj\n    return obj_unstacked",
-    "nl": "Private function used to reorder to use the work dimension as the first\ndimension, stack all the dimensions except the first one",
-    "original_nl": "Private function used to reorder to use the work dimension as the first\ndimension, stack all the dimensions except the first one"
-  },
-  {
     "code": "def GetNormalizedOutputAndLeakyTests(output):\n    output = ToUnixLineEnding(output)\n    output = RemoveReportHeaderAndFooter(output)\n    output = NormalizeErrorMarker(output)\n    output = RemoveLocations(output)\n    output = RemoveMemoryAddresses(output)\n    return (RemoveTestNamesOfLeakedMocks(output), GetLeakyTests(output))",
     "nl": "Normalizes the output of gmock_output_test_.\n\nArgs:\n  output: The test output.\n",
     "original_nl": "Normalizes the output of gmock_output_test_.\n\nArgs:\n  output: The test output.\n\nReturns:\n  A tuple (the normalized test output, the list of test names that have\n  leaked mocks)."
-  },
-  {
-    "code": "def init_connection_state(self):\n    pass",
-    "nl": "no state to be init-ed",
-    "original_nl": "no state to be init-ed"
   },
   {
     "code": "def test_nonlinear_variational_solver_custom_comm():\n    if (MPI.rank(mpi_comm_world()) == 0):\n        mesh = UnitIntervalMesh(mpi_comm_self(), 2)\n        V = FunctionSpace(mesh, 'CG', 1)\n        f = Constant(1)\n        u = Function(V)\n        v = TestFunction(V)\n        F = ((inner(u, v) * dx) - (inner(f, v) * dx))\n        solve((F == 0), u)\n        solve((F == 0), u, solver_parameters={\n            'nonlinear_solver': 'newton',\n        })\n        if has_petsc():\n            solve((F == 0), u, solver_parameters={\n                'nonlinear_solver': 'snes',\n            })",
@@ -1428,11 +1174,6 @@
     "code": "def get_port_id(self, tg_id, port_id):\n    port_name = self.tgs[tg_id].ports[(port_id - 1)]\n    return (self.ports.index(Port(tg_id, port_name)) + 1)",
     "nl": "Return port's sequence number in list of ports.\n\nArgs:\n    tg_id(int):  TG instance ID\n    port_id(int):  TG instance port's sequence number\n\nRaises:\n    ValueError:  in case expected port is not in list of ports\n",
     "original_nl": "Return port's sequence number in list of ports.\n\nArgs:\n    tg_id(int):  TG instance ID\n    port_id(int):  TG instance port's sequence number\n\nRaises:\n    ValueError:  in case expected port is not in list of ports\n\nReturns:\n    int:  Port sequence number in list of ports starting from 1"
-  },
-  {
-    "code": "def assertRealNotEqual(self, a, b, msg=None):\n    self.assertTrue((a != b), '{!r} != {!r}'.format(a, b))\n    self.assertTrue((b != a), '{!r} != {!r}'.format(b, a))\n    self.assertFalse((a == b), '{!r} == {!r}'.format(a, b))\n    self.assertFalse((b == a), '{!r} == {!r}'.format(b, a))",
-    "nl": "checks the == and != operators, also check symmetry",
-    "original_nl": "checks the == and != operators, also check symmetry"
   },
   {
     "code": "def clear(self):\n    if (not os.path.exists(self._dir)):\n        return\n    for fname in self._list_cache_files():\n        self._delete(fname)",
@@ -1495,16 +1236,6 @@
     "original_nl": "Attempt to implement thread-safety for contains method using Re-entrant locks.\n## I'm still not sure whether this implementation is correct."
   },
   {
-    "code": "def __init__(self, id_, name, human_readable_name, cost, colors, min_app_version=None):\n    self.id = id_\n    self.name = name\n    self.human_readable_name = human_readable_name\n    self.colors = colors\n    self.cost = cost\n    self.min_app_version = min_app_version",
-    "nl": "`colors` is a list of Color instances.",
-    "original_nl": "`colors` is a list of Color instances."
-  },
-  {
-    "code": "def func1(param1):\n    return None",
-    "nl": "Function 1\nwith 1 param\n\n",
-    "original_nl": "Function 1\nwith 1 param\n\n:param param1: 1st parameter\n:type param1: type\n:returns: None"
-  },
-  {
     "code": "def forward(self, inputs):\n    out = np.array(inputs)\n    for key in self.W.keys():\n        W = self.W[key]\n        b = self.b[key]\n        act = self.activation[key]\n        z = (np.dot(out, W) + b)\n        out = act(z)\n    return out",
     "nl": "Forward propagate the inputs through the neural network.\nINPUTS\n    inputs - array_like\n        An input to the neural network. Must match the specfied input\n        dimension or errors will be thrown.\nOUTPUTS\n    output - array_like\n        The output of the neural network. Its dimension is determined\n        by the number of units in the final specified layer.",
     "original_nl": "Forward propagate the inputs through the neural network.\nINPUTS\n    inputs - array_like\n        An input to the neural network. Must match the specfied input\n        dimension or errors will be thrown.\nOUTPUTS\n    output - array_like\n        The output of the neural network. Its dimension is determined\n        by the number of units in the final specified layer."
@@ -1513,11 +1244,6 @@
     "code": "def test_vamp_bg(self):\n    vamp_bg_test(nz=1000, ny=500, ns=10, verbose=False)",
     "nl": "Run VAMP with a BG prior",
     "original_nl": "Run VAMP with a BG prior"
-  },
-  {
-    "code": "def interpolate(self):\n    m = ((- 1.0) * (self.start - self.end))\n    b = self.start\n    x = (self.count / (self.expectedIterations - 1))\n    return ((m * x) + b)",
-    "nl": "This is confusing enough just needing to know algebra...\nYou also need to realize that start, end, and the return value are all Assets classes\nthat represent collections of stocks, bonds, etc. Good luck.",
-    "original_nl": "This is confusing enough just needing to know algebra...\nYou also need to realize that start, end, and the return value are all Assets classes\nthat represent collections of stocks, bonds, etc. Good luck."
   },
   {
     "code": "def c_moves_s(client):\n    return 'south'",
@@ -1560,11 +1286,6 @@
     "original_nl": "The output of the test runner (if applicable)."
   },
   {
-    "code": "def onNameChanged(self, event):\n    role = event.source.getRole()\n    try:\n        focusRole = orca_state.locusOfFocus.getRole()\n    except:\n        focusRole = None\n    if ((role == pyatspi.ROLE_FRAME) and (focusRole == pyatspi.ROLE_TABLE_CELL)):\n        return\n    default.Script.onNameChanged(self, event)",
-    "nl": "Callback for object:property-change:accessible-name events.",
-    "original_nl": "Callback for object:property-change:accessible-name events."
-  },
-  {
     "code": "def showCountDialog(countType, counts):\n    isNoStats = (not counts)\n    noStatsMsg = \"Usage stats aren't available yet, press any key...\"\n    if isNoStats:\n        (popup, width, height) = cli.popups.init(3, (len(noStatsMsg) + 4))\n    else:\n        (popup, width, height) = cli.popups.init((4 + max(1, len(counts))), 80)\n    if (not popup):\n        return\n    try:\n        control = cli.controller.getController()\n        popup.win.box()\n        if (countType == CountType.CLIENT_LOCALE):\n            title = 'Client Locales'\n        elif (countType == CountType.EXIT_PORT):\n            title = 'Exiting Port Usage'\n        else:\n            title = ''\n            log.warn(('Unrecognized count type: %s' % countType))\n        popup.addstr(0, 0, title, curses.A_STANDOUT)\n        if isNoStats:\n            popup.addstr(1, 2, noStatsMsg, (curses.A_BOLD | uiTools.getColor('cyan')))\n        else:\n            sortedCounts = sorted(counts.iteritems(), key=operator.itemgetter(1))\n            sortedCounts.reverse()\n            (keyWidth, valWidth, valueTotal) = (3, 1, 0)\n            for (k, v) in sortedCounts:\n                keyWidth = max(keyWidth, len(k))\n                valWidth = max(valWidth, len(str(v)))\n                valueTotal += v\n            if (countType == CountType.EXIT_PORT):\n                keyWidth += EXIT_USAGE_WIDTH\n            labelFormat = ('%%-%is %%%ii (%%%%%%-2i)' % (keyWidth, valWidth))\n            for i in range((height - 4)):\n                (k, v) = sortedCounts[i]\n                if (countType == CountType.EXIT_PORT):\n                    usage = connections.getPortUsage(k)\n                    if usage:\n                        keyFormat = ('%%-%is   %%s' % (keyWidth - EXIT_USAGE_WIDTH))\n                        k = (keyFormat % (k, usage[:(EXIT_USAGE_WIDTH - 3)]))\n                label = (labelFormat % (k, v, ((v * 100) / valueTotal)))\n                popup.addstr((i + 1), 2, label, (curses.A_BOLD | uiTools.getColor('green')))\n                labelWidth = len(label)\n                fillWidth = ((v * ((width - 4) - labelWidth)) / valueTotal)\n                for j in range(fillWidth):\n                    popup.addstr((i + 1), ((3 + labelWidth) + j), ' ', (curses.A_STANDOUT | uiTools.getColor('red')))\n            popup.addstr((height - 2), 2, 'Press any key...')\n        popup.win.refresh()\n        curses.cbreak()\n        control.getScreen().getch()\n    finally:\n        cli.popups.finalize()",
     "nl": "Provides a dialog with bar graphs and percentages for the given set of\ncounts. Pressing any key closes the dialog.\n\nArguments:\n  countType - type of counts being presented\n  counts    - mapping of labels to counts",
     "original_nl": "Provides a dialog with bar graphs and percentages for the given set of\ncounts. Pressing any key closes the dialog.\n\nArguments:\n  countType - type of counts being presented\n  counts    - mapping of labels to counts"
@@ -1605,19 +1326,9 @@
     "original_nl": "Checks if a module is loaded. Returns ModuleWrapper or None on\nfailure."
   },
   {
-    "code": "def is_celery_error(err):\n    return (isinstance(err, Exception) and (err.__class__.__module__ == 'celery.backends.base'))",
-    "nl": "Because Celery when using json serialization cannot (de)serialize original exceptions,\nerrors it throws to a client are derived ones dynamically generated within package\n'celery.backends.base'. It means that static 'except' blocks are impossible and we\nmust catch Exception and investigate further. This function helps with that.",
-    "original_nl": "Because Celery when using json serialization cannot (de)serialize original exceptions,\nerrors it throws to a client are derived ones dynamically generated within package\n'celery.backends.base'. It means that static 'except' blocks are impossible and we\nmust catch Exception and investigate further. This function helps with that."
-  },
-  {
     "code": "def quotereplacechar(char, sub, string):\n    quote = False\n    fixed_string = ''\n    for i in string:\n        if (i in [\"'\", '\"']):\n            if (not quote):\n                quote = i\n                fixed_string += i\n            elif (quote == i):\n                quote = False\n                fixed_string += i\n            else:\n                fixed_string += i\n        elif quote:\n            fixed_string += i\n        elif (i == char):\n            fixed_string += sub\n        else:\n            fixed_string += i\n    return fixed_string",
     "nl": "Quote respecting replace.",
     "original_nl": "Quote respecting replace."
-  },
-  {
-    "code": "def len(_: Seq) -> int:\n    pass",
-    "nl": "Return the number of items in a container.",
-    "original_nl": "Return the number of items in a container."
   },
   {
     "code": "def read_arguments():\n    parser = ArgumentParser(description=('Convert RTI Connext logs in ' + 'human-readable format.'))\n    parser.add_argument('-i', '--input', help='log file path, by default stdin')\n    parser.add_argument('-v', action='count', help=\"verbosity level - increased by multiple 'v'\")\n    parser.add_argument('--output', '-o', help='write the output into the specified file')\n    parser.add_argument('--overwrite-output', '-oo', help='write the output into a new/truncated file')\n    parser.add_argument('--write-original', help='write the original log output into a file')\n    parser.add_argument('--show-ip', action='store_true', help='show the IP address instead of an assigned name')\n    parser.add_argument('--obfuscate', action='store_true', help='hide sensitive information like IP addresses')\n    parser.add_argument('--salt', '-s', help='salt for obfuscation - from random if not set')\n    parser.add_argument('--show-timestamp', '-t', action='store_true', help='show timestamp log field')\n    parser.add_argument('--show-lines', action='store_true', help='print the original and parsed log lines')\n    parser.add_argument('--only', help='show only log messages that match the regex')\n    parser.add_argument('--colors', '-c', action='store_true', help='apply colors to log messages (e.g.: warnings)')\n    parser.add_argument('--highlight', help='show in bold regex matched logs, requires -c')\n    parser.add_argument('--local-host', help='set the local address')\n    parser.add_argument('--no-network', action='store_true', help='do not show the network related logs')\n    parser.add_argument('--no-inline', action='store_true', help='do not show warnigns and errors in network logs')\n    parser.add_argument('--no-stats', action='store_true', help='do not show the network and packet statistics')\n    parser.add_argument('--no-progress', action='store_true', help='do not show the interative info at the bottom')\n    parser.add_argument('--debug', action='store_true', help='debug mode - export unmatched logs')\n    parser.add_argument('--version', action='version', help='show the program version', version=('%(prog)s ' + __version__))\n    return parser.parse_args()",
@@ -1710,19 +1421,9 @@
     "original_nl": "Find the path to the library\n\n`lib_name` can be specified directly as a string (or sequence of strings), or within a\n\"platform\" dict. If multiple libs are specified, the first one found will be returned."
   },
   {
-    "code": "@property\ndef datafile(self):\n    return self.outfile",
-    "nl": "LAMMPS data file name.",
-    "original_nl": "LAMMPS data file name."
-  },
-  {
     "code": "def print_variant(variant_line=None, variant_dict=None, header_line=None, priority=None, outfile=None, mode='vcf', silent=False):\n    if variant_dict:\n        if (not header_line):\n            raise IOError('Print line needs a header_line when printing variant dict.')\n        print_line = [variant_dict.get(entry, '.') for entry in header_line]\n    else:\n        print_line = variant_line.rstrip().split('\\t')\n    if (mode == 'modified'):\n        print_line = print_line[1:]\n    elif priority:\n        print_line = ([priority] + print_line)\n    print_string = '\\t'.join(print_line)\n    if (not isinstance(print_string, str)):\n        print_string = print_string.encode('utf-8')\n    if outfile:\n        outfile.write((print_string + '\\n'))\n    elif (not silent):\n        print(print_string)\n    return",
     "nl": "Print a variant line.\n\nIf a result file is provided the variante will be appended to the file, \notherwise they are printed to stdout.\n\nThere are two modes, 'vcf' or 'modified'.\nIf 'vcf' we expect plain vcf variants and print them as they came in.\nIf 'modified' the first column has been used for sorting so we skip \nthat one.\n\nArgs:\n    variant_line (str): A vcf formatted variant line\n    variant_dict (dict): A variant dictionary\n    header_line (list): A list with haeder columns\n    priority (str): the priority for this variant\n    outfile (FileHandle): An opened file_handle\n    mode (str): 'vcf' or 'modified'\n    silent (bool): Bool. If nothing should be printed.",
     "original_nl": "Print a variant line.\n\nIf a result file is provided the variante will be appended to the file, \notherwise they are printed to stdout.\n\nThere are two modes, 'vcf' or 'modified'.\nIf 'vcf' we expect plain vcf variants and print them as they came in.\nIf 'modified' the first column has been used for sorting so we skip \nthat one.\n\nArgs:\n    variant_line (str): A vcf formatted variant line\n    variant_dict (dict): A variant dictionary\n    header_line (list): A list with haeder columns\n    priority (str): the priority for this variant\n    outfile (FileHandle): An opened file_handle\n    mode (str): 'vcf' or 'modified'\n    silent (bool): Bool. If nothing should be printed."
-  },
-  {
-    "code": "def test_prod2d(self):\n    npoints = 2000\n    variance = self.prod_variance(2)\n    self.run_all(self.prod, npoints, 0.25, variance, xl=[0.0, 0.0], xu=[1.0, 1.0])",
-    "nl": "f(x,y) = x*y between 0 and 1.",
-    "original_nl": "f(x,y) = x*y between 0 and 1."
   },
   {
     "code": "@staticmethod\ndef get_elastic_mappings(es_major):\n    if (es_major != '2'):\n        mapping = '\\n            {\\n                \"properties\": {\\n                    \"title_analyzed\": {\\n                        \"type\": \"text\"\\n                    }\\n               }\\n            } '\n    else:\n        mapping = '\\n                {\\n                    \"properties\": {\\n                        \"title_analyzed\": {\\n                            \"type\": \"string\",\\n                             \"index\": \"analyzed\"\\n                        }\\n                   }\\n                } '\n    return {\n        'items': mapping,\n    }",
@@ -1733,11 +1434,6 @@
     "code": "def clear_cookies(self):\n    lib.ph_context_clear_cookies()",
     "nl": "Clear all cookies.",
     "original_nl": "Clear all cookies."
-  },
-  {
-    "code": "def align_to_target(self, target_term_doc_mat):\n    self.priors = self.priors[target_term_doc_mat.get_terms()].fillna(0)\n    return self",
-    "nl": "Parameters\n----------\ntarget_term_doc_mat : TermDocMatrix\n",
-    "original_nl": "Parameters\n----------\ntarget_term_doc_mat : TermDocMatrix\n\nReturns\n-------\nPriorFactory"
   },
   {
     "code": "def test_DoubleQuoteString(self):\n    manhole.lastColorizedLine('\"1\"')",
@@ -1775,19 +1471,9 @@
     "original_nl": "Returns whether this coordinate sequence is 3D.  This property value is\ninherited from the parent Geometry."
   },
   {
-    "code": "def listele(self):\n    key = self.current.task_data['etkinlik_basvuru_id']\n    etkinlik = BAPEtkinlikProje.objects.get(key)\n    self.output['objects'] = [[_('Etkinlik Ba\u015fl\u0131\u011f\u0131'), _('Ba\u015fvuran'), _('Durum')]]\n    list_item = {\n        'fields': [etkinlik.bildiri_basligi, etkinlik.basvuru_yapan.__unicode__(), etkinlik.durum],\n        'actions': [{\n            'name': _('G\u00f6r\u00fcnt\u00fcle'),\n            'cmd': 'goruntule',\n            'mode': 'normal',\n            'show_as': 'button',\n        }],\n        'key': key,\n    }\n    self.output['objects'].append(list_item)\n    form = JsonForm(title=_(('%s Etkinlik Ba\u015fvuru De\u011ferlendirmesi' % etkinlik.__unicode__())))\n    form.daha_sonra_karar_ver = fields.Button(_('Daha Sonra Karar Ver'), cmd='daha_sonra_karar_ver')\n    self.form_out(form)",
-    "nl": "Komisyon \u00fcyesinin kendisine gelen etkinlik ba\u015fvurusunu liste \u015feklinde g\u00f6rd\u00fc\u011f\u00fc ad\u0131md\u0131r.",
-    "original_nl": "Komisyon \u00fcyesinin kendisine gelen etkinlik ba\u015fvurusunu liste \u015feklinde g\u00f6rd\u00fc\u011f\u00fc ad\u0131md\u0131r."
-  },
-  {
     "code": "def _GetProvides(sources):\n    provides = set()\n    for source in sources:\n        provides.update(source.provides)\n    return provides",
     "nl": "Get all namespaces provided by a collection of sources.",
     "original_nl": "Get all namespaces provided by a collection of sources."
-  },
-  {
-    "code": "def test_060_statement(self):\n    attr = self.mock_attr_factory('name60')\n    self.assertEqual('attribute name60;', attr.statement())",
-    "nl": "TypeAttribute basic statement",
-    "original_nl": "TypeAttribute basic statement"
   },
   {
     "code": "def get_command_info(self):\n    return self.command_info",
@@ -1850,19 +1536,9 @@
     "original_nl": "Serve a JSON array of run names, ordered by run started time.\n\nSort order is by started time (aka first event time) with empty times sorted\nlast, and then ties are broken by sorting on the run name."
   },
   {
-    "code": "@rpc_method(name='TestCaseStatus.filter')\ndef filter(query):\n    return TestCaseStatus.to_xmlrpc(query)",
-    "nl": ".. function:: XML-RPC TestCaseStatus.filter(query)\n\n    Search and return the list of test case statuses.\n\n    ",
-    "original_nl": ".. function:: XML-RPC TestCaseStatus.filter(query)\n\n    Search and return the list of test case statuses.\n\n    :param query: Field lookups for :class:`tcms.testcases.models.TestCaseStatus`\n    :type query: dict\n    :return: Serialized list of :class:`tcms.testcases.models.TestCaseStatus` objects\n    :rtype: list(dict)"
-  },
-  {
     "code": "def admins(self):\n    return self.root_admins",
     "nl": "Returns the list of admins accounts\n@rtype: List\n",
     "original_nl": "Returns the list of admins accounts\n@rtype: List\n@return: list of admin accounts"
-  },
-  {
-    "code": "def setUp(self):\n    self.factory = RequestFactory()\n    ConversionRate.objects.create(from_amount=1, to_amount=5, source='etherdelta', from_currency='ETH', to_currency='USDT', timestamp=datetime(2018, 1, 1))\n    ConversionRate.objects.create(from_amount=1, to_amount=2, source='etherdelta', from_currency='ETH', to_currency='USDT')\n    ConversionRate.objects.create(from_amount=1, to_amount=3, source='etherdelta', from_currency='ETH', to_currency='USDT')",
-    "nl": "Perform setup for the testcase.",
-    "original_nl": "Perform setup for the testcase."
   },
   {
     "code": "def filename_to_uri(self, filename):\n    try:\n        return self._uri_cache[filename]\n    except KeyError:\n        value = self._relativeize(filename)\n        self._uri_cache[filename] = value\n        return value",
@@ -1885,11 +1561,6 @@
     "original_nl": "Shrinks bar if number of iterations is less than the bar width"
   },
   {
-    "code": "@pytest.mark.parametrize(('imsize', 'upsample_factor', 'offset'), list(itertools.product(range(11, 27), range(1, 25), ((- 1.5), (- 0.5), 0.5, 1.5))))\ndef test_gaussian_upsample_oddoffsets(imsize, upsample_factor, offset):\n    x = np.arange(imsize)\n    g = gaussian(((x - ((imsize - 1) / 2.0)) - offset))\n    (xz, z) = zoom.zoom1d(g, upsample_factor, outsize=(g.size * upsample_factor), return_xouts=True)\n    assert (((gaussian(((xz - ((imsize - 1) / 2.0)) - offset)) - z) ** 2).sum() < ((4e-05 * upsample_factor) + (0.12 * (imsize ** (- 1.83)))))",
-    "nl": "Test that, when upsampled, z[::upsample_factor] = g\n\nTested for offsets in the *input gaussian function*\n\nThis doesn't imply you know what's going on, just that the behavior is consistent\n\nONLY tests for OUTSIZE=INSIZE*UPSAMPLE_FACTOR",
-    "original_nl": "Test that, when upsampled, z[::upsample_factor] = g\n\nTested for offsets in the *input gaussian function*\n\nThis doesn't imply you know what's going on, just that the behavior is consistent\n\nONLY tests for OUTSIZE=INSIZE*UPSAMPLE_FACTOR"
-  },
-  {
     "code": "def _checkPasswordConfirm(self, editable=None, reset_status=None):\n    if reset_status:\n        return GUICheck.CHECK_OK\n    pw = self.pw.get_text()\n    confirm = self.confirm.get_text()\n    if (((not pw) and (not confirm)) and self._kickstarted):\n        result = GUICheck.CHECK_OK\n    elif (confirm and (pw != confirm)):\n        result = _(PASSWORD_CONFIRM_ERROR_GUI)\n    else:\n        result = GUICheck.CHECK_OK\n    if (result == GUICheck.CHECK_OK):\n        if (editable == self.confirm):\n            self._password_check.update_check_status(check_data=True)\n        else:\n            self._confirm_check.update_check_status(check_data=True)\n    return result",
     "nl": "Check whether the password matches the confirmation data.",
     "original_nl": "Check whether the password matches the confirmation data."
@@ -1898,11 +1569,6 @@
     "code": "def login_required(func):\n\n    @wraps(func)\n    def wrapper(*args, **kwargs):\n        if (not g.current_user.is_active):\n            flash_notice('Bitte melde dich an.')\n            return redirect_to('authentication.login_form')\n        return func(*args, **kwargs)\n    return wrapper",
     "nl": "Ensure the current user has logged in.",
     "original_nl": "Ensure the current user has logged in."
-  },
-  {
-    "code": "def test_read_gen1():\n    (ref_seq, vcf) = load_data()\n    nodes = rgen.create_node_list(ref_seq, ref_start_pos=1, vl=vcf[0]['v'][1])\n    assert (rgen.generate_read(1, 10, 0, 3, nodes) == (1, '4=1X3=2I', [0, 3], 'ATGATGTATT'))\n    assert (rgen.generate_read(2, 10, 0, 3, nodes) == (2, '3=1X3=3I', [0, 3], 'TGATGTATTT'))\n    assert (rgen.generate_read(3, 10, 0, 4, nodes) == (3, '2=1X3=3I1=', [0, 3], 'GATGTATTTT'))\n    assert (rgen.generate_read(4, 10, 0, 4, nodes) == (4, '1=1X3=3I2=', [0, 3], 'ATGTATTTTC'))\n    assert (rgen.generate_read(5, 10, 1, 4, nodes) == (5, '1X3=3I3=', [0, 3], 'TGTATTTTCC'))\n    assert (rgen.generate_read(6, 10, 2, 6, nodes) == (6, '3=3I3=2D1=', [3, (- 2)], 'GTATTTTCCG'))\n    assert (rgen.generate_read(7, 10, 2, 6, nodes) == (7, '2=3I3=2D2=', [3, (- 2)], 'TATTTTCCGG'))\n    assert (rgen.generate_read(8, 10, 2, 6, nodes) == (8, '1=3I3=2D3=', [3, (- 2)], 'ATTTTCCGGA'))\n    assert (rgen.generate_read(9, 10, 3, 6, nodes) == (9, '3I3=2D4=', [3, (- 2)], 'TTTTCCGGAG'))\n    assert (rgen.generate_read(10, 10, 3, 6, nodes) == (9, '2I3=2D5=', [3, (- 2)], 'TTTCCGGAGG'))\n    assert (rgen.generate_read(11, 10, 3, 6, nodes) == (9, '1I3=2D6=', [3, (- 2)], 'TTCCGGAGGC'))\n    assert (rgen.generate_read(12, 10, 4, 6, nodes) == (9, '3=2D7=', [(- 2)], 'TCCGGAGGCG'))\n    assert (rgen.generate_read(13, 10, 4, 8, nodes) == (10, '2=2D7=4D1=', [(- 2), (- 4)], 'CCGGAGGCGC'))\n    assert (rgen.generate_read(14, 9, 4, 8, nodes) == (11, '1=2D7=4D1=', [(- 2), (- 4)], 'CGGAGGCGC'))\n    assert (rgen.generate_read(15, 8, 6, 8, nodes) == (14, '7=4D1=', [(- 4)], 'GGAGGCGC'))",
-    "nl": "Read gen: Read pos, cigar, v_list and seq (cpy 1)",
-    "original_nl": "Read gen: Read pos, cigar, v_list and seq (cpy 1)"
   },
   {
     "code": "def test_reproject_celestial_3d():\n    header_in = fits.Header.fromtextfile(get_pkg_data_filename('../../tests/data/cube.hdr'))\n    array_in = np.ones((3, 200, 180))\n    wcs_in = WCS(header_in)\n    wcs_out = wcs_in.deepcopy()\n    wcs_out.wcs.ctype = ['GLON-SIN', 'GLAT-SIN', wcs_in.wcs.ctype[2]]\n    wcs_out.wcs.crval = [158.0501, (- 21.530282), wcs_in.wcs.crval[2]]\n    wcs_out.wcs.crpix = [50.0, 50.0, (wcs_in.wcs.crpix[2] + 0.4)]\n    (out_full, foot_full) = _reproject_full(array_in, wcs_in, wcs_out, (3, 160, 170))\n    (out_celestial, foot_celestial) = _reproject_celestial(array_in, wcs_in, wcs_out, (3, 160, 170))\n    np.testing.assert_allclose(out_full, out_celestial)\n    np.testing.assert_allclose(foot_full, foot_celestial)",
@@ -1930,11 +1596,6 @@
     "original_nl": "Install or upgrade setuptools and EasyInstall."
   },
   {
-    "code": "def test_106_common_count(self):\n    self.assertEqual(self.p.common_count, 3)",
-    "nl": "SELinuxPolicy: common permisison set count",
-    "original_nl": "SELinuxPolicy: common permisison set count"
-  },
-  {
     "code": "def _check_active(self):\n    time.sleep(5)\n    return True",
     "nl": "Dummy service activity check.",
     "original_nl": "Dummy service activity check."
@@ -1943,11 +1604,6 @@
     "code": "def get_num_of_req(self):\n    if (self.num_of_req > 0):\n        return self.num_of_req\n    self.num_of_req = 0\n    if self.c_reader:\n        self.num_of_req = c_cacheReader.get_num_of_req(self.c_reader)\n    else:\n        while (self.read_one_req() is not None):\n            self.num_of_req += 1\n    self.reset()\n    return self.num_of_req",
     "nl": "count the number of requests in the trace, fast for binary type trace,\nfor plain/csv type trace, this is slow\n",
     "original_nl": "count the number of requests in the trace, fast for binary type trace,\nfor plain/csv type trace, this is slow\n:return: the number of requests in the trace"
-  },
-  {
-    "code": "def test_correlation_decomp(self):\n    acorr_amp = (np.dot((self.mu * self.obs1), self.R) * np.dot(self.L, self.obs1))\n    acorr = np.dot(self.ev_t, acorr_amp)\n    acorrn = correlation_decomp(self.T, self.obs1, k=self.k, times=self.times)\n    assert_allclose(acorrn, acorr)\n    'Cross-correlation'\n    'k=None'\n    corr_amp = (np.dot((self.mu * self.obs1), self.R) * np.dot(self.L, self.obs2))\n    corr = np.dot(self.ev_t, corr_amp)\n    corrn = correlation_decomp(self.T, self.obs1, obs2=self.obs2, k=self.k, times=self.times)\n    assert_allclose(corrn, corr)",
-    "nl": "Auto-correlation",
-    "original_nl": "Auto-correlation"
   },
   {
     "code": "def add_getwork(server, username, password):\n    __patch()\n    key = get_key(server, username, password)\n    if (key not in getworks):\n        getworks[key] = 0\n    getworks[key] += 1\n    username = shorten(username)\n    logging.info(('Getwork: %s:%s@%s' % (username, password, server)))",
@@ -1965,11 +1621,6 @@
     "original_nl": "Turns a sparse time series into a dense one, with number of seconds per bucket specified by resolution.\nIf a status_type (status, webStatus, messengerStatus etc.) is given, returns a generator of the status level (online, offline, idle) for that status type."
   },
   {
-    "code": "@mock.patch('listenbrainz.db.user.get')\ndef test_menu_logged_in_error_show(self, mock_user_get):\n\n    @self.app.route('/page_that_returns_400')\n    def view400():\n        raise BadRequest('bad request')\n\n    @self.app.route('/page_that_returns_404')\n    def view404():\n        raise NotFound('not found')\n    user = db_user.get_or_create('iliekcomputers')\n    mock_user_get.return_value = user\n    self.temporary_login(user['id'])\n    resp = self.client.get('/page_that_returns_400')\n    data = resp.data.decode('utf-8')\n    self.assert400(resp)\n    self.assertIn('iliekcomputers', data)\n    self.assertIn('Import!', data)\n    self.assertIn('Your Listens', data)\n    mock_user_get.assert_called_with(user['id'])\n    resp = self.client.get('/page_that_returns_404')\n    data = resp.data.decode('utf-8')\n    self.assert404(resp)\n    self.assertIn('iliekcomputers', data)\n    self.assertIn('Import!', data)\n    self.assertIn('Your Listens', data)\n    mock_user_get.assert_called_with(user['id'])",
-    "nl": "If the user is logged in, if we show a 400 or 404 error, show the user menu",
-    "original_nl": "If the user is logged in, if we show a 400 or 404 error, show the user menu"
-  },
-  {
     "code": "@cached_func\ndef get_replacement_mapping():\n    mapping = {\n        \n    }\n    for (cp, repl) in iteritems(generate_re_mapping(diacritic_for_letters(regenerate=False))):\n        mapping.setdefault(cp, []).extend(repl)\n    for (cp, repl) in iteritems(get_decomps_mapping(regenerate=False)):\n        mapping.setdefault(cp, []).extend(repl)\n    for (cp, repl) in iteritems(get_punctuation_mapping(regenerate=False)):\n        mapping.setdefault(cp, []).extend(repl)\n    return mapping",
     "nl": "Returns a dict mapping a sequence of characters to another sequence\nof characters.\n\nIf a key occurs in a text, it should also match any of the characters in\nin the value.",
     "original_nl": "Returns a dict mapping a sequence of characters to another sequence\nof characters.\n\nIf a key occurs in a text, it should also match any of the characters in\nin the value."
@@ -1978,11 +1629,6 @@
     "code": "def tag_resources(ResourceARNList=None, Tags=None):\n    pass",
     "nl": "Applies one or more tags to the specified resources. Note the following:\nSee also: AWS API Documentation\n\n\n:example: response = client.tag_resources(\n    ResourceARNList=[\n        'string',\n    ],\n    Tags={\n        'string': 'string'\n    }\n)\n\n\n:type ResourceARNList: list\n",
     "original_nl": "Applies one or more tags to the specified resources. Note the following:\nSee also: AWS API Documentation\n\n\n:example: response = client.tag_resources(\n    ResourceARNList=[\n        'string',\n    ],\n    Tags={\n        'string': 'string'\n    }\n)\n\n\n:type ResourceARNList: list\n:param ResourceARNList: [REQUIRED]\n        A list of ARNs. An ARN (Amazon Resource Name) uniquely identifies a resource. You can specify a minimum of 1 and a maximum of 20 ARNs (resources) to tag. An ARN can be set to a maximum of 1600 characters. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces in the AWS General Reference .\n        (string) --\n        \n\n:type Tags: dict\n:param Tags: [REQUIRED]\n        The tags that you want to add to the specified resources. A tag consists of a key and a value that you define.\n        (string) --\n        (string) --\n        \n\n:rtype: dict\n:return: {\n    'FailedResourcesMap': {\n        'string': {\n            'StatusCode': 123,\n            'ErrorCode': 'InternalServiceException'|'InvalidParameterException',\n            'ErrorMessage': 'string'\n        }\n    }\n}\n\n\n:returns: \nResourceARNList (list) -- [REQUIRED]\nA list of ARNs. An ARN (Amazon Resource Name) uniquely identifies a resource. You can specify a minimum of 1 and a maximum of 20 ARNs (resources) to tag. An ARN can be set to a maximum of 1600 characters. For more information, see Amazon Resource Names (ARNs) and AWS Service Namespaces in the AWS General Reference .\n\n(string) --\n\n\nTags (dict) -- [REQUIRED]\nThe tags that you want to add to the specified resources. A tag consists of a key and a value that you define.\n\n(string) --\n(string) --"
-  },
-  {
-    "code": "def __init__(self, url, username, password, user_agent):\n    self.url = url\n    self.username = username\n    self.password = password\n    self.user_agent = user_agent",
-    "nl": "This factory detects the remote Wordpress two-factor plugin type\nand returns the appropriate class",
-    "original_nl": "This factory detects the remote Wordpress two-factor plugin type\nand returns the appropriate class"
   },
   {
     "code": "@property\ndef capabilities(self):\n    return [self.Capability(item) for item in self._editor.get_element_value(self._capabilities_element).split(',') if (item != 'Uploads')]",
@@ -2005,11 +1651,6 @@
     "original_nl": "Called when the connection is lost or closed."
   },
   {
-    "code": "def __init__(self, df, category_col, parsed_col, feats_from_spacy_doc=FeatsFromSpacyDoc()):\n    self._df = df.reset_index()\n    self._category_col = category_col\n    self._parsed_col = parsed_col\n    self._category_idx_store = IndexStore()\n    self._X_factory = CSRMatrixFactory()\n    self._mX_factory = CSRMatrixFactory()\n    self._term_idx_store = IndexStore()\n    self._metadata_idx_store = IndexStore()\n    self._feats_from_spacy_doc = feats_from_spacy_doc",
-    "nl": "Parameters\n----------\ndf : pd.DataFrame\n contains category_col, and parse_col, were parsed col is entirely spacy docs\ncategory_col : str\n        name of category column in df\nparsed_col : str\n        name of spacy parsed column in df\nfeats_from_spacy_doc : FeatsFromSpacyDoc",
-    "original_nl": "Parameters\n----------\ndf : pd.DataFrame\n contains category_col, and parse_col, were parsed col is entirely spacy docs\ncategory_col : str\n        name of category column in df\nparsed_col : str\n        name of spacy parsed column in df\nfeats_from_spacy_doc : FeatsFromSpacyDoc"
-  },
-  {
     "code": "def get_bash_file(self, homefolder):\n    rc_file = os.path.abspath(('%s/.bashrc' % homefolder))\n    if os.path.exists(os.path.abspath(('%s/.bash_aliases' % homefolder))):\n        rc_file = os.path.abspath(('%s/.bash_aliases' % homefolder))\n    elif os.path.exists(os.path.abspath(('%s/.bashrc' % homefolder))):\n        rc_file = os.path.abspath(('%s/.bashrc' % homefolder))\n    elif os.path.exists(os.path.abspath(('%s/.bash_profile' % homefolder))):\n        rc_file = os.path.abspath(('%s/.bash_profile' % homefolder))\n    elif os.path.exists(os.path.abspath(('%s/.profile' % homefolder))):\n        rc_file = os.path.abspath(('%s/.profile' % homefolder))\n    elif os.path.exists(os.path.abspath(('%s/.login' % homefolder))):\n        rc_file = os.path.abspath(('%s/.login' % homefolder))\n    return rc_file",
     "nl": "Return the path to the user's bash rc file.",
     "original_nl": "Return the path to the user's bash rc file."
@@ -2025,11 +1666,6 @@
     "original_nl": "Return a writable from read_file. Support json, and pkl formats."
   },
   {
-    "code": "def validate_complaint_document(self, operation):\n    if ((operation == 'update') and (self.request.authenticated_role != self.context.author)):\n        self.request.errors.add('url', 'role', 'Can update document only author')\n        self.request.errors.status = 403\n        raise error_handler(self.request.errors)\n    if (self.request.validated['tender_status'] not in ['active.pre-qualification', 'active.pre-qualification.stand-still']):\n        raise_operation_error(self.request, \"Can't {} document in current ({}) tender status\".format(operation, self.request.validated['tender_status']))\n    if any([(i.status != 'active') for i in self.request.validated['tender'].lots if (i.id == self.request.validated['qualification'].lotID)]):\n        raise_operation_error(self.request, 'Can {} document only in active lot status'.format(operation))\n    if (self.request.validated['complaint'].status not in STATUS4ROLE.get(self.request.authenticated_role, [])):\n        raise_operation_error(self.request, \"Can't {} document in current ({}) complaint status\".format(operation, self.request.validated['complaint'].status))\n    return True",
-    "nl": "TODO move validators\nThis class is inherited from openua package, but validate_complaint_document function has different validators.\nFor now, we have no way to use different validators on methods according to procedure type.",
-    "original_nl": "TODO move validators\nThis class is inherited from openua package, but validate_complaint_document function has different validators.\nFor now, we have no way to use different validators on methods according to procedure type."
-  },
-  {
     "code": "def test_kml(self):\n    self._load_city_data()\n    h = City3D.objects.kml(precision=6).get(name='Houston')\n    ref_kml_regex = re.compile('^<Point><coordinates>-95.363\\\\d+,29.763\\\\d+,18</coordinates></Point>$')\n    self.assertTrue(ref_kml_regex.match(h.kml))",
     "nl": "Test GeoQuerySet.kml() with Z values.",
     "original_nl": "Test GeoQuerySet.kml() with Z values."
@@ -2038,11 +1674,6 @@
     "code": "def test_overflowBytesSentToWrappedProtocol(self):\n    factory = HAProxyWrappingFactory(Factory.forProtocol(StaticProtocol))\n    proto = factory.buildProtocol(address.IPv6Address('TCP', b'::1', 8080))\n    transport = StringTransportWithDisconnection()\n    proto.makeConnection(transport)\n    proto.dataReceived((self.IPV6HEADER + b'HTTP/1.1 / GET'))\n    self.assertEqual(proto.wrappedProtocol.data, b'HTTP/1.1 / GET')",
     "nl": "Test if non-header bytes are passed to the wrapped protocol.",
     "original_nl": "Test if non-header bytes are passed to the wrapped protocol."
-  },
-  {
-    "code": "def __init__(self, matcher):\n    self.matcher = matcher()",
-    "nl": "Constructor for Analyzer\n",
-    "original_nl": "Constructor for Analyzer\n:param matcher: A class which is derived from StringMatchingBase"
   },
   {
     "code": "def test_limit(self):\n    N = 10\n    var = list(Pagination(limit=N).limit(self.variants_django))\n    self.assertEqual(len(var), N)\n    var = list(Pagination(limit=N).limit(self.variants))\n    self.assertEqual(len(var), N)",
@@ -2085,11 +1716,6 @@
     "original_nl": "export model into another format eg html, d3 etc...\n<fromshell> : the local name is being passed from ontospy shell"
   },
   {
-    "code": "def __init__(self, indent=None, fmt=None, datefmt=None, epoch_time=False, **kwargs):\n    if ((fmt is not None) or (datefmt is not None)):\n        msg = \"JsonFormatter doesn't allow to set 'format' and 'datefmt'!\"\n        raise ValueError(msg)\n    super(SimpleJsonFormatter, self).__init__(fmt='%(uber_json)s', **kwargs)\n    self.indent = (indent or 0)\n    self.epoch = epoch_time",
-    "nl": "Initialize the handler.\nIf stream is not specified, sys.stderr is used.",
-    "original_nl": "Initialize the handler.\nIf stream is not specified, sys.stderr is used."
-  },
-  {
     "code": "def capitalize_first_letter(string):\n    if string:\n        string = (string[0].upper() + string[1:])\n    return string",
     "nl": "Same as capitalize() but leaves the other letter untouched.\n\nE.g.: 'abCd Efg' -> 'AbDd Efg'",
     "original_nl": "Same as capitalize() but leaves the other letter untouched.\n\nE.g.: 'abCd Efg' -> 'AbDd Efg'"
@@ -2100,24 +1726,9 @@
     "original_nl": "Returns z3 instance for each string that declares a constant."
   },
   {
-    "code": "def chr(_: int) -> str:\n    pass",
-    "nl": "Return a Unicode string of one character with ordinal i; 0 <= i <= 0x10ffff.",
-    "original_nl": "Return a Unicode string of one character with ordinal i; 0 <= i <= 0x10ffff."
-  },
-  {
     "code": "@site_name.setter\ndef site_name(self, site_name):\n    if (site_name in SITE_LIST):\n        self.__site_name = site_name\n        self.__site_url = SITE_LIST[site_name]['url']\n        if ('api_version' and ('hashed_string' in SITE_LIST[site_name])):\n            self.api_version = SITE_LIST[site_name]['api_version']\n            self.hash_string = SITE_LIST[site_name]['hashed_string']\n    else:\n        raise PybooruError(\"The 'site_name' is not valid, specify a valid 'site_name'.\")",
     "nl": "Function that sets and checks the site name and set url.\n",
     "original_nl": "Function that sets and checks the site name and set url.\n\nParameters:\n    site_name (str): The site name in 'SITE_LIST', default sites.\n\nRaises:\n    PybooruError: When 'site_name' isn't valid."
-  },
-  {
-    "code": "def __init__(self, constructed_object):\n    self.constructed_object = constructed_object\n    self.build_methods = dict()",
-    "nl": "Initialize a new Builder.\n\nConcrete Builders should call this method from within their own __init__ method.\nThe concrete __init__ method should also register all build options to build methods,\nby using the _register method.\n\n",
-    "original_nl": "Initialize a new Builder.\n\nConcrete Builders should call this method from within their own __init__ method.\nThe concrete __init__ method should also register all build options to build methods,\nby using the _register method.\n\n@param constructed_object: An instance of an object this builder is responsible for."
-  },
-  {
-    "code": "def __getitem__(self, index):\n    assert isinstance(index, int)\n    return self.__data[index]",
-    "nl": "@rtype: float",
-    "original_nl": "@rtype: float"
   },
   {
     "code": "def find_cluster(fa_list, thr=0.5):\n    fa0 = fa_list[0]\n    fa0_group = [fa0]\n    fa_other = fa_list[1:]\n    for fa_o in fa_list[1:]:\n        tm_d = jchem.calc_tm_dist_int(fa0, fa_o)\n        if (tm_d > thr):\n            fa0_group.append(fa_o)\n            fa_other.remove(fa_o)\n    return (fa0_group, fa_other)",
@@ -2143,11 +1754,6 @@
     "code": "def median1d(self, param, return_errors=False):\n    v = [self.mergers[m].median1d(param, return_errors=return_errors) for m in self.mergers]\n    if return_errors:\n        (value, merror, perror) = zip(*v)\n        return (numpy.array(value), numpy.array(merror), numpy.array(perror))\n    else:\n        return numpy.array(v)",
     "nl": "Return median 1d marginalized parameters\n",
     "original_nl": "Return median 1d marginalized parameters\n\nParameters\n----------\nname: str\n    The name of the parameter requested\nreturn_errors: Optional, {bool, False}\n    If true, return a second and third parameter that represents the\n    lower and upper 90% error on the parameter.\n\nReturns\n-------\nparam: nump.ndarray or tuple\n    The requested parameter"
-  },
-  {
-    "code": "def __init__(self, node=None):\n    self.type = 'NAF/KAF'\n    if (node is None):\n        self.node = etree.Element('factVal')\n    else:\n        self.node = node",
-    "nl": "Constructor of the object\n@type node: xml Element or None (to create and empty one)\n",
-    "original_nl": "Constructor of the object\n@type node: xml Element or None (to create and empty one)\n@param node:  this is the node of the element. If it is None it will create a new object"
   },
   {
     "code": "def test_031_role_match_regex(self):\n    q = ConstraintQuery(self.p, role='test31r.', role_regex=True)\n    constraint = sorted((c.tclass for c in q.results()))\n    self.assertListEqual(['test31a', 'test31b'], constraint)",
@@ -2195,11 +1801,6 @@
     "original_nl": "The node ID of the device on the bus."
   },
   {
-    "code": "def pairwise(iterable):\n    (a, b) = it.tee(iterable)\n    next(b, None)\n    return zip(a, b)",
-    "nl": "s -> (s0,s1), (s1,s2), (s2, s3), ...",
-    "original_nl": "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-  },
-  {
     "code": "@property\ndef loc_data(self):\n    return (json.loads(self.loc_payload) if self.loc_payload else None)",
     "nl": "The loc_data property is used to specify localization paramaters within the 'alert' aps key.\nhttps://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html",
     "original_nl": "The loc_data property is used to specify localization paramaters within the 'alert' aps key.\nhttps://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html"
@@ -2215,16 +1816,6 @@
     "original_nl": "This method helps to figure out the real-world time it will take until an\nin-game time has passed. E.g. if an event should take place a month later\nin-game, you will be able to find the number of real-world seconds this\ncorresponds to (hint: Interval events deal with real life seconds).\n\nKwargs:\n    format (bool): Formatting the output.\n    days, month etc (int): These are the names of time units that must\n        match the `settings.TIME_UNITS` dict keys.\n\nReturns:\n    time (float or tuple): The realtime difference or the same\n        time split up into time units.\n\nExample:\n     gametime_to_realtime(days=2) -> number of seconds in real life from\n                    now after which 2 in-game days will have passed."
   },
   {
-    "code": "def test_invalid_source(self):\n    with self.assertRaises(ValueError):\n        util.parse_filename('invalid_package_name.tar.gz')",
-    "nl": "Parse fails on invalid package name",
-    "original_nl": "Parse fails on invalid package name"
-  },
-  {
-    "code": "def on_typecode_inconsistency(match, state, logger):\n    logger.error(('RS found two different types with the same name: %s' % match[0]))",
-    "nl": "It happens when RS detects two different types with same name.",
-    "original_nl": "It happens when RS detects two different types with same name."
-  },
-  {
     "code": "def test_cleanedFailure(self):\n\n    def failing_func():\n        (1 / 0)\n    try:\n        failing_func()\n    except ZeroDivisionError:\n        failure = Failure()\n    failure.cleanFailure()\n    event = dict(log_format='Hi mom', who='me', log_failure=failure)\n    (records, output) = self.logEvent(event)\n    self.assertEqual(len(records), 1)\n    self.assertIn('Hi mom', output)\n    self.assertIn('in failing_func', output)\n    self.assertIn('ZeroDivisionError', output)",
     "nl": "A cleaned Failure object has a fake traceback object; make sure that\nlogging such a failure still results in the exception details being\nlogged.",
     "original_nl": "A cleaned Failure object has a fake traceback object; make sure that\nlogging such a failure still results in the exception details being\nlogged."
@@ -2233,11 +1824,6 @@
     "code": "def get_model():\n    (ch, row, col) = (3, 45, 160)\n    model = Sequential()\n    model.add(Lambda((lambda x: ((x / 255.0) - 0.5)), input_shape=(row, col, ch), output_shape=(row, col, ch)))\n    model.add(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode='same'))\n    model.add(ELU())\n    model.add(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode='same'))\n    model.add(ELU())\n    model.add(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode='same'))\n    model.add(Flatten())\n    model.add(Dropout(0.5))\n    model.add(ELU())\n    model.add(Dense(512))\n    model.add(Dropout(0.5))\n    model.add(ELU())\n    model.add(Dense(1))\n    return model",
     "nl": "Get the model, this is a slight modification of comma.ai model",
     "original_nl": "Get the model, this is a slight modification of comma.ai model"
-  },
-  {
-    "code": "def getNewRepository():\n    return WidenRepository()",
-    "nl": "Get the repository constructor.",
-    "original_nl": "Get the repository constructor."
   },
   {
     "code": "def test_tcp4(self):\n    self.onePrefix('haproxy:tcp:8080', TCP4ServerEndpoint)",
@@ -2273,11 +1859,6 @@
     "code": "def test_noZipFile(self):\n    with open('./test_data/test.txt', 'wb') as f:\n        f.write('test')\n    testcat.unzipFiles()\n    l = os.listdir('./test_out')\n    self.assertEqual(l, [])",
     "nl": "Test that an empty list is returned when there is no zip file in the input directory.",
     "original_nl": "Test that an empty list is returned when there is no zip file in the input directory."
-  },
-  {
-    "code": "def test_writePID(self):\n    pid = 1995\n    pidFile = PIDFile(DummyFilePath())\n    pidFile._write(pid)\n    self.assertEqual(pidFile.read(), pid)",
-    "nl": "L{PIDFile._write} stores the given PID.",
-    "original_nl": "L{PIDFile._write} stores the given PID."
   },
   {
     "code": "def check_get_datafile(self):\n    datafile = xml_Utils.getChildTextbyParentTag(self.filepath, 'Details', 'InputDataFile')\n    if ((datafile is None) or (datafile is False) or (str(datafile).strip() == '')):\n        if (self.filetype == 'tc'):\n            datafile = get_default_xml_datafile(self.filepath)\n        if (self.filetype == 'ts'):\n            datatype = self.check_get_datatype(False)\n            if str(datatype).lower().startswith('iterative'):\n                datafile = get_default_xml_datafile(self.filepath)\n            else:\n                datafile = False\n        elif (self.filetype == 'proj'):\n            datafile = False\n    elif (str(datafile).strip().upper() == 'DEFAULT'):\n        print_info('This testcase will be executed using the default InputDataFile')\n        datafile = get_default_xml_datafile(self.filepath)\n    elif (str(datafile).strip().upper() == 'NO_DATA'):\n        print_info('This test case will be run without any InputDataFile')\n        datafile = 'NO_DATA'\n    elif ((datafile is not None) and (datafile is not False)):\n        datafile_rel = str(datafile).strip()\n        datafile = file_Utils.getAbsPath(datafile_rel, os.path.dirname(self.filepath))\n    if ((str(datafile).strip().upper() != 'NO_DATA') and (datafile is not False)):\n        if (not file_Utils.fileExists(datafile)):\n            print_info('\\n')\n            print_error('!!! *** InputDataFile does not exist in provided path:{0} *** !!!'.format(datafile))\n    return datafile",
@@ -2320,11 +1901,6 @@
     "original_nl": "Update position of point given new name and vals."
   },
   {
-    "code": "def __init__(self, *args, **kwargs):\n    super(EnrollmentTransaction, self).__init__(*args, **kwargs)\n    self.Type = TransactionType.EnrollmentTransaction",
-    "nl": "Create an instance.\n\nArgs:\n    *args:\n    **kwargs:",
-    "original_nl": "Create an instance.\n\nArgs:\n    *args:\n    **kwargs:"
-  },
-  {
     "code": "@classmethod\ndef sort_menus(c):\n    for name in c.items:\n        if (not c.sorted[name]):\n            c.items[name].sort(key=(lambda x: x.weight))\n            c.sorted[name] = True",
     "nl": "sort_menus goes through the items and sorts them based on\ntheir weight",
     "original_nl": "sort_menus goes through the items and sorts them based on\ntheir weight"
@@ -2360,16 +1936,6 @@
     "original_nl": "Return a sequence comprising the lines of code necessary\nto construct the inner Meta class for the model corresponding\nto the given database table name."
   },
   {
-    "code": "def test_strReturnsStr(self):\n    self.assertEqual(type(self.path.__str__()), str)",
-    "nl": "Calling C{str()} with a L{URLPath} will always return a L{str}.",
-    "original_nl": "Calling C{str()} with a L{URLPath} will always return a L{str}."
-  },
-  {
-    "code": "@api.multi\ndef get_hold_gifts(self):\n    return reduce((lambda x, y: (x and y)), self.mapped('project_id.hold_gifts'))",
-    "nl": ":return: True if all children's gift are held.",
-    "original_nl": ":return: True if all children's gift are held."
-  },
-  {
     "code": "def insideout(ds):\n    ds = list(ds)\n    result = dict([(k, []) for k in ds[0].keys()])\n    for d in ds:\n        for (k, v) in d.items():\n            result[k].append(v)\n    return result",
     "nl": "Transform a list of dictionaries to a dictionary of lists.",
     "original_nl": "Transform a list of dictionaries to a dictionary of lists."
@@ -2403,11 +1969,6 @@
     "code": "def write_to_cache(self, data, filename):\n    json_data = self.json_format_dict(data, True)\n    cache = open(filename, 'w')\n    cache.write(json_data)\n    cache.close()",
     "nl": "Writes data in JSON format to a file",
     "original_nl": "Writes data in JSON format to a file"
-  },
-  {
-    "code": "def pytest_addoption(parser):\n    group = parser.getgroup('Test duration', 'plugin test duration')\n    group.addoption('--test_duration', action='store', default=None, help=\"Set time to control long-run tests where is used 'duration' fixture.E.g. --test_duration=30s, --test_duration=1.5H\")",
-    "nl": "Plugin specific options.",
-    "original_nl": "Plugin specific options."
   },
   {
     "code": "def _create_template(self, num_instances, num_replace=0, template_version=('heat_template_version', '2015-04-30')):\n    return super(AutoScalingResourceGroup, self)._create_template(num_instances, num_replace, template_version=template_version)",
@@ -2465,11 +2026,6 @@
     "original_nl": "Render a sparkline"
   },
   {
-    "code": "def isActive(self, index):\n    return self._iget_active(index)",
-    "nl": "@rtype: bool",
-    "original_nl": "@rtype: bool"
-  },
-  {
     "code": "def __repr__(self) -> str:\n    return self.to_json()",
     "nl": "Get the debug representation of the robot model.\n\n",
     "original_nl": "Get the debug representation of the robot model.\n\n:return:"
@@ -2483,11 +2039,6 @@
     "code": "def testParseOptions(self):\n    options = cli_test_lib.TestOptions()\n    options.filter = 'event.timestamp == 0'\n    test_tool = tools.CLITool()\n    event_filters.EventFiltersArgumentsHelper.ParseOptions(options, test_tool)\n    self.assertEqual(test_tool._event_filter_expression, options.filter)\n    self.assertIsNotNone(test_tool._event_filter)\n    with self.assertRaises(errors.BadConfigObject):\n        event_filters.EventFiltersArgumentsHelper.ParseOptions(options, None)",
     "nl": "Tests the ParseOptions function.",
     "original_nl": "Tests the ParseOptions function."
-  },
-  {
-    "code": "def t_paren(self, s):\n    self.add_token(BRACKET2NAME[s], s)",
-    "nl": "[(){}[\\]]",
-    "original_nl": "[(){}[\\]]"
   },
   {
     "code": "def getCubicPathByBeginEnd(begin, controlPoints, elementNode, end):\n    return svg_reader.getCubicPoints(begin, controlPoints, end, lineation.getNumberOfBezierPoints(begin, elementNode, end))",
@@ -2523,11 +2074,6 @@
     "code": "def get_brands_with_person_counts() -> Iterator[Tuple[(Brand, int)]]:\n    brands = Brand.query.all()\n    person_counts_by_brand_id = get_person_count_by_brand_id()\n    for brand in brands:\n        person_count = person_counts_by_brand_id[brand.id]\n        (yield (brand, person_count))",
     "nl": "Yield (brand, person count) pairs.",
     "original_nl": "Yield (brand, person count) pairs."
-  },
-  {
-    "code": "def f():\n    pass",
-    "nl": "Func doc string",
-    "original_nl": "Func doc string"
   },
   {
     "code": "def switch_cursor(cursor_type, parent_window):\n    watch = Gdk.Cursor(cursor_type)\n    window = parent_window.get_root_window()\n    window.set_cursor(watch)",
@@ -2595,11 +2141,6 @@
     "original_nl": "Subroutine which checks if there is a pair of point such that one\npoint is in Px, the other is in Py and the distance between them is less\nthan delta.\n\nReturns:\n    None, if no split pair is discovered which w/ dist smaller than delta.\n    tuple, of points (tuples) representing point w/ smallest distance.\n        Format: ((x1, y1), (x2, y2))"
   },
   {
-    "code": "def sort_columns(self):\n    if self.request.session.get('back', ''):\n        if (self.request.META['PATH_INFO'] != self.request.session['back']):\n            self.request.session['sort'] = None\n            self.request.session['back'] = self.request.META['PATH_INFO']\n    else:\n        self.request.session['back'] = self.request.META['PATH_INFO']\n    select_action = self.request.GET.get('action', '')\n    if (select_action == 'number'):\n        self.context['select_number'] = True\n        if (self.request.session.get('sort') == 'cart_number'):\n            self.request.session['sort'] = '-cart_number'\n            self.context['number_triangle'] = '\u25bc'\n        else:\n            self.context['number_triangle'] = '\u25b2'\n            self.request.session['sort'] = 'cart_number'\n    elif (select_action == 'name'):\n        self.context['select_type'] = True\n        if (self.request.session.get('sort') == 'cart_itm_name'):\n            self.request.session['sort'] = '-cart_itm_name'\n            self.context['type_triangle'] = '\u25bc'\n        else:\n            self.request.session['sort'] = 'cart_itm_name'\n            self.context['type_triangle'] = '\u25b2'\n    elif (select_action == 'recovery'):\n        self.context['select_count'] = True\n        if (self.request.session.get('sort') == 'cart_number_refills'):\n            self.request.session['sort'] = '-cart_number_refills'\n            self.context['count_triangle'] = '\u25bc'\n        else:\n            self.request.session['sort'] = 'cart_number_refills'\n            self.context['count_triangle'] = '\u25b2'\n    elif (select_action == 'dataadd'):\n        self.context['select_date'] = True\n        if (self.request.session.get('sort') == 'cart_date_added'):\n            self.request.session['sort'] = '-cart_date_added'\n            self.context['date_triangle'] = '\u25bc'\n        else:\n            self.request.session['sort'] = 'cart_date_added'\n            self.context['date_triangle'] = '\u25b2'\n    elif (select_action == 'change_date'):\n        self.context['select_change_date'] = True\n        if (self.request.session.get('sort') == 'cart_date_change'):\n            self.request.session['sort'] = '-cart_date_change'\n            self.context['datec_triangle'] = '\u25bc'\n        else:\n            self.request.session['sort'] = 'cart_date_change'\n            self.context['datec_triangle'] = '\u25b2'\n    else:\n        sort_order = self.request.session.get('sort', '')\n        if ((sort_order == 'cart_number') or (sort_order == '-cart_number')):\n            self.context['select_number'] = True\n            self.context['number_triangle'] = ('\u25b2' if (sort_order == 'cart_number') else '\u25bc')\n        elif ((sort_order == 'cart_itm_name') or (sort_order == '-cart_itm_name')):\n            self.context['select_type'] = True\n            self.context['type_triangle'] = ('\u25b2' if (sort_order == 'cart_itm_name') else '\u25bc')\n        elif ((sort_order == 'cart_number_refills') or (sort_order == '-cart_number_refills')):\n            self.context['select_count'] = True\n            self.context['count_triangle'] = ('\u25b2' if (sort_order == 'cart_number_refills') else '\u25bc')\n        elif ((sort_order == 'cart_date_added') or (sort_order == '-cart_date_added')):\n            self.context['select_date'] = True\n            self.context['date_triangle'] = ('\u25b2' if (sort_order == 'cart_date_added') else '\u25bc')\n        elif ((sort_order == 'cart_date_change') or (sort_order == '-cart_date_change')):\n            self.context['select_change_date'] = True\n            self.context['datec_triangle'] = ('\u25b2' if (sort_order == 'cart_datec_added') else '\u25bc')\n        else:\n            self.context['select_number'] = True\n            self.request.session['sort'] = 'cart_number'\n            self.context['number_triangle'] = '\u25b2'",
-    "nl": "\u0421\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u043a\u0430 \u0434\u0430\u043d\u043d\u044b\u0445 \u043d\u0430 \u043e\u0441\u043d\u043e\u0432\u0435 \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u043e\u0433\u043e \u0441\u0442\u043e\u0431\u0446\u0430.",
-    "original_nl": "\u0421\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u043a\u0430 \u0434\u0430\u043d\u043d\u044b\u0445 \u043d\u0430 \u043e\u0441\u043d\u043e\u0432\u0435 \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u043e\u0433\u043e \u0441\u0442\u043e\u0431\u0446\u0430."
-  },
-  {
     "code": "def ap_date(value):\n    if (not value):\n        return ''\n    bits = unicode(value).split('/')\n    (month, day, year) = bits\n    output = AP_MONTHS[(int(month) - 1)]\n    output += (' ' + unicode(int(day)))\n    output += (', ' + year)\n    return output",
     "nl": "Converts a date string in m/d/yyyy format into AP style.",
     "original_nl": "Converts a date string in m/d/yyyy format into AP style."
@@ -2613,11 +2154,6 @@
     "code": "def save_ready(self, service_name):\n    self._load_ready_file()\n    self._ready.add(service_name)\n    self._save_ready_file()",
     "nl": "Save an indicator that the given service is now data_ready.",
     "original_nl": "Save an indicator that the given service is now data_ready."
-  },
-  {
-    "code": "def action(**kwargs):\n    redata = kwargs['redata']\n    jdata = kwargs['jdata']\n    logger = kwargs['logger']\n    run = True\n    if (redata['trigger'] > jdata['failcount']):\n        run = False\n    checktime = (time.time() - float(redata['lastrun']))\n    if (checktime < redata['frequency']):\n        run = False\n    if (redata['data']['call_on'] not in jdata['check']['status']):\n        run = False\n    if run:\n        return actionEC2(redata, jdata, logger)\n    else:\n        return None",
-    "nl": "This method is called to action a reaction",
-    "original_nl": "This method is called to action a reaction"
   },
   {
     "code": "def _get_localzone(_root='/'):\n    tzenv = os.environ.get('TZ')\n    if tzenv:\n        try:\n            return _tz_from_env(tzenv)\n        except pytz.UnknownTimeZoneError:\n            pass\n    tzpath = os.path.join(_root, 'etc/timezone')\n    if os.path.exists(tzpath):\n        with open(tzpath, 'rb') as tzfile:\n            data = tzfile.read()\n            if (data[:5] != 'TZif2'):\n                etctz = data.strip().decode()\n                if (' ' in etctz):\n                    (etctz, dummy) = etctz.split(' ', 1)\n                if ('#' in etctz):\n                    (etctz, dummy) = etctz.split('#', 1)\n                return pytz.timezone(etctz.replace(' ', '_'))\n    zone_re = re.compile('\\\\s*ZONE\\\\s*=\\\\s*\"')\n    timezone_re = re.compile('\\\\s*TIMEZONE\\\\s*=\\\\s*\"')\n    end_re = re.compile('\"')\n    for filename in ('etc/sysconfig/clock', 'etc/conf.d/clock'):\n        tzpath = os.path.join(_root, filename)\n        if (not os.path.exists(tzpath)):\n            continue\n        with open(tzpath, 'rt') as tzfile:\n            data = tzfile.readlines()\n        for line in data:\n            match = zone_re.match(line)\n            if (match is None):\n                match = timezone_re.match(line)\n            if (match is not None):\n                line = line[match.end():]\n                etctz = line[:end_re.search(line).start()]\n                return pytz.timezone(etctz.replace(' ', '_'))\n    tzpath = os.path.join(_root, 'etc/localtime')\n    if (os.path.exists(tzpath) and os.path.islink(tzpath)):\n        tzpath = os.path.realpath(tzpath)\n        start = (tzpath.find('/') + 1)\n        while (start is not 0):\n            tzpath = tzpath[start:]\n            try:\n                return pytz.timezone(tzpath)\n            except pytz.UnknownTimeZoneError:\n                pass\n            start = (tzpath.find('/') + 1)\n    for filename in ('etc/localtime', 'usr/local/etc/localtime'):\n        tzpath = os.path.join(_root, filename)\n        if (not os.path.exists(tzpath)):\n            continue\n        with open(tzpath, 'rb') as tzfile:\n            return pytz.tzfile.build_tzinfo('local', tzfile)\n    raise pytz.UnknownTimeZoneError('Can not find any timezone configuration')",
@@ -2680,24 +2216,9 @@
     "original_nl": "Returns a fully populated CourseDetails model given the course descriptor"
   },
   {
-    "code": "@classmethod\n@contextmanager\ndef open(cls, *args, **kwargs):\n    c = cls(*args, **kwargs)\n    c.connect()\n    try:\n        (yield c)\n    finally:\n        c.close()",
-    "nl": "just something to make it easier to quickly open a connection, do something\nand then close it",
-    "original_nl": "just something to make it easier to quickly open a connection, do something\nand then close it"
-  },
-  {
-    "code": "def _set_value(self, value):\n    if (type(value) != dict):\n        raise TypeError('Must use dict. Provided: {0}'.format(type(value)))\n    if self._caster:\n        for x in value.keys():\n            caster = self._caster.get(x, None)\n            if callable(caster):\n                value[x] = caster(value[x])\n    super(DictField, self)._set_value(value)",
-    "nl": "Internal method that sets the field value.\n\n",
-    "original_nl": "Internal method that sets the field value.\n\n:param value: The value to use.\n:type value: dict\n:raises: TypeError"
-  },
-  {
     "code": "@property\ndef coor(self):\n    return (self.start, self.end)",
     "nl": "returns a tuple with start and stop",
     "original_nl": "returns a tuple with start and stop"
-  },
-  {
-    "code": "def init(self, options):\n    pass",
-    "nl": "Initialize the class with the options the user has given.",
-    "original_nl": "Initialize the class with the options the user has given."
   },
   {
     "code": "def create(self, request):\n    telnet = request.telnet\n    telnet.sendline('group -a')\n    telnet.expect(('Adding a new Group(.+)\\\\n' + INTERACTIVE_PROMPT))\n    if (not ('gid' in request.data)):\n        raise MissingKeyError('Missing gid (group identifier)')\n    telnet.sendline((('gid ' + request.data['gid']) + '\\n'))\n    telnet.expect(INTERACTIVE_PROMPT)\n    telnet.sendline('ok\\n')\n    matched_index = telnet.expect([('.+Successfully added(.+)\\\\[(.+)\\\\][\\\\n\\\\r]+' + STANDARD_PROMPT), ('.+Error: (.+)[\\\\n\\\\r]+' + INTERACTIVE_PROMPT), (((('.+(.*)(' + INTERACTIVE_PROMPT) + '|') + STANDARD_PROMPT) + ')')])\n    if (matched_index == 0):\n        gid = telnet.match.group(2).strip()\n        telnet.sendline('persist\\n')\n        return JsonResponse({\n            'name': gid,\n        })\n    else:\n        raise ActionFailed(telnet.match.group(1))",
@@ -2715,29 +2236,14 @@
     "original_nl": "iterator to generate geometric series\n:param start: start number\n:param factor: constant factor to apply\n:return: geometric series, e.g. geom(16, 0.5) -> 16 8 4 2 1 0.5 ..."
   },
   {
-    "code": "def get_key(self):\n    return self.__key",
-    "nl": "get_key() -> bytes",
-    "original_nl": "get_key() -> bytes"
-  },
-  {
     "code": "def enqueue_all_shuffled_tasks(self, options):\n    task_options = ({\n        'routing_key': options['routing_key'],\n    } if options.get('routing_key') else {\n        \n    })\n    for (seq_id, kwargs) in enumerate(self._shuffled_task_kwargs(options)):\n        kwargs['seq_id'] = seq_id\n        result = tasks.compute_grades_for_course_v2.apply_async(kwargs=kwargs, **task_options)\n        log.info('Grades: Created {task_name}[{task_id}] with arguments {kwargs}'.format(task_name=tasks.compute_grades_for_course.name, task_id=result.task_id, kwargs=kwargs))",
     "nl": "Enqueue all tasks, in shuffled order.",
     "original_nl": "Enqueue all tasks, in shuffled order."
   },
   {
-    "code": "def __init__(self, address, port, name, role, list, logincallback, insertcallback, disconnectcallback):\n    Client.__init__(self, address, port)\n    self.logged_in = False\n    self.name = name\n    self.role = role.lower()\n    self.list = list\n    self.exit = False\n    self.login_callback = logincallback\n    self.insert_callback = insertcallback\n    self.disconnect_callback = disconnectcallback",
-    "nl": ":param address: address of the network\n:param port: port of the network\n:param name: username for the login\n:param role: role for the login (\"master\" or \"client\")\n:param list: StrategiesList object from the StrategiesFrame (for updating its database)\n:param logincallback: Callback to call when login succeeds\n:param insertcallback: Callback to call when a command is received\n:param disconnectcallback: Callback to call when disconnect occurs",
-    "original_nl": ":param address: address of the network\n:param port: port of the network\n:param name: username for the login\n:param role: role for the login (\"master\" or \"client\")\n:param list: StrategiesList object from the StrategiesFrame (for updating its database)\n:param logincallback: Callback to call when login succeeds\n:param insertcallback: Callback to call when a command is received\n:param disconnectcallback: Callback to call when disconnect occurs"
-  },
-  {
     "code": "def test_profiles_filters(self):\n    filter_url = self.profiles_list_url\n    resp = self.api_client.get(filter_url)\n    self.assertValidJSONResponse(resp)\n    self.assertEquals(len(self.deserialize(resp)['objects']), 8)\n    filter_url = (self.profiles_list_url + '?name__icontains=norm')\n    resp = self.api_client.get(filter_url)\n    self.assertValidJSONResponse(resp)\n    self.assertEquals(len(self.deserialize(resp)['objects']), 1)\n    filter_url = (self.profiles_list_url + '?name__icontains=NoRmAN')\n    resp = self.api_client.get(filter_url)\n    self.assertValidJSONResponse(resp)\n    self.assertEquals(len(self.deserialize(resp)['objects']), 1)\n    filter_url = (self.profiles_list_url + '?name__icontains=bar')\n    resp = self.api_client.get(filter_url)\n    self.assertValidJSONResponse(resp)\n    self.assertEquals(len(self.deserialize(resp)['objects']), 0)",
     "nl": "Test profiles filtering",
     "original_nl": "Test profiles filtering"
-  },
-  {
-    "code": "@cmd(1)\ndef cmd_tofme(self, chan, args, sender_nick):\n    who = args[0]\n    self.say(('%s : %s' % (who, self._tofades())))",
-    "nl": "Tof to someone (give a nickname)",
-    "original_nl": "Tof to someone (give a nickname)"
   },
   {
     "code": "def __init__(self, motifs):\n    self._motifs = motifs\n    self._motif_size = len(self._motifs[0])\n    for motif in self._motifs:\n        if (len(motif) != self._motif_size):\n            raise ValueError(('Motif %s given, expected motif size %s' % (motif, self._motif_size)))",
@@ -2810,11 +2316,6 @@
     "original_nl": "Return a Python object compiled from a string."
   },
   {
-    "code": "def test_mako(self):\n    test_dict = {\n        'test_string': 'test-=&\\\\;\\'\"<>\u2603'.encode(encoding='utf-8'),\n        'test_tuple': (1, 2, 3),\n        'test_number': 3.5,\n        'test_bool': False,\n    }\n    template = Template('\\n                <%!\\n                import json\\n                from openedx.core.djangolib.js_utils import (\\n                    dump_js_escaped_json, js_escaped_string\\n                )\\n                %>\\n                <body>\\n                    <div\\n                        data-test-dict=\\'${json.dumps(test_dict)}\\'\\n                        data-test-string=\\'${test_dict[\"test_string\"]}\\'\\n                        data-test-tuple=\\'${json.dumps(test_dict[\"test_tuple\"])}\\'\\n                        data-test-number=\\'${json.dumps(test_dict[\"test_number\"])}\\'\\n                        data-test-bool=\\'${json.dumps(test_dict[\"test_bool\"])}\\'\\n                    ></div>\\n\\n                    <script>\\n                        var test_dict = ${test_dict | n, dump_js_escaped_json}\\n                        var test_string = \\'${test_dict[\"test_string\"] | n, js_escaped_string}\\'\\n                        var test_none_string = \\'${None | n, js_escaped_string}\\'\\n                        var test_tuple = ${test_dict[\"test_tuple\"] | n, dump_js_escaped_json}\\n                        var test_number = ${test_dict[\"test_number\"] | n, dump_js_escaped_json}\\n                        var test_bool = ${test_dict[\"test_bool\"] | n, dump_js_escaped_json}\\n                        var test_none_json = ${None | n, dump_js_escaped_json}\\n                    </script>\\n                </body>\\n            ', default_filters=['decode.utf8', 'h'])\n    out = template.render(test_dict=test_dict)\n    expected_json_for_html = '{&#34;test_bool&#34;: false, &#34;test_number&#34;: 3.5, &#34;test_tuple&#34;: [1, 2, 3], &#34;test_string&#34;: &#34;test-=&amp;\\\\\\\\;&#39;\\\\&#34;&lt;&gt;\\\\u2603&#34;}'\n    expected_attr_json_for_html = ((\"data-test-dict='\" + expected_json_for_html) + \"'\")\n    self._validate_expectation_of_json_for_html(test_dict, expected_json_for_html)\n    self.assertIn(expected_attr_json_for_html, out)\n    self.assertIn(\"data-test-string='test-=&amp;\\\\;&#39;&#34;&lt;&gt;\u2603'\", out)\n    self.assertIn(\"data-test-tuple='[1, 2, 3]'\", out)\n    self.assertIn(\"data-test-number='3.5'\", out)\n    self.assertIn(\"data-test-bool='false'\", out)\n    expected_string_for_js_in_dict = 'test-=\\\\u0026\\\\\\\\;\\'\\\\\"\\\\u003c\\\\u003e\\\\u2603'\n    self._validate_expectation_of_string_for_js(test_dict['test_string'], expected_string_for_js_in_dict)\n    self.assertIn((('var test_dict = {\"test_bool\": false, \"test_number\": 3.5, \"test_tuple\": [1, 2, 3], \"test_string\": \"' + expected_string_for_js_in_dict) + '\"}'), out)\n    expected_string_for_js = 'test\\\\u002D\\\\u003D\\\\u0026\\\\u005C\\\\u003B\\\\u0027\\\\u0022\\\\u003C\\\\u003E\u2603'\n    self._validate_expectation_of_string_for_js(test_dict['test_string'], expected_string_for_js)\n    self.assertIn(((\"var test_string = '\" + expected_string_for_js.decode(encoding='utf-8')) + \"'\"), out)\n    self.assertIn(\"var test_none_string = ''\", out)\n    self.assertIn('var test_tuple = [1, 2, 3]', out)\n    self.assertIn('var test_number = 3.5', out)\n    self.assertIn('var test_bool = false', out)\n    self.assertIn('var test_none_json = null', out)",
-    "nl": "Tests the full suite of Mako best practices by running all of the\ncombinations of types of data and types of escaping through a Mako\ntemplate.\n\nAdditionally, validates the best practices themselves by validating\nthe expectations to ensure they can properly be unescaped and/or\nparsed from json where applicable.",
-    "original_nl": "Tests the full suite of Mako best practices by running all of the\ncombinations of types of data and types of escaping through a Mako\ntemplate.\n\nAdditionally, validates the best practices themselves by validating\nthe expectations to ensure they can properly be unescaped and/or\nparsed from json where applicable."
-  },
-  {
     "code": "def load(self, config_file):\n    module_name = filepath.splitext(filepath.basename(config_file))[0]\n    if (self.deployer_object and self.deployer_object.loaded):\n        raise deployer.DeployerError('Tried to load {module} deployer that is already loaded!'.format(module=module_name))\n    self.deployer_name = module_name\n    self.deployer_module = deployer.deployer_import(self.deployer_name, config_file)\n    (docstring, new_style, classic, default) = fabric_main.load_tasks_from_module(self.deployer_module)\n    self.tasks = {\n        'docstring': docstring,\n        'functions': (new_style if state.env.new_style_tasks else classic),\n        'default': default,\n    }\n    state.commands.update(self.tasks.get('functions', {\n        \n    }))\n    if (not state.commands):\n        log.err('No commands found ...aborting')\n    else:\n        for name in state.commands:\n            execute(name)",
     "nl": "Load the workflow rules from a Mamba .dc Python file\n\n",
     "original_nl": "Load the workflow rules from a Mamba .dc Python file\n\n:param config_file: The file where to load the configuration from\n:type config_file: str"
@@ -2823,11 +2324,6 @@
     "code": "def create_random_samples(count=30, seed=1):\n    if (seed is not None):\n        numpy.random.seed(seed)\n    sample_a = create_random_sample(10.0, 1.0, count=count, seed=None)\n    sample_b = create_random_sample(12.0, 1.0, count=count, seed=None)\n    return (sample_a, sample_b)",
     "nl": "Create a sample of measurements.",
     "original_nl": "Create a sample of measurements."
-  },
-  {
-    "code": "def twoSum(self, nums, target):\n    map = {\n        \n    }\n    for (i, v) in zip(range(len(nums)), nums):\n        if (v in map):\n            if (map[v] < i):\n                return [map[v], i]\n        else:\n            map[(target - v)] = i",
-    "nl": ":type nums: List[int]\n:type target: int\n:rtype: List[int]",
-    "original_nl": ":type nums: List[int]\n:type target: int\n:rtype: List[int]"
   },
   {
     "code": "def sleep(self):\n    curr_time = time()\n    sleep(self._remaining(curr_time))\n    self.last_time = (self.last_time + self.sleep_dur)\n    if ((curr_time - self.last_time) > (self.sleep_dur * 2)):\n        self.last_time = curr_time",
@@ -2840,11 +2336,6 @@
     "original_nl": "Rainmeter only supports up to 255."
   },
   {
-    "code": "@ops.RegisterShape('CropAndResizeGradBoxes')\ndef _CropAndResizeGradBoxesShape(op):\n    return [op.inputs[2].get_shape()]",
-    "nl": "Shape function for CropAndResizeGradBoxes.",
-    "original_nl": "Shape function for CropAndResizeGradBoxes."
-  },
-  {
     "code": "def as_sql(self, compiler, connection):\n    (lhs, lhs_params) = self.process_lhs(compiler, connection)\n    (rhs, rhs_params) = self.process_rhs(compiler, connection)\n    params = (lhs_params + rhs_params)\n    return ((f'%s <> %s' % (lhs, rhs)), params)",
     "nl": "Handle as SQL method for not equal lookup.",
     "original_nl": "Handle as SQL method for not equal lookup."
@@ -2853,11 +2344,6 @@
     "code": "def add_heat(self, heatmap, bbox_list):\n    for box in bbox_list:\n        heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1\n    return heatmap",
     "nl": "Add heat according to bounding box list\nAttr:\n    heatmap: heat map initiliazed to image size\n    bbox_list: bounding boxes",
     "original_nl": "Add heat according to bounding box list\nAttr:\n    heatmap: heat map initiliazed to image size\n    bbox_list: bounding boxes\nReturns:\n    resulted heat map image"
-  },
-  {
-    "code": "def __str__(self):\n    return 'Monsoon'",
-    "nl": "Return the name of this power meter.",
-    "original_nl": "Return the name of this power meter."
   },
   {
     "code": "def getRepoMetadata(self):\n    try:\n        self.payload.updateBaseRepo(fallback=False, checkmount=False)\n    except (OSError, PayloadError) as err:\n        LOG.error('Error: %s', err)\n        self.errors.append(_('Failed to set up installation source'))\n    else:\n        self.payload.gatherRepoMetadata()\n        self.payload.release()\n        if (not self.payload.baseRepo):\n            self.errors.append(_('Error downloading package metadata'))\n        else:\n            try:\n                self.payload.environments\n                self.payload.groups\n            except MetadataError:\n                self.errors.append(_('No installation source available'))",
@@ -2885,11 +2371,6 @@
     "original_nl": "Record any new blog posts."
   },
   {
-    "code": "def run(self):\n    if os.path.exists(self.__destination):\n        if self.__force:\n            if os.path.isdir(self.__destination):\n                shutil.rmtree(self.__destination)\n            else:\n                os.unlink(self.__destination)\n        else:\n            s = \"'{0}' exists; use -f to overwrite\".format(self.__destination)\n            self.error(s)\n    self.write_table()",
-    "nl": "Top level entry point.",
-    "original_nl": "Top level entry point."
-  },
-  {
     "code": "def sign_str(data, key):\n    return sign(key, data, HASH_TYPE)",
     "nl": "Sign a string blob",
     "original_nl": "Sign a string blob"
@@ -2905,11 +2386,6 @@
     "original_nl": "Return terminal code to scroll up n lines."
   },
   {
-    "code": "def __init__(self, site_key=None, secret_key=None, gtag_attrs={\n    \n}, js_params={\n    \n}, *args, **kwargs):\n    site_key = (site_key if site_key else settings.NORECAPTCHA_SITE_KEY)\n    self.secret_key = (secret_key if secret_key else settings.NORECAPTCHA_SECRET_KEY)\n    self.widget = NoReCaptchaWidget(site_key=site_key, gtag_attrs=gtag_attrs, js_params=js_params)\n    self.required = True\n    super(NoReCaptchaField, self).__init__(*args, **kwargs)",
-    "nl": "site_key = the Google provided site_key\nsecret_key = the Google provided secret_key\ngtag_attrs = html input attributes to provide\n    to the g-recaptcha tag\njs_params = parameters to passed to the javascript backend\n\nSee: https://developers.google.com/recaptcha/docs/display",
-    "original_nl": "site_key = the Google provided site_key\nsecret_key = the Google provided secret_key\ngtag_attrs = html input attributes to provide\n    to the g-recaptcha tag\njs_params = parameters to passed to the javascript backend\n\nSee: https://developers.google.com/recaptcha/docs/display"
-  },
-  {
     "code": "@property\ndef C(self):\n    return self.single",
     "nl": "Bitname for 'Single' in original equation derivation.",
     "original_nl": "Bitname for 'Single' in original equation derivation."
@@ -2918,16 +2394,6 @@
     "code": "def _policy_evaluation(mdp, policy, max_iter=200, epsilon=1e-05):\n    finished = False\n    iteration = 0\n    value = np.zeros(len(mdp.S))\n    while ((iteration < max_iter) and (not finished)):\n        v_old = np.array(value)\n        delta = 0\n        for s in mdp.S:\n            value[s] = (mdp.R(s, None) + (mdp.gamma * np.sum([(p * value[s1]) for (p, s1) in mdp.T(s, policy[s])])))\n            delta = max(delta, np.fabs((value[s] - v_old[s])))\n        if (delta < epsilon):\n            finished = True\n        iteration += 1\n    return value",
     "nl": "Compute the value of a policy\n\nPerform Bellman backups to find the value of a policy for all states in the\nMDP",
     "original_nl": "Compute the value of a policy\n\nPerform Bellman backups to find the value of a policy for all states in the\nMDP"
-  },
-  {
-    "code": "@property\ndef best(self):\n    if self:\n        return self[0][0]",
-    "nl": "The best match as value.",
-    "original_nl": "The best match as value."
-  },
-  {
-    "code": "def parse_timestamp(self, timestamp):\n    timestamp = timestamp.replace('Current Conditions as of ', '')\n    return datetime.datetime.strptime(timestamp, '%H:%M %A, %B %d, %Y')",
-    "nl": "Current Conditions as of 12:01 Wednesday, September 9, 2015",
-    "original_nl": "Current Conditions as of 12:01 Wednesday, September 9, 2015"
   },
   {
     "code": "def update(self, iterable):\n    set = self.set\n    for index in iterable:\n        set(index)",
@@ -2965,24 +2431,9 @@
     "original_nl": "Get hidden feature matrix by SVD method\n\n:param user_rate_dict: each user's rating score\n:param k: number of hidden features\n:return data: hidden feature dataset\n:rtype: ndarray"
   },
   {
-    "code": "def process(self, sess, **kwargs):\n    try:\n        train_data_batch = self.get_batch(size=30, require_terminal=True)\n        self._check(train_data_batch)\n        (self.on_policy_batch, self.off_policy_batch, self.rp_batch) = self.process_batch(sess, train_data_batch)\n        print('on_p_batch_size: {}'.format(self.on_policy_batch['batch_size']))\n        on_policy_mini_batch = self.sample_batch(self.on_policy_batch, 17)\n        print('on_p_mini_batch_size: {}'.format(on_policy_mini_batch['batch_size']))\n        feed_dict = self._get_main_feeder(sess, on_policy_mini_batch, None, None, True)\n    except:\n        msg = ('process() exception occurred' + '\\n\\nPress `Ctrl-C` or jupyter:[Kernel]->[Interrupt] for clean exit.\\n')\n        self.log.exception(msg)\n        raise RuntimeError(msg)",
-    "nl": "Usage example. Override.",
-    "original_nl": "Usage example. Override."
-  },
-  {
     "code": "def __init__(self, name, generator_class, vehicles, net_params, initial_config=None):\n    self.left_len = net_params.additional_params['horizontal_length_in']\n    self.right_len = net_params.additional_params['horizontal_length_out']\n    self.bottom_len = net_params.additional_params['vertical_length_in']\n    self.top_len = net_params.additional_params['vertical_length_out']\n    self.horizontal_junction_len = (2.9 + (3.3 * net_params.additional_params['vertical_lanes']))\n    self.vertical_junction_len = (2.9 + (3.3 * net_params.additional_params['horizontal_lanes']))\n    self.inner_space_len = 0.28\n    net_params.additional_params['length'] = (((((self.left_len + self.right_len) + self.horizontal_junction_len) + self.bottom_len) + self.top_len) + self.vertical_junction_len)\n    if ('horizontal_lanes' not in net_params.additional_params):\n        raise ValueError('number of horizontal lanes not supplied')\n    if ('vertical_lanes' not in net_params.additional_params):\n        raise ValueError('number of vertical lanes not supplied')\n    self.lanes = {\n        'top': net_params.additional_params['vertical_lanes'],\n        'bottom': net_params.additional_params['vertical_lanes'],\n        'left': net_params.additional_params['horizontal_lanes'],\n        'right': net_params.additional_params['horizontal_lanes'],\n    }\n    self.enter_lane = {\n        'horizontal': 'left',\n        'vertical': 'bottom',\n    }\n    if ('speed_limit' not in net_params.additional_params):\n        raise ValueError('speed limit not supplied')\n    if (isinstance(net_params.additional_params['speed_limit'], int) or isinstance(net_params.additional_params['speed_limit'], float)):\n        self.speed_limit = {\n            'horizontal': net_params.additional_params['speed_limit'],\n            'vertical': net_params.additional_params['speed_limit'],\n        }\n    elif (('vertical' in net_params.additional_params['speed_limit']) and ('horizontal' in net_params.additional_params['speed_limit'])):\n        self.speed_limit = {\n            'horizontal': net_params.additional_params['speed_limit']['horizontal'],\n            'vertical': net_params.additional_params['speed_limit']['vertical'],\n        }\n    else:\n        raise ValueError('speed limit must contain a number or a dict with keys: \"vertical\" and \"horizontal\"')\n    super().__init__(name, generator_class, vehicles, net_params, initial_config)",
     "nl": "Initializes a two-way intersection scenario. Required net_params: horizontal_length_before,\nhorizontal_length_after, horizontal_lanes, vertical_length_before, vertical_length_after, vertical_lanes,\nspeed_limit. Required initial_config: positions.\n\nSee Scenario.py for description of params.",
     "original_nl": "Initializes a two-way intersection scenario. Required net_params: horizontal_length_before,\nhorizontal_length_after, horizontal_lanes, vertical_length_before, vertical_length_after, vertical_lanes,\nspeed_limit. Required initial_config: positions.\n\nSee Scenario.py for description of params."
-  },
-  {
-    "code": "def destroy_video(self, access_token, video_id):\n    url = 'https://openapi.youku.com/v2/videos/destroy.json'\n    data = {\n        'client_id': self.client_id,\n        'access_token': access_token,\n        'video_id': video_id,\n    }\n    r = requests.post(url, data=data)\n    check_error(r)\n    return r.json()['id']",
-    "nl": "doc: http://open.youku.com/docs/doc?id=51",
-    "original_nl": "doc: http://open.youku.com/docs/doc?id=51"
-  },
-  {
-    "code": "def yl05_bind(MWD, lpc):\n    if (lpc <= 0):\n        raise BadInputError('log central density should be > 0')\n    MNR = (1.436 * (1 - np.exp((((- 0.01316) * np.exp((2.706 * np.log(lpc)))) + (0.2493 * lpc)))))\n    if (MWD < MNR):\n        raise BadInputError('MWD = {0:.3f} is less than non-rotating value {1:.3f} for lpc = {2:.3f}'.format(MWD, MNR, lpc))\n    benr = (((- 32.759747) + (6.7179802 * lpc)) - ((0.28717609 * lpc) * lpc))\n    c5 = ((- 370.73052) + (lpc * (132.97204 + (lpc * ((- 16.117031) + (lpc * 0.66986678))))))\n    return (1e+50 * (benr + (c5 * np.exp((1.03 * np.log((MWD - MNR)))))))",
-    "nl": "Binding energies from Yoon & Langer 2005, equation (32).\n\nThe central density is really a function of the angular momentum of a\ndifferentially rotating white dwarf.  Should re-read YL05 to make sure\nI understand what's really going on here.  Input parameters:\n    MWD:  mass of the white dwarf (solar masses)\n    lpc:  log10 of central density\nOutput binding energy in erg.",
-    "original_nl": "Binding energies from Yoon & Langer 2005, equation (32).\n\nThe central density is really a function of the angular momentum of a\ndifferentially rotating white dwarf.  Should re-read YL05 to make sure\nI understand what's really going on here.  Input parameters:\n    MWD:  mass of the white dwarf (solar masses)\n    lpc:  log10 of central density\nOutput binding energy in erg."
   },
   {
     "code": "def shuffle(reader, buf_size):\n\n    def data_reader():\n        buf = []\n        for e in reader():\n            buf.append(e)\n            if (len(buf) >= buf_size):\n                random.shuffle(buf)\n                for b in buf:\n                    (yield b)\n                buf = []\n        if (len(buf) > 0):\n            random.shuffle(buf)\n            for b in buf:\n                (yield b)\n    return data_reader",
@@ -2993,11 +2444,6 @@
     "code": "def add_tag(self, tag):\n    return self.conn.transaction([], [operation.OperationAddTag(node=self.id, tag=tag)])",
     "nl": "Adds a tag to this object.  Returns an awaitable of None.",
     "original_nl": "Adds a tag to this object.  Returns an awaitable of None."
-  },
-  {
-    "code": "@dev.command()\n@click.argument('name', required=False)\n@click.option('--no-verify', is_flag=True, help='Skip verification that ticket exists')\n@click.option('--head', is_flag=True, help='Branch off of the current head rather than develop')\n@click.option('rename_flag', '--rename', is_flag=True, help='Rename the current branch rather than making a new one')\n@click.option('-t', '--type', type=click.Choice(['feature/', 'release/', 'hotfix/', 'support/']), help='the ticket type to make', default='feature/')\n@click.pass_context\ndef start(ctx, name, no_verify, head, rename_flag, type):\n    repo = ctx.obj.repo\n    if rename_flag:\n        check_if_active_branch_can_be_renamed(repo)\n    develop_branch_name = ctx.obj.develop_branch_name()\n    if (not (head or rename_flag)):\n        develop_is_current_future = zazu.util.async(branch_is_current, repo, develop_branch_name)\n    if (name is None):\n        try:\n            name = str(make_ticket(ctx.obj.issue_tracker()))\n            no_verify = True\n        except zazu.issue_tracker.IssueTrackerError as e:\n            raise click.ClickException(str(e))\n        click.echo('Created ticket \"{}\"'.format(name))\n    issue_descriptor = make_issue_descriptor(name)\n    if (not (head or rename_flag)):\n        try:\n            develop_is_current = develop_is_current_future.result()\n        except (git.exc.GitCommandError, AttributeError):\n            click.secho('WARNING: unable to fetch from origin!', fg='red')\n            develop_is_current = True\n    existing_branch = find_branch_with_id(repo, issue_descriptor.id)\n    if (existing_branch and (not (rename_flag and (repo.active_branch.name == existing_branch)))):\n        raise click.ClickException('branch with same id exists: {}'.format(existing_branch))\n    issue = (None if no_verify else verify_ticket_exists(ctx.obj.issue_tracker(), issue_descriptor.id))\n    if (not issue_descriptor.description):\n        issue_descriptor.description = zazu.util.prompt('Enter a short description for the branch')\n    issue_descriptor.type = type\n    branch_name = issue_descriptor.get_branch_name()\n    if (not (head or rename_flag)):\n        offer_to_stash_changes(repo)\n        click.echo('Checking out {}...'.format(develop_branch_name))\n        repo.heads[develop_branch_name].checkout()\n        if (not develop_is_current):\n            click.echo('Merging latest from origin...')\n            repo.git.merge()\n    try:\n        repo.git.checkout(branch_name)\n        click.echo('Branch {} already exists!'.format(branch_name))\n    except git.exc.GitCommandError:\n        if rename_flag:\n            click.echo('Renaming current branch to \"{}\"...'.format(branch_name))\n            rename_branch(repo, repo.active_branch.name, branch_name)\n        else:\n            click.echo('Creating new branch named \"{}\"...'.format(branch_name))\n            repo.git.checkout('HEAD', b=branch_name)\n    if (issue is not None):\n        ctx.obj.issue_tracker().assign_issue(issue, ctx.obj.issue_tracker().user())",
-    "nl": "Start a new feature, much like git-flow but with more sugar.",
-    "original_nl": "Start a new feature, much like git-flow but with more sugar."
   },
   {
     "code": "def head(self, view, view_args=None, view_kwargs=None, path='/', data={\n    \n}, follow=False, **extra):\n    return super(Client, self).head(path, data=data, follow=follow, **lang.updated(extra, self._view_request(view, view_args, view_kwargs)))",
@@ -3045,11 +2491,6 @@
     "original_nl": "A trailing dot in domain names is preserved."
   },
   {
-    "code": "@pytest.mark.parametrize('input, version', (('pg_ctl (PostgreSQL) 9.6.6', '9.6'), ('pg_ctl (PostgreSQL) 9.5', '9.5'), ('pg_ctl (PostgreSQL) 9.4.1', '9.4'), ('pg_ctl (PostgreSQL) 10.0', '10.0'), ('pg_ctl (PostgreSQL) 10.1', '10.1')))\ndef test_versions(input, version):\n    match = PostgreSQLExecutor.VERSION_RE.search(input)\n    assert (match.groupdict()['version'] == version)",
-    "nl": "Check correctness of the version regexp.",
-    "original_nl": "Check correctness of the version regexp."
-  },
-  {
     "code": "def get_database_version(self):\n    try:\n        cursor = self.connection.cursor()\n        cursor.execute('SELECT VERSION()')\n        version = cursor.fetchone()\n        print('Database version : {0} '.format(version))\n    except MySQLdb.Warning as e:\n        print(((Fore.YELLOW + 'Warning {0}: {1}'.format(e.args[0], e.args[1])) + Style.RESET_ALL))\n    except MySQLdb.Error as e:\n        print(((Fore.RED + 'Error {0}: {1}'.format(e.args[0], e.args[1])) + Style.RESET_ALL))\n        if (e.args[0] == 2003):\n            print(e)\n            return False\n        else:\n            sys.exit(1)\n    finally:\n        if cursor:\n            cursor.close\n    return True",
     "nl": "Method that returns the database version.\n\n",
     "original_nl": "Method that returns the database version.\n\n:return: The version of remote database, if it can connect with her, or else return False."
@@ -3060,19 +2501,9 @@
     "original_nl": "Returns Extended Resource for service type management."
   },
   {
-    "code": "def genera_e_salva(self, nome='File.xlsx', scadenza=None, ordina_fogli=True, **kwargs):\n    scadenza = (scadenza or domani())\n    generatore = GeneratoreNomeFile('allegati/')\n    zname = generatore(self, nome)\n    self.prepara_cartelle((MEDIA_ROOT + zname))\n    workbook = xlsxwriter.Workbook((MEDIA_ROOT + zname))\n    bold = workbook.add_format({\n        'bold': True,\n    })\n    for foglio in [x for x in self.fogli]:\n        worksheet = workbook.add_worksheet(foglio.nome)\n        for (col, testo) in enumerate(foglio.intestazione):\n            worksheet.write(0, col, str(testo), bold)\n        for (riga, colonne) in enumerate(foglio.contenuto):\n            riga += 1\n            for (colonna, testo) in enumerate(colonne):\n                if isinstance(testo, datetime):\n                    testo = testo.strftime('%d/%m/%Y %H:%M')\n                if isinstance(testo, date):\n                    testo = testo.strftime('%d/%m/%Y')\n                if (testo == ', '):\n                    testo = ''\n                worksheet.write(riga, colonna, str(testo))\n    if ordina_fogli:\n        workbook.worksheets_objs.sort(key=(lambda x: x.name))\n    workbook.close()\n    self.file = zname\n    self.nome = nome\n    self.scadenza = scadenza\n    self.save()",
-    "nl": "Genera il file e lo salva su database.\n",
-    "original_nl": "Genera il file e lo salva su database.\n:param nome: Il nome del file da allegare (opzionale, default 'File.xlsx').\n:param scadenza: Scadenza del file. Domani.\n:param kwargs:\n:return:"
-  },
-  {
     "code": "@view_config(context=APIPackageFileResource, request_method='DELETE', subpath=(), permission='write')\ndef delete_package(context, request):\n    package = request.db.fetch(context.filename)\n    if (package is None):\n        return HTTPBadRequest(('Could not find %s' % context.filename))\n    request.db.delete(package)\n    return request.response",
     "nl": "Delete a package",
     "original_nl": "Delete a package"
-  },
-  {
-    "code": "def __test_parsing(self, html, etalon):\n    clear_run_data = self.__normalize_data(self.__parser.parse(html))\n    self.assertEqual(etalon, clear_run_data)\n    dirty_run_data = self.__normalize_data(self.__parser.parse(html))\n    self.assertEqual(etalon, clear_run_data)\n    self.assertEqual(etalon, dirty_run_data)",
-    "nl": "Runs the test with the specified data.",
-    "original_nl": "Runs the test with the specified data."
   },
   {
     "code": "def fernet_encrypt_psk(message, raw=False):\n    fernet = _get_fernet_context()\n    if isinstance(message, str):\n        message = message.encode('utf-8')\n    token = fernet.encrypt(message)\n    if (raw is True):\n        token = urlsafe_b64decode(token)\n    return token",
@@ -3090,11 +2521,6 @@
     "original_nl": "Starts and stops the server, mocking the actual server.start()\nChecks that the correct fallback port is used from the environment."
   },
   {
-    "code": "def setUserCol(self, value):\n    self._paramMap[self.userCol] = value\n    return self",
-    "nl": "Sets the value of :py:attr:`userCol`.",
-    "original_nl": "Sets the value of :py:attr:`userCol`."
-  },
-  {
     "code": "def __repr__(self):\n    s = '<MultiGraph: '\n    keys = sorted(self.__adjacency_list.keys())\n    for key in keys:\n        values = sorted(self.__adjacency_list[key].list())\n        s += (((('(' + repr(key)) + ': ') + ','.join(map(repr, values))) + ')')\n    return (s + '>')",
     "nl": "Returns an unique string representation of this graph.",
     "original_nl": "Returns an unique string representation of this graph."
@@ -3105,19 +2531,9 @@
     "original_nl": "Return a list of structure names the plug-in\nand its data support for the 'corpname' corpus.\n\narguments:\ncorpname -- a corpus identifier\n\nreturns:\na list of structures (e.g. ['doc', 'p'])"
   },
   {
-    "code": "def __init__(self, startThread, queue):\n    self._q = queue\n    self._hasQuit = Quit()\n\n    def work():\n        for task in iter(queue.get, _stop):\n            task()\n    startThread(work)",
-    "nl": "Create a L{ThreadWorker} with a function to start a thread and a queue\nto use to communicate with that thread.\n\n",
-    "original_nl": "Create a L{ThreadWorker} with a function to start a thread and a queue\nto use to communicate with that thread.\n\n@param startThread: a callable that takes a callable to run in another\n    thread.\n@type startThread: callable taking a 0-argument callable and returning\n    nothing.\n\n@param queue: A L{Queue} to use to give tasks to the thread created by\n    C{startThread}.\n@param queue: L{Queue}"
-  },
-  {
     "code": "def paint_houses(n, m, cost):\n\n    def get_cost(i, j):\n        if (i in cost):\n            if (j in cost[i]):\n                return cost[i][j]\n        return 0\n    A = [([0] * m) for _ in range(n)]\n    B = [([None] * m) for _ in range(n)]\n    for i in range(1, n):\n        for j in range(0, m):\n            min_k = float('inf')\n            min_partial_cost = float('inf')\n            for k in range(0, m):\n                if (k == j):\n                    continue\n                partial_cost = (A[(i - 1)][k] + get_cost(k, j))\n                if (partial_cost < min_partial_cost):\n                    min_partial_cost = partial_cost\n                    min_k = k\n            A[i][j] = min_partial_cost\n            B[i][j] = min_k\n    (min_k, min_cost) = min(enumerate([A[(n - 1)][k] for k in range(0, m)]), key=(lambda t: t[1]))\n    colors = []\n    i = (n - 1)\n    while (i >= 0):\n        colors.append(min_k)\n        min_k = B[i][min_k]\n        i -= 1\n    colors.reverse()\n    return (min_cost, colors)",
     "nl": "Paint a list of N houses and M colors, each combination has cost,\nminimize the total cost without color in row.\n\nArgs\n    n - number of houses\n    m - number of colors\n    cost - cost matrix of each combination. Format {color1: {color2: cost}}\n",
     "original_nl": "Paint a list of N houses and M colors, each combination has cost,\nminimize the total cost without color in row.\n\nArgs\n    n - number of houses\n    m - number of colors\n    cost - cost matrix of each combination. Format {color1: {color2: cost}}\n\nReturns:\n    (min_cost, colors), min_cost - the total min cost of the coloring.\n                        colors - the order of the coloring."
-  },
-  {
-    "code": "def testB(self, b, u):\n    if (not (u.find('\\\\b ') == (- 1))):\n        print(('\\\\b tag with text content in: ' + b))",
-    "nl": "\b cannot have text content.",
-    "original_nl": "\b cannot have text content."
   },
   {
     "code": "def get_function_by_ifname(ifname):\n    try:\n        dev_path = ('/sys/class/net/%s/device' % ifname)\n        dev_info = os.listdir(dev_path)\n        for dev_file in dev_info:\n            if _VIRTFN_RE.match(dev_file):\n                return (os.readlink(dev_path).strip('./'), True)\n        else:\n            return (os.readlink(dev_path).strip('./'), False)\n    except Exception:\n        LOG.error((_LE('PCI device %s not found') % ifname))\n        return (None, False)",
@@ -3143,11 +2559,6 @@
     "code": "def startSuite(name):\n    pass",
     "nl": "Deprecated in Twisted 8.0.\n\nSuites which wish to appear in reporter output should call this\nbefore running their tests.",
     "original_nl": "Deprecated in Twisted 8.0.\n\nSuites which wish to appear in reporter output should call this\nbefore running their tests."
-  },
-  {
-    "code": "def p_rexcmd_error_rex(p):\n    p[0] = p[1]\n    p[0].add_child(p[2])",
-    "nl": "rexcmd : rexcmd value",
-    "original_nl": "rexcmd : rexcmd value"
   },
   {
     "code": "def get_areas_for_party(party_id: PartyID) -> Area:\n    return Area.query.for_party_id(party_id).all()",
@@ -3215,19 +2626,9 @@
     "original_nl": "Combines coverage data and sets the list of coverage objects to report on."
   },
   {
-    "code": "def fetch_track_items(upstream_file_url, data_source):\n    track_uris = []\n    req = requests_ses.get(upstream_file_url)\n    try:\n        req.raise_for_status()\n    except requests.exceptions.HTTPError as ex:\n        logger.warning(\"Can't get gerrit reviews from %s\", upstream_file_url)\n        logger.warning(ex)\n        return track_uris\n    logger.debug('Found reviews to be tracked in %s', upstream_file_url)\n    lines = iter(req.text.split('\\n'))\n    for line in lines:\n        if ('url: ' in line):\n            dso = next(lines).split('system: ')[1].strip('\\n')\n            if (dso == data_source):\n                track_uris.append(line.split('url: ')[1].strip('\\n'))\n    return track_uris",
-    "nl": "The file format is:\n\n# Upstream contributions, bitergia will crawl this and extract the relevant information\n# system is one of Gerrit, Bugzilla, Launchpad (insert more)\n---\n-\n  url: https://review.openstack.org/169836\n  system: Gerrit",
-    "original_nl": "The file format is:\n\n# Upstream contributions, bitergia will crawl this and extract the relevant information\n# system is one of Gerrit, Bugzilla, Launchpad (insert more)\n---\n-\n  url: https://review.openstack.org/169836\n  system: Gerrit"
-  },
-  {
     "code": "def timerfd_gettime(fd):\n    if hasattr(fd, 'fileno'):\n        fd = fd.fileno()\n    assert isinstance(fd, int), 'fd must be an integer'\n    curr_val = ffi.new('struct itimerspec *')\n    ret = C.timerfd_gettime(fd, curr_val)\n    if (ret < 0):\n        err = ffi.errno\n        if (err == errno.EBADF):\n            raise ValueError('fd is not a valid file descriptor')\n        elif (err == errno.EFAULT):\n            raise InternalError('curr_val is not a valid pointer (internal/bug, let us know)')\n        elif (err == errno.EINVAL):\n            raise ValueError('fd is not a valid timerfd')\n        else:\n            raise UnknownError(err)\n    curr_val = TimerVal(timerspec=curr_val)\n    return curr_val",
     "nl": "Get the current expiry time of a timerfd\n\nArguments\n----------\n",
     "original_nl": "Get the current expiry time of a timerfd\n\nArguments\n----------\n:param int fd: File descriptor representing the timerfd\n\nReturns\n--------\n:return: The file descriptor representing the timerfd\n:rtype: int\n\nExceptions\n-----------\n:raises ValueError: Invalid value in flags\n:raises OSError: Max per process FD limit reached\n:raises OSError: Max system FD limit reached\n:raises OSError: Could not mount (internal) anonymous inode device\n:raises MemoryError: Insufficient kernel memory"
-  },
-  {
-    "code": "def insert_callback(self, command, args):\n    print('Insert callback received: ', command, args)\n    if (command == 'readonly'):\n        (target, allowed) = args\n        if (target != self.client.name):\n            return\n        allowed = literal_eval(allowed)\n        for map in self.maps:\n            map.set_readonly(allowed)\n        if allowed:\n            messagebox.showinfo('Info', 'You are now allowed to edit the maps.')\n        else:\n            messagebox.showinfo('Info', 'You are no longer allowed to edit the maps.')\n    elif (command == 'kicked'):\n        messagebox.showerror('Info', 'You were kicked from the Server.')\n        self.settings.disconnect_client()\n        return\n    elif (command == 'banned'):\n        messagebox.showerror('Info', 'You were banned from the Server.')\n        self.settings.disconnect_client()\n        return\n    elif (command == 'allowshare'):\n        if (not isinstance(args, list)):\n            args = literal_eval(args)\n        (_, name, allowed) = args\n        if (not isinstance(allowed, bool)):\n            allowed = literal_eval(allowed)\n        self.settings.update_share(name, allowed)\n        if (name != self.client.name):\n            return\n        if allowed:\n            messagebox.showinfo('Info', 'You are now allowed by the Master of the Server to share your Strategies.')\n        else:\n            messagebox.showinfo('Info', 'You are now no longer allowed by the Master of the Server to share your Strategies.')\n        return\n    elif (command == 'allowedit'):\n        (_, name, allowed) = args\n        if (not isinstance(allowed, bool)):\n            allowed = literal_eval(allowed)\n        if (name == self.client.name):\n            if allowed:\n                messagebox.showinfo('Info', 'You are now allowed by the Master of the Server to edit the Strategies you have available. These edits will be shared with the other users.')\n                for map in self.maps:\n                    map.set_readonly(False)\n            else:\n                messagebox.showinfo('Info', 'You are now no longer allowed by the Master of the Server to edit the Strategies you have available.')\n                for map in self.maps:\n                    map.set_readonly(True)\n        self.settings.update_edit(name, allowed)\n        return\n    elif (command == 'master'):\n        name = args\n        if (name == self.client.name):\n            messagebox.showinfo('Info', 'You are now the Master of the Server.')\n            self.settings.update_master()\n        else:\n            self.settings.new_master(name)\n        return\n    elif (command == 'master_login'):\n        name = args\n        self.settings._login_callback(name, 'master')\n    elif (command == 'client_login'):\n        name = args\n        self.settings._login_callback(name, 'client')\n    elif (command == 'logout'):\n        name = args\n        self.settings._logout_callback(name)\n    elif (command == 'description'):\n        (_, strategy, phase, description) = args\n        if (phase == 'None'):\n            phase = None\n        self.list.db[strategy][phase].description = description\n        if (strategy == self.list.selected_strategy):\n            self.description.delete('1.0', tk.END)\n            self.description.insert('1.0', description)\n    elif ((self.list.selected_strategy != args[0]) or (self.list.selected_phase != args[1])):\n        return\n    elif (command == 'add_item'):\n        (_, _, text, font, color) = args\n        for map in self.maps:\n            map.add_item(text, font=font, color=color)\n    elif (command == 'del_item'):\n        (_, _, text) = args\n        for map in self.maps:\n            map.canvas.delete(map.items[text][0], map.items[text][1])\n    elif (command == 'move_item'):\n        (_, _, text, x, y) = args\n        for map in self.maps:\n            (rectangle, item) = map.items[text]\n            if (map is self.in_map):\n                coords = (int(((int(x) / 768) * 385)), int(((int(y) / 768) * 385)))\n                map.canvas.coords(item, *coords)\n            else:\n                map.canvas.coords(item, int(x), int(y))\n            map.canvas.coords(rectangle, map.canvas.bbox(item))\n    else:\n        raise ValueError('Unknown command: {0} with args {1}'.format(command, args))",
-    "nl": "Callback that has numerous functions:\n- Before doing anything checks if the Client object is valid for\n  operations to be performed\n- Inserts a log entry for the command received into the\n  ServerToplevel widget if the client is a master client\n- Executes the command of the network on the Map widgets with\n  the given arguments\n  * add_item\n  * move_item\n  * del_item\n",
-    "original_nl": "Callback that has numerous functions:\n- Before doing anything checks if the Client object is valid for\n  operations to be performed\n- Inserts a log entry for the command received into the\n  ServerToplevel widget if the client is a master client\n- Executes the command of the network on the Map widgets with\n  the given arguments\n  * add_item\n  * move_item\n  * del_item\n:param command: command received from the network\n:param args: arguments to perform this command\n:return: None\n:raises: ValueError when the Client is not set or not logged in\n:raises: ValueError when the command received is unknown"
   },
   {
     "code": "def test_chunks(self):\n    q = self.queue()\n    for x in range(5):\n        q.push(str(x))\n    chunks = glob.glob(os.path.join(self.qdir, 'q*'))\n    self.assertEqual(len(chunks), ((5 / self.chunksize) + 1))\n    for x in range(5):\n        q.pop()\n    chunks = glob.glob(os.path.join(self.qdir, 'q*'))\n    self.assertEqual(len(chunks), 1)",
@@ -3250,11 +2651,6 @@
     "original_nl": "The feedforward algorithm loops over all the nodes in the hidden layer and\nadds together all the outputs from the input layer * their weights\nthe output of each node is the sigmoid function of the sum of all inputs\nwhich is then passed on to the next layer.\n:param inputs: input data\n:return: updated activation output vector"
   },
   {
-    "code": "def get_test_application():\n    return get_application_for_env('test')",
-    "nl": "\u0412\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 application \u0432 \u0442\u0435\u0441\u0442\u043e\u0432\u043e\u043c \u043e\u043a\u0440\u0443\u0436\u0435\u043d\u0438\u0438\n",
-    "original_nl": "\u0412\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 application \u0432 \u0442\u0435\u0441\u0442\u043e\u0432\u043e\u043c \u043e\u043a\u0440\u0443\u0436\u0435\u043d\u0438\u0438\n:return:"
-  },
-  {
     "code": "@command.skill_level('administrator')\n@command.completers(completers.call(corosync.get_all_paths))\ndef do_get(self, context, path):\n    for v in corosync.get_values(path):\n        print(v)",
     "nl": "Get a corosync configuration value",
     "original_nl": "Get a corosync configuration value"
@@ -3268,11 +2664,6 @@
     "code": "@property\ndef printer(self):\n    return self._printer",
     "nl": "Returns the underlying printer where logs are printed to.",
     "original_nl": "Returns the underlying printer where logs are printed to."
-  },
-  {
-    "code": "@property\ndef index(self):\n    wand = self.container.wand\n    library.MagickResetIterator(wand)\n    image = library.GetImageFromMagickWand(wand)\n    i = 0\n    while ((self.c_original_resource != image) and image):\n        image = libmagick.GetNextImageInList(image)\n        i += 1\n    assert image\n    assert (self.c_original_resource == image)\n    return i",
-    "nl": "(:class:`numbers.Integral`) The index of the single image in\nthe :attr:`container` image.",
-    "original_nl": "(:class:`numbers.Integral`) The index of the single image in\nthe :attr:`container` image."
   },
   {
     "code": "def iterate(self, debug):\n    pass",
@@ -3325,26 +2716,6 @@
     "original_nl": "Returns torrent magnet link, consisting of BTIH (BitTorrent Info Hash) URN\nanr optional other information.\n\n:param bool|list|tuple|set detailed:\n    For boolean - whether additional info (such as trackers) should be included.\n    For iterable - expected allowed parameter names:\n        tr - trackers\n        ws - webseeds"
   },
   {
-    "code": "def removeListener(self, listener, iface=None):\n    if (isinstance(listener, IItemSetChangeListener) and ((iface is None) or issubclass(iface, IItemSetChangeListener))):\n        if (listener in self.getItemSetChangeListeners()):\n            self.getItemSetChangeListeners().remove(listener)\n    if (isinstance(listener, IPropertySetChangeListener) and ((iface is None) or issubclass(iface, IPropertySetChangeListener))):\n        if (listener in self.getPropertySetChangeListeners()):\n            self.getPropertySetChangeListeners().remove(listener)",
-    "nl": "Implementation of the corresponding method in\nL{IPropertySetChangeNotifier} and L{ItemSetChangeNotifier}, override\nand implement the interface to use this.\n\n@see: L{IPropertySetChangeNotifier.removeListener}\n@see: L{ItemSetChangeNotifier.removeListener}",
-    "original_nl": "Implementation of the corresponding method in\nL{IPropertySetChangeNotifier} and L{ItemSetChangeNotifier}, override\nand implement the interface to use this.\n\n@see: L{IPropertySetChangeNotifier.removeListener}\n@see: L{ItemSetChangeNotifier.removeListener}"
-  },
-  {
-    "code": "def test_danisman_atama(self):\n    log_bucket_count = len(log_bucket.get_keys())\n    version_bucket_keys = version_bucket.get_keys()\n    self.prepare_client('/danisman_atama', username='ogrenci_isleri_1')\n    resp = self.client.post(id='RnKyAoVDT9Hc89KEZecz0kSRXRF', model='OgrenciProgram', param='ogrenci_id', wf='danisman_atama', filters={\n        'ogrenci_id': {\n            'values': ['KhFizqvCaZGtTloAZoPH1Uy98Pw'],\n            'type': 'check',\n        },\n    })\n    op = OgrenciProgram.objects.filter(ogrenci_id='RnKyAoVDT9Hc89KEZecz0kSRXRF')\n    assert (len(resp.json['forms']['form'][2]['titleMap']) == len(op))\n    resp = self.client.post(model='OgrenciProgram', form={\n        'program': 'UEGET7qn9CDj9VEj4n0nbQ7m89d',\n        'sec': 1,\n    })\n    guncel_donem = Donem.guncel_donem()\n    program = op[0]\n    donem_danisman = DonemDanisman.objects.filter(donem=guncel_donem, bolum=program.program.birim)\n    assert (len(donem_danisman) == len(resp.json['forms']['form'][2]['titleMap']))\n    resp = self.client.post(model='OgrenciProgram', form={\n        'donem_danisman': 'Js2goP48yA183oMDAN8uM5GOExM',\n        'sec': 1,\n    })\n    assert (len(log_bucket.get_keys()) == log_bucket_count)\n    yeni_versiyon_keyleri = list((set(version_bucket.get_keys()) - set(version_bucket_keys)))\n    op_versiyon_key = list(filter((lambda x: (version_bucket.get(x).data['model'] == 'ogrenci_program')), yeni_versiyon_keyleri))[0]\n    danisman_key = DonemDanisman.objects.get('Js2goP48yA183oMDAN8uM5GOExM').okutman.personel.key\n    assert (version_bucket.get(op_versiyon_key).data['data']['danisman_id'] == danisman_key)\n    ogrenci = Ogrenci.objects.get('RnKyAoVDT9Hc89KEZecz0kSRXRF')\n    assert (((ogrenci.ad + ' ') + ogrenci.soyad) in resp.json['msgbox']['msg'])",
-    "nl": "Dan\u0131\u015fman\u0131 atanamayan \u00f6\u011frenciler \u00f6\u011frenci i\u015fleri taraf\u0131ndan at\u0131l\u0131r.\nDan\u0131\u015fman atama i\u015f ak\u0131\u015f\u0131n\u0131n ilk ad\u0131m\u0131nda \u00f6\u011frenci program\u0131 se\u00e7ilir.\n\nSe\u00e7ilen \u00f6\u011frenciye ait veritaban\u0131ndan d\u00f6nen \u00f6\u011frenci program\u0131 say\u0131s\u0131 ile\nsunucudan d\u00f6nen \u00f6\u011frenci program say\u0131s\u0131n\u0131n e\u015fitli\u011fi kar\u015f\u0131la\u015ft\u0131r\u0131l\u0131p test edilir.\n\n\u0130kinci ad\u0131m\u0131nda ise atanacak dan\u0131\u015fman se\u00e7ilir.\n\nVeritaban\u0131ndan d\u00f6nen dan\u0131\u015fmanlar\u0131n say\u0131s\u0131 ile sunucudan d\u00f6nen dan\u0131\u015fmalar\u0131n say\u0131s\u0131n\u0131n\ne\u015fitli\u011fi kar\u015f\u0131la\u015ft\u0131r\u0131l\u0131p test edilir.\n\n\u00dc\u00e7\u00fcnc\u00fc ad\u0131m\u0131nda ise dan\u0131\u015fman kaydedilir.\n\nMesaj kutusunda dan\u0131\u015fman atamas\u0131 yap\u0131lan \u00f6\u011frencinin ad ve soyad bilgilerinin olup\nolmad\u0131\u011f\u0131 test edilir.",
-    "original_nl": "Dan\u0131\u015fman\u0131 atanamayan \u00f6\u011frenciler \u00f6\u011frenci i\u015fleri taraf\u0131ndan at\u0131l\u0131r.\nDan\u0131\u015fman atama i\u015f ak\u0131\u015f\u0131n\u0131n ilk ad\u0131m\u0131nda \u00f6\u011frenci program\u0131 se\u00e7ilir.\n\nSe\u00e7ilen \u00f6\u011frenciye ait veritaban\u0131ndan d\u00f6nen \u00f6\u011frenci program\u0131 say\u0131s\u0131 ile\nsunucudan d\u00f6nen \u00f6\u011frenci program say\u0131s\u0131n\u0131n e\u015fitli\u011fi kar\u015f\u0131la\u015ft\u0131r\u0131l\u0131p test edilir.\n\n\u0130kinci ad\u0131m\u0131nda ise atanacak dan\u0131\u015fman se\u00e7ilir.\n\nVeritaban\u0131ndan d\u00f6nen dan\u0131\u015fmanlar\u0131n say\u0131s\u0131 ile sunucudan d\u00f6nen dan\u0131\u015fmalar\u0131n say\u0131s\u0131n\u0131n\ne\u015fitli\u011fi kar\u015f\u0131la\u015ft\u0131r\u0131l\u0131p test edilir.\n\n\u00dc\u00e7\u00fcnc\u00fc ad\u0131m\u0131nda ise dan\u0131\u015fman kaydedilir.\n\nMesaj kutusunda dan\u0131\u015fman atamas\u0131 yap\u0131lan \u00f6\u011frencinin ad ve soyad bilgilerinin olup\nolmad\u0131\u011f\u0131 test edilir."
-  },
-  {
-    "code": "@params.setter\ndef params(self, value):\n    self._params = value",
-    "nl": "Setter for parameters of learner.\n",
-    "original_nl": "Setter for parameters of learner.\n\nParameters\n----------\nvalue : dict\n    New dictionary to assign\n\nReturns\n-------\nNothing"
-  },
-  {
-    "code": "def app_factory(global_settings, **local_settings):\n    config = Configurator()\n    config.setup_registry(settings=local_settings, root_factory=RootFactory())\n    if ('configure_zcml' in local_settings):\n        config.load_zcml(local_settings['configure_zcml'])\n    app = config.make_wsgi_app()\n    app_name = app_name_from_ini_file(global_settings['__file__'])\n    ep_group = ('%s.plugins' % app_name)\n    plugin_mgr = config.get_registered_utility(IPluginManager)\n    plugin_mgr.load_all(ep_group)\n    return app",
-    "nl": "Default factory for creating a WSGI application using the everest\nconfigurator and root factory.\n\n",
-    "original_nl": "Default factory for creating a WSGI application using the everest\nconfigurator and root factory.\n\n:param dict global_settings: Global settings extracted from an ini file.\n    Not used in this default app factory.\n:param dict local_settings: App settings extracted from an ini file."
-  },
-  {
     "code": "def uniques(self, collapse=False):\n    uniques = set()\n    for (name, view) in self:\n        for sv in view.uniques(collapse=collapse):\n            uniques.add(sv)\n    return uniques",
     "nl": "Return the set of unique BrainData objects contained by this dataset",
     "original_nl": "Return the set of unique BrainData objects contained by this dataset"
@@ -3359,6 +2730,7 @@
     "nl": "Pull down all non-local items and save them into remotes_storage.",
     "original_nl": "Pull down all non-local items and save them into remotes_storage."
   },
+  {"END_OF_MANUAL": null},
   {
     "code": "@abc.abstractmethod\ndef verify(self, query_response):\n    pass",
     "nl": "Verify whether the cache key maches a piece of service discovery\ninformation.\n\n",
