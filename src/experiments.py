@@ -107,7 +107,8 @@ def generate_experiment_folder(
         if not isinstance(seeds, list):
             seeds = [seeds]
         assert VALID_SEED not in seeds, "{} reserved for internal seed".format(
-            VALID_SEED)
+            VALID_SEED
+        )
         np.random.seed(seeds[0])
 
     train_data.reset()
@@ -197,11 +198,13 @@ def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
     paths = [code_path, nl_path]
     for input_path in paths:
         output_path = os.path.splitext(input_path)[0] + ".npy"
-        print("Encoding {} w/ {} to {}".format(
-            input_path,
-            encoder_path,
-            output_path,
-        ))
+        print(
+            "Encoding {} w/ {} to {}".format(
+                input_path,
+                encoder_path,
+                output_path,
+            )
+        )
         apply_encoder(
             input_path,
             encoder_path,
@@ -237,8 +240,9 @@ def generate_experiments(
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
         if os.path.exists(exp["output_dir"]) and not force:
-            print("Skipping {}, output folder exists".format(
-                exp["output_dir"]))
+            print(
+                "Skipping {}, output folder exists".format(exp["output_dir"])
+            )
             print("Use --force if re-run is desired")
             continue
 
@@ -256,6 +260,7 @@ def generate_experiments(
             seeds=exp.get("seeds", seed),
         )
 
+
 def run_experiments(base_dir, model, test_setting, force=False):
     experiment_folders = [
         os.path.join(base_dir, p) for p in os.listdir(base_dir)
@@ -264,16 +269,32 @@ def run_experiments(base_dir, model, test_setting, force=False):
         test_code_paths = {}
         test_nl_paths = {}
         if test_setting == "conala":
-            test_code_paths['conala'] = os.path.join(experiment_root, "test-code.npy")
-            test_nl_paths['conala'] = os.path.join(experiment_root, "test-nl.npy")
+            test_code_paths['conala'] = os.path.join(
+                experiment_root, "test-code.npy"
+            )
+            test_nl_paths['conala'] = os.path.join(
+                experiment_root, "test-nl.npy"
+            )
         elif test_setting == "github":
-            test_code_paths['github'] = os.path.join(experiment_root, "test-code-github.npy")
-            test_nl_paths['github'] = os.path.join(experiment_root, "test-nl-github.npy")
+            test_code_paths['github'] = os.path.join(
+                experiment_root, "test-code-github.npy"
+            )
+            test_nl_paths['github'] = os.path.join(
+                experiment_root, "test-nl-github.npy"
+            )
         else:
-            test_code_paths['conala'] = os.path.join(experiment_root, "test-code.npy")
-            test_nl_paths['conala'] = os.path.join(experiment_root, "test-nl.npy")
-            test_code_paths['github'] = os.path.join(experiment_root, "test-code-github.npy")
-            test_nl_paths['github'] = os.path.join(experiment_root, "test-nl-github.npy")
+            test_code_paths['conala'] = os.path.join(
+                experiment_root, "test-code.npy"
+            )
+            test_nl_paths['conala'] = os.path.join(
+                experiment_root, "test-nl.npy"
+            )
+            test_code_paths['github'] = os.path.join(
+                experiment_root, "test-code-github.npy"
+            )
+            test_nl_paths['github'] = os.path.join(
+                experiment_root, "test-nl-github.npy"
+            )
 
         valid_code_path = os.path.join(experiment_root, "valid-code.npy")
         valid_nl_path = os.path.join(experiment_root, "valid-nl.npy")
@@ -302,7 +323,9 @@ def run_experiments(base_dir, model, test_setting, force=False):
             nl_path = os.path.join(seed_folder, "train-nl.npy")
             for test_option in test_code_paths.keys():
                 for model_option in models:
-                    exp_folder = os.path.join(seed_folder, model_option+'-'+test_option)
+                    exp_folder = os.path.join(
+                        seed_folder, model_option + '-' + test_option
+                    )
                     utils.create_dir(exp_folder)
 
                     run_single_experiment(
@@ -318,6 +341,7 @@ def run_experiments(base_dir, model, test_setting, force=False):
                         model_option,
                         force=force,
                     )
+
 
 def run_single_experiment(
         folder,
@@ -381,7 +405,7 @@ def initial_experiments(output_dir):
     experiments = []
 
     # Simplest process (tokenize and lower case)
-    exp0 = dict(empty_experiment)
+    exp0 = dict(EMPTY_EXPERIMENT)
     exp0["code"] = simplest_pipeline
     exp0["nl"] = simplest_pipeline
     exp0["code_test"] = simplest_pipeline
@@ -390,7 +414,7 @@ def initial_experiments(output_dir):
     experiments.append(exp0)
 
     # Split code characters but only method name
-    exp1 = dict(empty_experiment)
+    exp1 = dict(EMPTY_EXPERIMENT)
     exp1["code"] = preprocess.sequence(
         preprocess.extract_qualified_def_name,
         preprocess.split_on_code_characters,
@@ -403,7 +427,7 @@ def initial_experiments(output_dir):
     experiments.append(exp1)
 
     # Split code characters, method name and calls
-    exp2 = dict(empty_experiment)
+    exp2 = dict(EMPTY_EXPERIMENT)
     exp2["code"] = preprocess.sequence(
         preprocess.plus(
             preprocess.extract_qualified_def_name,
@@ -419,7 +443,7 @@ def initial_experiments(output_dir):
     experiments.append(exp2)
 
     # Remove stop words and stem
-    exp3 = dict(empty_experiment)
+    exp3 = dict(EMPTY_EXPERIMENT)
     exp3["code"] = preprocess.sequence(
         preprocess.plus(
             preprocess.extract_qualified_def_name,
@@ -437,7 +461,7 @@ def initial_experiments(output_dir):
     experiments.append(exp3)
 
     # Removal of stopwords/stemming but for all tokens in code
-    exp4 = dict(empty_experiment)
+    exp4 = dict(EMPTY_EXPERIMENT)
     exp4["code"] = preprocess.sequence(
         preprocess.split_on_code_characters,
         preprocess.lower_case,
@@ -460,7 +484,7 @@ def initial_experiments(output_dir):
     )
 
     # NL: remove stopwords and stemming
-    exp5 = dict(empty_experiment)
+    exp5 = dict(EMPTY_EXPERIMENT)
     exp5["code"] = best_sequence_for_code
     exp5["nl"] = preprocess.sequence(
         preprocess.split_on_code_characters,
@@ -474,7 +498,7 @@ def initial_experiments(output_dir):
     experiments.append(exp5)
 
     # NL: take description, remove param etc.
-    exp6 = dict(empty_experiment)
+    exp6 = dict(EMPTY_EXPERIMENT)
     exp6["code"] = best_sequence_for_code
     exp6["nl"] = preprocess.sequence(
         preprocess.remove_params_and_returns,
@@ -489,7 +513,7 @@ def initial_experiments(output_dir):
     experiments.append(exp6)
 
     # NL: take first sentence in docstring
-    exp7 = dict(empty_experiment)
+    exp7 = dict(EMPTY_EXPERIMENT)
     exp7["code"] = best_sequence_for_code
     exp7["nl"] = preprocess.sequence(
         preprocess.remove_params_and_returns,
@@ -621,7 +645,8 @@ def paper_experiments(output_dir):
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="Setup and run preprocessing experiments")
+        description="Setup and run preprocessing experiments"
+    )
     subparsers = parser.add_subparsers(help="Actions")
     gen_parser = subparsers.add_parser("generate")
     gen_parser.add_argument(
@@ -663,7 +688,8 @@ def get_args():
         "-d",
         "--data",
         type=str,
-        help="Root directory with experiment subfolders generated")
+        help="Root directory with experiment subfolders generated"
+    )
     run_parser.add_argument(
         "-f",
         "--force",
