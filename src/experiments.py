@@ -44,7 +44,9 @@ EMPTY_EXPERIMENT = {
     "min_count": 5,
     "downsample_train": 10000,
     "downsample_valid": 500,
-    "seeds": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+    #"seeds": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+    # DEBUG
+    "seeds": [10, 20],
 }
 
 
@@ -229,6 +231,8 @@ def generate_experiments(
     utils.create_dir(output_dir)
 
     experiments = paper_experiments(output_dir)
+    # DEBUG
+    experiments = [experiments[0]]
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
@@ -271,6 +275,10 @@ def run_experiments(base_dir, model, test_setting, force=False):
             test_code_paths['github'] = os.path.join(experiment_root, "test-code-github.npy")
             test_nl_paths['github'] = os.path.join(experiment_root, "test-nl-github.npy")
 
+        valid_code_path = os.path.join(experiment_root, "valid-code.npy")
+        valid_nl_path = os.path.join(experiment_root, "valid-nl.npy")
+        embeddings_path = os.path.join(experiment_root, "embeddings.vec")
+        encoder_path = os.path.join(experiment_root, "encoder.pkl")
         # Models to run
         models = []
         if model == "lstm":
@@ -337,7 +345,7 @@ def run_single_experiment(
         encoder_path,
         model_option,
         print_every=1000,
-        save_every=2000,
+        save_every=50,
         num_epochs=100,
         output_folder=folder,
         valid_code_path=valid_code_path,
@@ -560,7 +568,7 @@ def paper_experiments(output_dir):
     experiments.append(code4)
 
     # NL experiments
-    l1 = dict(nl)
+    nl1 = dict(nl)
     nl1["nl"] = preprocess.sequence(
         preprocess.split_on_code_characters,
         preprocess.lower_case,

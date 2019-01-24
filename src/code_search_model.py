@@ -139,14 +139,16 @@ class DANModel(nn.Module):
         nl_vocab_size,
         emb_size,
         hidden_size,
+        dropout=0.0,
         fixed_embeddings=False,
-        num_layers=2,
+        num_layers=3,
     ):
         super().__init__()
         self.margin = margin
         self.num_layers = num_layers
         self.emb_size = emb_size
         self.hidden_size = hidden_size
+        self.dropout = dropout
         self.code_embeddings = nn.Embedding(
             code_vocab_size,
             emb_size,
@@ -165,8 +167,13 @@ class DANModel(nn.Module):
                 nn.Linear(n_in, n_out)
             )
             self.code_nn.add_module('activation-{}'.format(i),
-                nn.Tanh()
+                nn.ReLU()
             )
+            if self.dropout > 0:
+                self.code_nn.add_module('dropout-{}'.format(i),
+                    nn.Dropout(p=self.dropout)
+                )
+
         self.nl_nn = nn.Sequential()
         for i in range(self.num_layers):
             n_in = self.hidden_size if i>0 else self.emb_size
@@ -175,8 +182,12 @@ class DANModel(nn.Module):
                 nn.Linear(n_in, n_out)
             )
             self.nl_nn.add_module('activation-{}'.format(i),
-                nn.Tanh()
+                nn.ReLU()
             )
+            if self.dropout > 0:
+                self.nl_nn.add_module('dropout-{}'.format(i),
+                    nn.Dropout(p=self.dropout)
+                )
             
         if fixed_embeddings:
             self.code_embeddings.weight.requires_grad = False

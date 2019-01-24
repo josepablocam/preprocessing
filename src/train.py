@@ -24,7 +24,8 @@ MARGIN = 0.25
 NUM_EPOCHS = 100
 LR = 5e-4
 HIDDEN_SIZE = 300
-NUM_LAYERS = 2 # For DAN
+NUM_LAYERS = 3 # For DAN
+DROPOUT = 0.0 # For DAN
 
 
 def load_data(batch_size, code_path, docstring_path):
@@ -119,6 +120,7 @@ def train(
         num_epochs=NUM_EPOCHS,
         hidden_size=HIDDEN_SIZE,
         num_layers=NUM_LAYERS, # for dan
+        dropout=DROPOUT, # for dan
         fixed_embeddings=True,
         valid_code_path=None,
         valid_docstrings_path=None,
@@ -197,6 +199,7 @@ def train(
             vocab_size,
             emb_size,
             hidden_size=hidden_size,
+            dropout=dropout,
             fixed_embeddings=fixed_embeddings,
             num_layers=num_layers,
         )
