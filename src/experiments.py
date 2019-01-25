@@ -217,6 +217,29 @@ def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
         )
 
 
+def filter_experiment_subset(experiments, subset):
+    """Filter out experiment folders based on name (not path)"""
+    if subset is None:
+        return experiments
+    clean_experiments = []
+    subset = [os.path.basename(s) for s in subset]
+    for entry in experiments:
+        if isinstance(entry, str):
+            # for experiment folder name when running
+            folder = entry
+        elif isinstance(entry, dict) and "output_dir" in entry:
+            # for experiment configurations when generating data
+            folder = entry["output_dir"]
+        else:
+            raise ValueError("Unhandled entry type: {}".format(entry))
+
+        if os.path.basename(folder) not in subset:
+            print("Ignoring {}, not in {}".format(folder, subset))
+        else:
+            clean_experiments.append(entry)
+    return clean_experiments
+
+
 def generate_experiments(
         train_data_path,
         test_data_names,
@@ -224,6 +247,7 @@ def generate_experiments(
         output_dir,
         train_downsample=None,
         seed=None,
+        subset=None,
         force=False,
 ):
     """
@@ -240,6 +264,7 @@ def generate_experiments(
     utils.create_dir(output_dir)
 
     experiments = paper_experiments(output_dir)
+    experiments = filter_experiment_subset(experiments, subset)
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
@@ -277,20 +302,6 @@ def get_test_data_paths(folder):
         },
     }
     return paths
-
-
-def filter_experiment_subset(experiments, subset):
-    """Filter out experiment folders based on name (not path)"""
-    if subset is None:
-        return experiments
-    clean_experiments = []
-    subset = [os.path.basename(s) for s in subset]
-    for folder in experiments:
-        if os.path.basename(folder) not in subset:
-            print("Ignoring {}, not in {}".format(folder, subset))
-        else:
-            clean_experiments.append(folder)
-    return clean_experiments
 
 
 def run_experiments(
@@ -722,6 +733,12 @@ def get_args():
         action="store_true",
         help="Force generation of data, otherwise if folder exists skips",
     )
+    gen_parser.add_argument(
+        "--subset",
+        type=str,
+        nargs="+",
+        help="Subset of experiment folders to generate (name, not full path)",
+    )
     gen_parser.set_defaults(which="generate")
 
     run_parser = subparsers.add_parser("run")
@@ -771,6 +788,7 @@ def main():
             args.output,
             train_downsample=args.downsample,
             seed=args.seed,
+            subset=args.subset,
             force=args.force,
         )
     elif args.which == "run":
