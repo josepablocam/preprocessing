@@ -73,7 +73,7 @@ def evaluate_with_known_answer(
     ans_locs = location_of_correct(sim_mat)
 
     summary = {}
-    mr = np.mean(ans_locs)
+    mr = np.mean(ans_locs + 1)
     mrr = get_mrr(ans_locs)
     summary["mrr"] = mrr
 

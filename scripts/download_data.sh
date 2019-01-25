@@ -81,3 +81,8 @@ python -m src.conala \
 python -m src.github \
   --input "${GITHUB_DIR}/train_original_function.json" \
   --output "${GITHUB_DIR}/dataset.pkl"
+
+python -m src.github \
+  --input "${GITHUB_DIR}/sampled_test_data.json" \
+  --output "${GITHUB_DIR}/test-dataset.pkl" \
+  --manual_test
