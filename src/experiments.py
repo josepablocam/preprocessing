@@ -308,6 +308,18 @@ def get_test_data_paths(folder):
 def run_experiments(
         base_dir, model_option, test_option, subset=None, force=False
 ):
+    # Models to run
+    models = []
+    if model_option == "lstm":
+        models.append("lstm")
+    elif model_option == "dan":
+        models.append("dan")
+    elif model_option == "all":
+        models.append("lstm")
+        models.append("dan")
+    else:
+        raise Exception("Uknown model option: {}".format(model_option))
+
     experiment_folders = [
         os.path.join(base_dir, p) for p in os.listdir(base_dir)
     ]
@@ -323,6 +335,7 @@ def run_experiments(
         encoder_path = os.path.join(experiment_root, "encoder.pkl")
         test_paths = get_test_data_paths(experiment_root)
 
+        # path to test depends on the experiment folder
         test_paths = {
             k: v
             for k, v in test_paths.items()
@@ -331,18 +344,6 @@ def run_experiments(
 
         if len(test_paths) == 0:
             raise Exception("Unknown test option: {}".format(test_option))
-
-        # Models to run
-        models = []
-        if model_option == "lstm":
-            models.append("lstm")
-        elif model_option == "dan":
-            models.append("dan")
-        elif model_option == "all":
-            models.append("lstm")
-            models.append("dan")
-        else:
-            raise Exception("Uknown model option: {}".format(model_option))
 
         # each seed produces a new subfolder, where we train using
         # a new sample of the training data
