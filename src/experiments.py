@@ -279,10 +279,30 @@ def get_test_data_paths(folder):
     return paths
 
 
-def run_experiments(base_dir, model_option, test_option, force=False):
+def filter_experiment_subset(experiments, subset):
+    """Filter out experiment folders based on name (not path)"""
+    if subset is None:
+        return experiments
+    clean_experiments = []
+    subset = [os.path.basename(s) for s in subset]
+    for folder in experiments:
+        if os.path.basename(folder) not in subset:
+            print("Ignoring {}, not in {}".format(folder, subset))
+        else:
+            clean_experiments.append(folder)
+    return clean_experiments
+
+
+def run_experiments(
+        base_dir, model_option, test_option, subset=None, force=False
+):
     experiment_folders = [
         os.path.join(base_dir, p) for p in os.listdir(base_dir)
     ]
+    experiment_folders = filter_experiment_subset(
+        experiment_folders,
+        subset,
+    )
     for experiment_root in experiment_folders:
         # shared across seeds
         valid_code_path = os.path.join(experiment_root, "valid-code.npy")
@@ -731,6 +751,12 @@ def get_args():
         default="all",
         choices=["github", "conala", "all"],
     )
+    run_parser.add_argument(
+        "--subset",
+        type=str,
+        nargs="+",
+        help="Subset of experiment folders to run (name, not full path)",
+    )
     run_parser.set_defaults(which="run")
     return parser.parse_args()
 
@@ -748,7 +774,13 @@ def main():
             force=args.force,
         )
     elif args.which == "run":
-        run_experiments(args.data, args.model, args.test, force=args.force)
+        run_experiments(
+            args.data,
+            args.model,
+            args.test,
+            subset=args.subset,
+            force=args.force,
+        )
     else:
         raise ValueError("Unknown action: {}".format(args.which))
 
