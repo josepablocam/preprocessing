@@ -721,14 +721,14 @@ def get_args():
         "--model",
         type=str,
         help="Model you want to run experiment with, can be lstm, dan, all",
-        default="both",
+        default="all",
         choices=["lstm", "dan", "all"],
     )
     run_parser.add_argument(
         "--test",
         type=str,
         help="Test setting you want to run on. Can be github, conala, all",
-        default="conala",
+        default="all",
         choices=["github", "conala", "all"],
     )
     run_parser.set_defaults(which="run")
