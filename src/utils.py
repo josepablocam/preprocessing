@@ -1,6 +1,8 @@
 import os
 import sys
 import torch
+import numpy as np
+import scipy.stats
 
 
 def create_dir(dir_path):
@@ -35,3 +37,11 @@ def negate_gradient(_optim):
 
 def get_trainable_params(obj):
     return [p for p in obj.parameters() if p.requires_grad]
+
+
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0 * np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n-1)
+    return [m, h]
