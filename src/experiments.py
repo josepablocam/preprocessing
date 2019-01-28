@@ -411,7 +411,7 @@ def run_single_experiment(
             encoder_path,
             model_option,
             print_every=1000,
-            save_every=50,
+            save_every=100,
             num_epochs=100,
             output_folder=folder,
             valid_code_path=valid_code_path,

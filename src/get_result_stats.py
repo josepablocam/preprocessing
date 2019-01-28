@@ -3,6 +3,7 @@ from . import utils
 import os
 import glob
 import json
+import argparse
 
 
 def get_args():
@@ -15,6 +16,8 @@ def get_args():
         type=str,
         help="Root directory of experiments"
     )
+    return parser.parse_args()
+
 
 def main():
     args = get_args()
@@ -40,7 +43,7 @@ def main():
         for seed_folder in experiment_subfolders:
             # Read results
             for model in models:
-                with open(os.path.join(seed_folder, model, 'result.json'),'r') as f:
+                with open(os.path.join(seed_folder, model, 'results.json'),'r') as f:
                     data = json.load(f)
                     for data_entry in data:
                         for metric in metrics:
@@ -58,6 +61,7 @@ def main():
         results_path = os.path.join(setting_folder, "stats.json")
         with open(results_path, "w") as fout:
             json.dump(results, fout)
+        print('Finish compute for ' + setting_folder)
 
 
 if __name__ == "__main__":
