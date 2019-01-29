@@ -44,12 +44,11 @@ EMPTY_EXPERIMENT = {
     "min_count": 5,
     "downsample_train": 10000,
     "downsample_valid": 500,
-    # "seeds": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-    "seeds": [10, 20, 30, 40, 50],
+    "seeds": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
 }
 
 
-def produce_embeddings(train_data, min_vocab_count, dim, output_dir):
+def produce_embeddings(train_data, min_vocab_count, dim, output_dir, force=False):
     """
     Builds embeddings using fastText
     """
@@ -72,7 +71,10 @@ def produce_embeddings(train_data, min_vocab_count, dim, output_dir):
     # concatenate code and nl into single file
     embeddings_raw_path = os.path.join(output_dir, "embeddings")
     embeddings_path = embeddings_raw_path + ".vec"
-    run_fasttext(combined_path, min_vocab_count, dim, embeddings_raw_path)
+    if os.path.exists(embeddings_path) and not force:
+        print("Skipping build embeddings, exist at: {}".format(embeddings_path))
+    else:
+        run_fasttext(combined_path, min_vocab_count, dim, embeddings_raw_path)
     return embeddings_path
 
 
@@ -90,6 +92,7 @@ def generate_experiment_folder(
         downsample_train=None,
         downsample_valid=None,
         seeds=None,
+        force=False,
 ):
     """
     Produces experiment subfolder with all necessary data.
@@ -188,13 +191,16 @@ def generate_experiment_folder(
 
         train_code_path = os.path.join(seed_dir, "train-code.txt")
         train_nl_path = os.path.join(seed_dir, "train-nl.txt")
-        encode_dataset(
-            train_downsampled,
-            train_code_path,
-            train_nl_path,
-            encoder_path,
-            target_len,
-        )
+        if os.path.exists(train_code_path) and not force:
+            print("Data already generated, skipping output: {}".format(seed_dir))
+        else:
+            encode_dataset(
+                train_downsampled,
+                train_code_path,
+                train_nl_path,
+                encoder_path,
+                target_len,
+            )
 
 
 def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
@@ -269,12 +275,13 @@ def generate_experiments(
 
     for exp in experiments:
         print("Generating experiment: {}".format(exp["output_dir"]))
-        if os.path.exists(exp["output_dir"]) and not force:
-            print(
-                "Skipping {}, output folder exists".format(exp["output_dir"])
-            )
-            print("Use --force if re-run is desired")
-            continue
+        # TODO: we'll do forcing further down, at the seed level
+        # if os.path.exists(exp["output_dir"]) and not force:
+        #     print(
+        #         "Skipping {}, output folder exists".format(exp["output_dir"])
+        #     )
+        #     print("Use --force if re-run is desired")
+        #     continue
 
         generate_experiment_folder(
             train_data,
@@ -288,6 +295,7 @@ def generate_experiments(
             downsample_train=exp["downsample_train"],
             downsample_valid=exp["downsample_valid"],
             seeds=exp.get("seeds", seed),
+            force=force,
         )
 
 
