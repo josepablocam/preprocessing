@@ -1,17 +1,46 @@
-import sys
-from . import utils
-import os
-import glob
-import json
 import argparse
+from collections import defaultdict
+import glob
+import os
+import json
+import sys
+
+import pandas as pd
+
+from . import utils
+
+RESULTS_FILE = "results.json"
+STATS_FILE = "stats.json"
 
 
 def get_args():
     parser = argparse.ArgumentParser(
         description="Get the result statistics of the preprocessing experiments"
     )
-    parser.add_argument(
-        "-d", "--data", type=str, help="Root directory of experiments")
+    subparsers = parser.add_subparsers(help="Actions")
+    compute_parser = subparsers.add_parser("compute")
+    compute_parser.add_argument(
+        "-d",
+        "--data",
+        type=str,
+        help="Root directory of experiments",
+    )
+    compute_parser.set_defaults(which="compute")
+
+    table_parser = subparsers.add_parser("latex")
+    table_parser.add_argument(
+        "-d",
+        "--data",
+        type=str,
+        help="Root directory of experiments with stats.json computed already",
+    )
+    table_parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        help="Path to save down latex of tables",
+    )
+    table_parser.set_defaults(which="latex")
     return parser.parse_args()
 
 
@@ -38,9 +67,8 @@ def compute_stats(root_folder):
         for seed_folder in experiment_subfolders:
             # Read results
             for model in models:
-                with open(
-                        os.path.join(seed_folder, model, 'results.json'),
-                        'r') as f:
+                with open(os.path.join(seed_folder, model, RESULTS_FILE),
+                          'r') as f:
                     data = json.load(f)
                     for data_entry in data:
                         for metric in metrics:
@@ -60,18 +88,77 @@ def compute_stats(root_folder):
                             confidence=confidence)
 
         # Store results under setting root folder
-        results_path = os.path.join(setting_folder, "stats.json")
+        results_path = os.path.join(setting_folder, STATS_FILE)
         with open(results_path, "w") as fout:
             json.dump(results, fout)
         print('Finish compute for ' + setting_folder)
 
+
+def build_tables(all_stats):
+    table_data = defaultdict(lambda: [])
+    for folder_name, model_stats in all_stats.items():
+        for model_name, dataset_stats in model_stats.items():
+            if not isinstance(dataset_stats, dict):
+                print("Skipping field: {}".format(dataset_stats))
+                continue
+            for dataset, values in dataset_stats.items():
+                row = {
+                    value_name: "{:.2f} ({:.2f})".format(v, ci)
+                    for value_name, (v, ci) in values.items()
+                }
+                row["pipeline"] = folder_name
+                table_data[(model_name, dataset)].append(row)
+    dfs = {k: pd.DataFrame(vs) for k, vs in table_data.items()}
+    # sort by pipeline name and order of columns
+    cols = ["pipeline", "mrr", "success@1", "success@5", "success@10"]
+    dfs = {k: df.sort_values("pipeline")[cols] for k, df in dfs.items()}
+    return dfs
+
+
+def to_latex(dfs):
+    tables = []
+    for (model, dataset), df in dfs.items():
+        table_str = """
+        \\begin{{table}}
+        \\caption{{Results for model {} on dataset {}}}
+        {}
+        """.format(model, dataset, df.to_latex())
+        tables.append(table_str)
+
+    document = """
+    \\documentclass{{article}}
+    \\usepackage{{booktabs}}
+    \\begin{{document}}
+    {}
+    \\end{{document}}\n
+    """.format("\n".join(tables))
+    return document
+
+
+def build_latex_doc(root_folder, output):
+    experiment_folders = get_experiment_folders(root_folder)
+    data = {}
+    for folder in experiment_folders:
+        stats_path = os.path.join(folder, STATS_FILE)
+        with open(stats_path, "r") as fin:
+            stats = json.load(fin)
+            data[os.path.basename(folder)] = stats
+    dfs = build_tables(data)
+    doc = to_latex(dfs)
+    with open(output, "w") as fout:
+        fout.write(doc)
 
 
 def main():
     args = get_args()
     # For each exp settings
     root_folder = args.data
-    compute_stats(root_folder)
+    if args.which == "compute":
+        compute_stats(root_folder)
+    elif args.which == "latex":
+        build_latex_doc(root_folder, args.output)
+    else:
+        raise Exception("Unknown action")
 
 
 if __name__ == "__main__":
