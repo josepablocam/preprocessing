@@ -714,6 +714,24 @@ def paper_experiments(output_dir):
     nl5["output_dir"] = os.path.join(output_dir, "nl-5")
     experiments.append(nl5)
 
+    nl6 = dict(nl)
+    nl6["nl"] = preprocess.sequence(
+        nl1["nl"],
+        preprocess.remove_english_stopwords,
+    )
+    nl6["nl_test"] = nl6["nl"]
+    nl6["output_dir"] = os.path.join(output_dir, "nl-6")
+    experiments.append(nl6)
+
+    nl7 = dict(nl)
+    nl7["nl"] = preprocess.sequence(
+        nl6["nl"],
+        preprocess.stem_english_words,
+    )
+    nl7["nl_test"] = nl7["nl"]
+    nl7["output_dir"] = os.path.join(output_dir, "nl-7")
+    experiments.append(nl7)
+
     return experiments
 
 
