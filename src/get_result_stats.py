@@ -123,7 +123,7 @@ def to_latex(dfs):
         \\caption{{Results for model {} on dataset {}}}
         {}
         \\end{{table}}
-        """.format(model, dataset, df.to_latex())
+        """.format(model, dataset, df.to_latex(index=False))
         tables.append(table_str)
 
     document = """
