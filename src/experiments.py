@@ -608,6 +608,22 @@ def paper_experiments(output_dir):
     nl["code"] = base_code_pipeline
     nl["code_test"] = nl["code"]
 
+    size = dict(EMPTY_EXPERIMENT)
+    size["code"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+    )
+    size["code_test"] = size["code"]
+    size["nl"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+
+    )
+    size["nl_test"] = size["nl"]
+
+
     # Code experiments
     code1 = dict(code)
     code1["code"] = preprocess.sequence(
@@ -732,6 +748,28 @@ def paper_experiments(output_dir):
     nl7["output_dir"] = os.path.join(output_dir, "nl-7")
     experiments.append(nl7)
 
+
+    # vocab size experiments
+    size1 = dict(size)
+    size1["min_count"] = 1
+    size1["output_dir"] = os.path.join(output_dir, "size-1")
+    experiments.append(size1)
+
+    # Note that min_count=5 we already have
+    size2 = dict(size)
+    size2["min_count"] = 10
+    size2["output_dir"] = os.path.join(output_dir, "size-2")
+    experiments.append(size2)
+
+    size3 = dict(size)
+    size3["min_count"] = 15
+    size3["output_dir"] = os.path.join(output_dir, "size-3")
+    experiments.append(size3)
+
+    size4 = dict(size)
+    size4["min_count"] = 20
+    size4["output_dir"] = os.path.join(output_dir, "size-4")
+    experiments.append(size4)
     return experiments
 
 
