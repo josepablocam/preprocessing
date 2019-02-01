@@ -4,23 +4,26 @@ from sklearn.metrics.pairwise import cosine_similarity
 from .evaluation import location_of_correct, get_mrr, get_fraction_correct_at
 
 
-def load_evaluation_data(code_path, queries_path):
+def load_evaluation_data(code_path, queries_path, train_code_path):
     code = np.load(code_path)
     queries = np.load(queries_path)
-    return code, queries
+    train_code = np.load(train_code_path)
+    return code, queries, train_code
 
 
-def eval_traditional(queries, code, args):
+def eval_traditional(queries, code, train_code, args):
     '''
     queries and code are both np matrix (n,max_len_query), (n,max_len_code)
     '''
     # Get vocab size, padding idx
-    vocab_size = max(np.max(queries), np.max(code)) + 1
+    vocab_size = max(np.max(queries), np.max(code), np.max(train_code)) + 1
     padding_idx = code[0][-1]
     n = code.shape[0]
+    m = train_code.shape[0]
 
     count_matrix_code = np.zeros((n, vocab_size))
     count_matrix_queries = np.zeros((n, vocab_size))
+    count_matrix_train_code = np.zeros((m, vocab_size))
     for i in range(n):
         for idx in code[i]:
             if idx != padding_idx:
@@ -28,10 +31,15 @@ def eval_traditional(queries, code, args):
         for idx in queries[i]:
             if idx != padding_idx:
                 count_matrix_queries[i][idx] += 1
+    for i in range(m):
+        for idx in train_code[i]:
+            if idx != padding_idx:
+                count_matrix_train_code[i][idx] += 1
 
-    # Compute idf using code
-    idf = np.count_nonzero(count_matrix_code, 0)
-    idf[np.nonzero(idf)] = np.log(np.true_divide(n, idf[np.nonzero(idf)])) + 1
+    # Compute idf using train code
+    idf = np.count_nonzero(count_matrix_train_code, 0)
+    idf = np.log(np.true_divide(m - idf + 0.5, idf + 0.5))
+    #idf[np.nonzero(idf)] = np.log(np.true_divide(n, idf[np.nonzero(idf)])) + 1
 
     # Compute tf
     tf_code = np.true_divide(
@@ -106,6 +114,12 @@ def get_args():
         help="Path to saved queries dataset (must be aligned with code)",
     )
     parser.add_argument(
+        "-tc",
+        "--train_code_path",
+        type=str,
+        help="Path to training code corpus, use to compute idf",
+    )
+    parser.add_argument(
         "-k",
         "--k",
         type=float,
@@ -126,12 +140,13 @@ def get_args():
 def main():
     args = get_args()
 
-    code, queries = load_evaluation_data(
+    code, queries, train_code = load_evaluation_data(
         args.code_path,
         args.queries_path,
+        args.train_code_path,
     )
 
-    summary = eval_traditional(queries, code, args)
+    summary = eval_traditional(queries, code, train_code, args)
 
 
 if __name__ == "__main__":
