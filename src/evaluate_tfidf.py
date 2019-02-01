@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from .evaluation import location_of_correct, get_mrr, get_fraction_correct_at
+import json
 
 
 def load_evaluation_data(code_path, queries_path, train_code_path):
@@ -75,7 +76,7 @@ def eval_traditional(queries, code, train_code, args):
     mrr = get_mrr(ans_locs)
     summary["mrr"] = mrr
 
-    cutoffs = [10]
+    cutoffs = [1,5,10]
     fracs = []
 
     for c in cutoffs:
@@ -133,6 +134,12 @@ def get_args():
         default=0.75,
         help="Parameter for bm25",
     )
+    parser.add_argument(
+        "-o",
+        "--out_file",
+        type=str,
+        help="Output file name",
+    )
     args = parser.parse_args()
     return args
 
@@ -147,6 +154,8 @@ def main():
     )
 
     summary = eval_traditional(queries, code, train_code, args)
+    with open(args.out_file, 'w') as fout:
+        json.dump(summary, fout)
 
 
 if __name__ == "__main__":

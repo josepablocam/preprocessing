@@ -8,8 +8,10 @@ cd ..
 #-l models/lstm_fix_new_wass
 
 python -m src.evaluate_tfidf \
--c new-data/test/code.npy \
--q new-data/test/nl.npy \
--m tfidf \
-#-k 1 \
-#-b 0.2
+-c experiment_pipelines/nl-3/test-code-github.npy \
+-q experiment_pipelines/nl-3/test-nl-github.npy \
+-tc experiment_pipelines/nl-3/seed-10/train-code.npy \
+-m bm25 \
+-o bm25-github.json \
+-k 1 \
+-b 0.2
