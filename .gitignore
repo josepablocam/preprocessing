@@ -6,3 +6,4 @@ experiment_pipelines/
 init_exps/
 bm25-*.json
 tfidf*.json
+table.txt
