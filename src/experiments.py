@@ -28,6 +28,8 @@ DIMENSION = 100
 # validation seed
 VALID_SEED = 123123
 
+NUM_EPOCHS = {"full": 10}
+
 # Test data is always modified with the same pipeline
 TEST_PIPELINE = preprocess.sequence(
     preprocess.split_on_code_characters,
@@ -376,6 +378,10 @@ def run_experiments(base_dir,
                 # on chosen test datasets
                 exp_folder = os.path.join(seed_folder, model_option)
                 utils.create_dir(exp_folder)
+                num_epochs = NUM_EPOCHS.get(
+                    os.path.basename(experiment_root),
+                    100,
+                )
                 run_single_experiment(
                     exp_folder,
                     code_path,
@@ -387,6 +393,7 @@ def run_experiments(base_dir,
                     encoder_path,
                     model_option,
                     force=force,
+                    num_epochs=num_epochs,
                 )
 
 
@@ -411,6 +418,7 @@ def run_single_experiment(
         encoder_path,
         model_option,
         force=False,
+        num_epochs=100,
 ):
 
     if get_trained_model_path(folder) is not None and not force:
@@ -425,7 +433,7 @@ def run_single_experiment(
             model_option,
             print_every=1000,
             save_every=100,
-            num_epochs=100,
+            num_epochs=num_epochs,
             output_folder=folder,
             valid_code_path=valid_code_path,
             valid_docstrings_path=valid_nl_path,
