@@ -4,3 +4,5 @@ test.py
 experiment_pipelines/
 *.pyc
 init_exps/
+bm25-*.json
+tfidf*.json
