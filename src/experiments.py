@@ -798,6 +798,22 @@ def paper_experiments(output_dir):
     size4["output_dir"] = os.path.join(output_dir, "size-4")
     experiments.append(size4)
 
+    # some large min frequency experiments to observe performance degradation
+    size5 = dict(size)
+    size5["min_count"] = 100
+    size5["output_dir"] = os.path.join(output_dir, "size-5")
+    experiments.append(size5)
+
+    size6 = dict(size)
+    size6["min_count"] = 1000
+    size6["output_dir"] = os.path.join(output_dir, "size-6")
+    experiments.append(size6)
+
+    size7 = dict(size)
+    size7["min_count"] = 10000
+    size7["output_dir"] = os.path.join(output_dir, "size-7")
+    experiments.append(size7)
+
     full = dict(full_base)
     full["output_dir"] = os.path.join(output_dir, "full")
     experiments.append(full)
