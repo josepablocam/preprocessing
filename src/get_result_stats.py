@@ -40,6 +40,13 @@ def get_args():
         type=str,
         help="Path to save down latex of tables",
     )
+    table_parser.add_argument(
+        "-s",
+        "--subset",
+        type=str,
+        nargs="+",
+        help="Subset of experiment folders to use",
+    )
     table_parser.set_defaults(which="latex")
     return parser.parse_args()
 
@@ -136,10 +143,14 @@ def to_latex(dfs):
     return document
 
 
-def build_latex_doc(root_folder, output):
+def build_latex_doc(root_folder, output, subset=None):
     experiment_folders = get_experiment_folders(root_folder)
     data = {}
     for folder in experiment_folders:
+        if folder is not None and os.path.basename(folder) not in subset:
+            print("Skipping {}, not in {}".format(folder, subset))
+            continue
+
         stats_path = os.path.join(folder, STATS_FILE)
         with open(stats_path, "r") as fin:
             stats = json.load(fin)
@@ -157,7 +168,7 @@ def main():
     if args.which == "compute":
         compute_stats(root_folder)
     elif args.which == "latex":
-        build_latex_doc(root_folder, args.output)
+        build_latex_doc(root_folder, args.output, args.subset)
     else:
         raise Exception("Unknown action")
 
