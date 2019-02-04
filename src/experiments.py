@@ -28,6 +28,8 @@ DIMENSION = 100
 # validation seed
 VALID_SEED = 123123
 
+NUM_EPOCHS = {"full": 10}
+
 # Test data is always modified with the same pipeline
 TEST_PIPELINE = preprocess.sequence(
     preprocess.split_on_code_characters,
@@ -48,7 +50,11 @@ EMPTY_EXPERIMENT = {
 }
 
 
-def produce_embeddings(train_data, min_vocab_count, dim, output_dir, force=False):
+def produce_embeddings(train_data,
+                       min_vocab_count,
+                       dim,
+                       output_dir,
+                       force=False):
     """
     Builds embeddings using fastText
     """
@@ -72,7 +78,8 @@ def produce_embeddings(train_data, min_vocab_count, dim, output_dir, force=False
     embeddings_raw_path = os.path.join(output_dir, "embeddings")
     embeddings_path = embeddings_raw_path + ".vec"
     if os.path.exists(embeddings_path) and not force:
-        print("Skipping build embeddings, exist at: {}".format(embeddings_path))
+        print(
+            "Skipping build embeddings, exist at: {}".format(embeddings_path))
     else:
         run_fasttext(combined_path, min_vocab_count, dim, embeddings_raw_path)
     return embeddings_path
@@ -109,8 +116,7 @@ def generate_experiment_folder(
         if not isinstance(seeds, list):
             seeds = [seeds]
         assert VALID_SEED not in seeds, "{} reserved for internal seed".format(
-            VALID_SEED
-        )
+            VALID_SEED)
         np.random.seed(seeds[0])
 
     train_data.reset()
@@ -142,9 +148,8 @@ def generate_experiment_folder(
 
     # Test data: shared across all seeds
     for name, ds in test_data_dict.items():
-        test_code_path = os.path.join(
-            output_dir, "test-code-{}.txt".format(name)
-        )
+        test_code_path = os.path.join(output_dir,
+                                      "test-code-{}.txt".format(name))
         test_nl_path = os.path.join(output_dir, "test-nl-{}.txt".format(name))
         encode_dataset(
             ds,
@@ -184,15 +189,19 @@ def generate_experiment_folder(
             seed_dir = os.path.join(output_dir, "seed-{}".format(train_seed))
             os.makedirs(seed_dir, exist_ok=True)
 
-        train_downsampled = train_data.downsample(
-            downsample_train,
-            seed=train_seed,
-        )
+        if downsample_train is not None:
+            train_downsampled = train_data.downsample(
+                downsample_train,
+                seed=train_seed,
+            )
+        else:
+            train_downsampled = train_data
 
         train_code_path = os.path.join(seed_dir, "train-code.txt")
         train_nl_path = os.path.join(seed_dir, "train-nl.txt")
         if os.path.exists(train_code_path) and not force:
-            print("Data already generated, skipping output: {}".format(seed_dir))
+            print(
+                "Data already generated, skipping output: {}".format(seed_dir))
         else:
             encode_dataset(
                 train_downsampled,
@@ -208,13 +217,11 @@ def encode_dataset(ds, code_path, nl_path, encoder_path, target_len):
     paths = [code_path, nl_path]
     for input_path in paths:
         output_path = os.path.splitext(input_path)[0] + ".npy"
-        print(
-            "Encoding {} w/ {} to {}".format(
-                input_path,
-                encoder_path,
-                output_path,
-            )
-        )
+        print("Encoding {} w/ {} to {}".format(
+            input_path,
+            encoder_path,
+            output_path,
+        ))
         apply_encoder(
             input_path,
             encoder_path,
@@ -313,9 +320,11 @@ def get_test_data_paths(folder):
     return paths
 
 
-def run_experiments(
-        base_dir, model_option, test_option, subset=None, force=False
-):
+def run_experiments(base_dir,
+                    model_option,
+                    test_option,
+                    subset=None,
+                    force=False):
     # Models to run
     models = []
     if model_option == "lstm":
@@ -357,10 +366,8 @@ def run_experiments(
         # a new sample of the training data
         experiment_subfolders = glob.glob(experiment_root + "/seed*")
         if len(experiment_subfolders) == 0:
-            print(
-                "No seed folders used, data must be at: {}".
-                format(experiment_root)
-            )
+            print("No seed folders used, data must be at: {}".format(
+                experiment_root))
             experiment_subfolders = [experiment_root]
 
         for seed_folder in experiment_subfolders:
@@ -371,6 +378,10 @@ def run_experiments(
                 # on chosen test datasets
                 exp_folder = os.path.join(seed_folder, model_option)
                 utils.create_dir(exp_folder)
+                num_epochs = NUM_EPOCHS.get(
+                    os.path.basename(experiment_root),
+                    100,
+                )
                 run_single_experiment(
                     exp_folder,
                     code_path,
@@ -382,6 +393,7 @@ def run_experiments(
                     encoder_path,
                     model_option,
                     force=force,
+                    num_epochs=num_epochs,
                 )
 
 
@@ -406,6 +418,7 @@ def run_single_experiment(
         encoder_path,
         model_option,
         force=False,
+        num_epochs=100,
 ):
 
     if get_trained_model_path(folder) is not None and not force:
@@ -420,7 +433,7 @@ def run_single_experiment(
             model_option,
             print_every=1000,
             save_every=100,
-            num_epochs=100,
+            num_epochs=num_epochs,
             output_folder=folder,
             valid_code_path=valid_code_path,
             valid_docstrings_path=valid_nl_path,
@@ -608,6 +621,38 @@ def paper_experiments(output_dir):
     nl["code"] = base_code_pipeline
     nl["code_test"] = nl["code"]
 
+    size = dict(EMPTY_EXPERIMENT)
+    size["code"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+    )
+    size["code_test"] = size["code"]
+    size["nl"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+    )
+    size["nl_test"] = size["nl"]
+
+    full_base = dict(EMPTY_EXPERIMENT)
+    full_base["code"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+    )
+    full_base["code_test"] = full_base["code"]
+    full_base["nl"] = preprocess.sequence(
+        preprocess.split_on_code_characters,
+        preprocess.lower_case,
+        preprocess.remove_english_stopwords,
+    )
+    full_base["nl_test"] = full_base["nl"]
+    full_base["min_count"] = 10
+    full_base["downsample_train"] = None
+    full_base["downsample_valid"] = 500
+    full_base["seeds"] = [10]
+
     # Code experiments
     code1 = dict(code)
     code1["code"] = preprocess.sequence(
@@ -663,7 +708,6 @@ def paper_experiments(output_dir):
     code6["code_test"] = code6["code"]
     code6["output_dir"] = os.path.join(output_dir, "code-6")
     experiments.append(code6)
-
 
     # NL experiments
     nl1 = dict(nl)
@@ -732,13 +776,37 @@ def paper_experiments(output_dir):
     nl7["output_dir"] = os.path.join(output_dir, "nl-7")
     experiments.append(nl7)
 
+    # vocab size experiments
+    size1 = dict(size)
+    size1["min_count"] = 1
+    size1["output_dir"] = os.path.join(output_dir, "size-1")
+    experiments.append(size1)
+
+    # Note that min_count=5 we already have
+    size2 = dict(size)
+    size2["min_count"] = 10
+    size2["output_dir"] = os.path.join(output_dir, "size-2")
+    experiments.append(size2)
+
+    size3 = dict(size)
+    size3["min_count"] = 15
+    size3["output_dir"] = os.path.join(output_dir, "size-3")
+    experiments.append(size3)
+
+    size4 = dict(size)
+    size4["min_count"] = 20
+    size4["output_dir"] = os.path.join(output_dir, "size-4")
+    experiments.append(size4)
+
+    full = dict(full_base)
+    full["output_dir"] = os.path.join(output_dir, "full")
+    experiments.append(full)
     return experiments
 
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="Setup and run preprocessing experiments"
-    )
+        description="Setup and run preprocessing experiments")
     subparsers = parser.add_subparsers(help="Actions")
     gen_parser = subparsers.add_parser("generate")
     gen_parser.add_argument(
@@ -793,8 +861,7 @@ def get_args():
         "-d",
         "--data",
         type=str,
-        help="Root directory with experiment subfolders generated"
-    )
+        help="Root directory with experiment subfolders generated")
     run_parser.add_argument(
         "-f",
         "--force",

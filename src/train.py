@@ -262,6 +262,15 @@ def train(
                 )
                 best_valid_loss = loss
                 best_valid_model = copy.deepcopy(sim_model)
+                # make sure to log it each time, just in case
+                log_models(
+                    {
+                        "sim_model": best_valid_model
+                    },
+                    model_folder,
+                    "best",
+                    time_seconds=None,
+                )
 
         if epoch % save_every == 0:
             current_time = datetime.datetime.now()
