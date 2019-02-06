@@ -320,11 +320,14 @@ def get_test_data_paths(folder):
     return paths
 
 
-def run_experiments(base_dir,
-                    model_option,
-                    test_option,
-                    subset=None,
-                    force=False):
+def run_experiments(
+        base_dir,
+        model_option,
+        test_option,
+        tune=False,
+        subset=None,
+        force=False,
+):
     # Models to run
     models = []
     if model_option == "lstm":
@@ -392,6 +395,7 @@ def run_experiments(base_dir,
                     embeddings_path,
                     encoder_path,
                     model_option,
+                    tune=tune,
                     force=force,
                     num_epochs=num_epochs,
                 )
@@ -417,6 +421,7 @@ def run_single_experiment(
         embeddings_path,
         encoder_path,
         model_option,
+        tune=False,
         force=False,
         num_epochs=100,
 ):
@@ -431,6 +436,7 @@ def run_single_experiment(
             embeddings_path,
             encoder_path,
             model_option,
+            fixed_embeddings=not tune,
             print_every=1000,
             save_every=100,
             num_epochs=num_epochs,
@@ -904,6 +910,11 @@ def get_args():
         nargs="+",
         help="Subset of experiment folders to run (name, not full path)",
     )
+    run_parser.add_argument(
+        "--tune",
+        action="store_true",
+        help="Train models with tune-able embeddings (i.e. not fixed)",
+    )
     run_parser.set_defaults(which="run")
     return parser.parse_args()
 
@@ -926,6 +937,7 @@ def main():
             args.data,
             args.model,
             args.test,
+            tune=args.tune,
             subset=args.subset,
             force=args.force,
         )
