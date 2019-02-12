@@ -29,6 +29,12 @@ python -m src.experiments run \
  --test all \
  --subset full
 
+ # Experiments for increasing amounts of training data
+ python -m src.experiments run \
+ --data experiment_pipelines/ \
+ --model all \
+ --test all \
+ --subset partial-50 partial-100 partial-250 partial-500 partial-750
 
  ## Tuned embeddings
  # Add --tune to each of the calls above (note that it overwrites model folders)
