@@ -28,7 +28,16 @@ DIMENSION = 100
 # validation seed
 VALID_SEED = 123123
 
-NUM_EPOCHS = {"full": 10}
+# for partial, determined by interpolating between 10k subsample 100 epochs
+# and 10 epochs for full
+NUM_EPOCHS = {
+    "full": 10,
+    "partial-50": 96,
+    "partial-100": 91,
+    "partial-250": 78,
+    "partial-500": 55,
+    "partial-750": 32,
+}
 
 # Test data is always modified with the same pipeline
 TEST_PIPELINE = preprocess.sequence(
@@ -783,46 +792,34 @@ def paper_experiments(output_dir):
     experiments.append(nl7)
 
     # vocab size experiments
-    size1 = dict(size)
-    size1["min_count"] = 1
-    size1["output_dir"] = os.path.join(output_dir, "size-1")
-    experiments.append(size1)
-
     # Note that min_count=5 we already have
-    size2 = dict(size)
-    size2["min_count"] = 10
-    size2["output_dir"] = os.path.join(output_dir, "size-2")
-    experiments.append(size2)
-
-    size3 = dict(size)
-    size3["min_count"] = 15
-    size3["output_dir"] = os.path.join(output_dir, "size-3")
-    experiments.append(size3)
-
-    size4 = dict(size)
-    size4["min_count"] = 20
-    size4["output_dir"] = os.path.join(output_dir, "size-4")
-    experiments.append(size4)
-
     # some large min frequency experiments to observe performance degradation
-    size5 = dict(size)
-    size5["min_count"] = 100
-    size5["output_dir"] = os.path.join(output_dir, "size-5")
-    experiments.append(size5)
+    vocab_sizes = [1, 10, 15, 20, 100, 1000, 10000]
+    for ix, vocab_size in enumerate(vocab_sizes, start=1):
+        size_config = dict(size)
+        size_config["min_count"] = vocab_size
+        size_config["output_dir"] = os.path.join(output_dir, "size-{}".format(vocab_size))
+        experiments.append(size_config)
 
-    size6 = dict(size)
-    size6["min_count"] = 1000
-    size6["output_dir"] = os.path.join(output_dir, "size-6")
-    experiments.append(size6)
-
-    size7 = dict(size)
-    size7["min_count"] = 10000
-    size7["output_dir"] = os.path.join(output_dir, "size-7")
-    experiments.append(size7)
 
     full = dict(full_base)
     full["output_dir"] = os.path.join(output_dir, "full")
     experiments.append(full)
+
+    # increasing amounts of data for training
+    partial_sizes = [50, 100, 250, 500, 750]
+    num_seeds = [9, 9, 7, 5, 3]
+
+    for downsample_size, num_seed in zip(partial_sizes, num_seeds):
+        partial_config = dict(full_base)
+        partial_config["downsample_train"] = int(downsample_size * 1e3)
+        partial_config["output_dir"] = os.path.join(
+            output_dir,
+            "partial-{}".format(downsample_size),
+        )
+        partial_config["seeds"] = list(range(10, (num_seed + 1) * 10, 10))
+        experiments.append(partial_config)
+
     return experiments
 
 
