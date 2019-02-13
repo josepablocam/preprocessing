@@ -6,6 +6,9 @@ import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 
+import scipy
+
+
 def vocab_counts(input_path):
     counter = Counter()
     with open(input_path, "r") as fin:
@@ -29,4 +32,8 @@ def distribution(cts, cutoffs):
 cts = vocab_counts("embedding-input.txt")
 cutoffs = list(range(1, 100, 1))
 fractions = distribution(cts, cutoffs)
-plt.plot(cutoffs, fractions)
+fig, ax = plt.subplots(1)
+ax.plot(cutoffs, fractions)
+ax.set_xlabel("Minimum frequency of token")
+ax.set_ylabel("(size of new vocabulary) / (size of original vocabulary)")
+fig.savefig("vocab_cutoff_distribution.pdf")

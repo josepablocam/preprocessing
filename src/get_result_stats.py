@@ -150,7 +150,7 @@ def build_latex_doc(root_folder, output, subset=None):
     experiment_folders = get_experiment_folders(root_folder)
     data = {}
     for folder in experiment_folders:
-        if folder is not None and os.path.basename(folder) not in subset:
+        if folder is not None and subset is not None and os.path.basename(folder) not in subset:
             print("Skipping {}, not in {}".format(folder, subset))
             continue
 
