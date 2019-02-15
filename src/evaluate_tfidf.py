@@ -18,7 +18,7 @@ def eval_traditional(queries, code, train_code, args):
     '''
     # Get vocab size, padding idx
     vocab_size = max(np.max(queries), np.max(code), np.max(train_code)) + 1
-    padding_idx = code[0][-1]
+    padding_idx = 1
     n = code.shape[0]
     m = train_code.shape[0]
 
@@ -40,6 +40,7 @@ def eval_traditional(queries, code, train_code, args):
     # Compute idf using train code
     idf = np.count_nonzero(count_matrix_train_code, 0)
     idf = np.log(np.true_divide(m - idf + 0.5, idf + 0.5))
+    #idf = np.clip(idf,0,None)
     #idf[np.nonzero(idf)] = np.log(np.true_divide(n, idf[np.nonzero(idf)])) + 1
 
     # Compute tf
@@ -68,6 +69,7 @@ def eval_traditional(queries, code, train_code, args):
     else:
         raise KeyError("Method invalid")
 
+    import pdb
     # Evaluate performance
     ans_locs = location_of_correct(sim_mat)
 

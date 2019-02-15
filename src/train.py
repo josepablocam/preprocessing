@@ -222,7 +222,7 @@ def train(
     models = {}
     models["sim_model"] = sim_model
 
-    log_models(models, model_folder, "pre-start")
+#    log_models(models, model_folder, "pre-start")
     batch_count = 0
     losses = defaultdict(lambda: [])
 
@@ -272,15 +272,17 @@ def train(
                     time_seconds=None,
                 )
 
-        if epoch % save_every == 0:
-            current_time = datetime.datetime.now()
-            amt_time_seconds = (current_time - start_time).total_seconds()
-            log_models(models, model_folder, epoch, amt_time_seconds)
-
-    # final log if any
-    log_models(models, model_folder, "final", amt_time_seconds)
+#        if epoch % save_every == 0:
+#            current_time = datetime.datetime.now()
+#            amt_time_seconds = (current_time - start_time).total_seconds()
+#            log_models(models, model_folder, epoch, amt_time_seconds)
+#
+#    # final log if any
+#    log_models(models, model_folder, "final", amt_time_seconds)
 
     if use_validation:
+        current_time = datetime.datetime.now()
+        amt_time_seconds = (current_time - start_time).total_seconds()
         log_models(
             {
                 "sim_model": best_valid_model

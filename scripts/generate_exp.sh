@@ -4,5 +4,4 @@ python -m src.experiments generate \
 --test_names conala github \
 --test_paths data/conala/dataset.pkl data/github/test-dataset.pkl \
 --output experiment_pipelines \
---subset nl-6 nl-7 \
---downsample 10000 --seed 42
+--subset full

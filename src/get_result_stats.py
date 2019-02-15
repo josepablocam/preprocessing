@@ -10,7 +10,7 @@ import pandas as pd
 from . import utils
 
 RESULTS_FILE = "results.json"
-STATS_FILE = "stats.json"
+STATS_FILE = "stats-tune.json"
 
 
 def get_args():
@@ -45,7 +45,7 @@ def get_args():
 
 
 def get_experiment_folders(root_folder):
-    return [os.path.join(root_folder, p) for p in os.listdir(root_folder)]
+    return [os.path.join(root_folder, p) for p in os.listdir(root_folder) if not p=='full']
 
 
 def compute_stats(root_folder):
@@ -67,7 +67,7 @@ def compute_stats(root_folder):
         for seed_folder in experiment_subfolders:
             # Read results
             for model in models:
-                with open(os.path.join(seed_folder, model, RESULTS_FILE),
+                with open(os.path.join(seed_folder, model+'-tune', RESULTS_FILE),
                           'r') as f:
                     data = json.load(f)
                     for data_entry in data:

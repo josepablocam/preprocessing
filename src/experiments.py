@@ -324,7 +324,8 @@ def run_experiments(base_dir,
                     model_option,
                     test_option,
                     subset=None,
-                    force=False):
+                    force=False,
+                    tune=False):
     # Models to run
     models = []
     if model_option == "lstm":
@@ -376,7 +377,10 @@ def run_experiments(base_dir,
             for model_option in models:
                 # each model gets own folder where it is evaluated
                 # on chosen test datasets
-                exp_folder = os.path.join(seed_folder, model_option)
+                if tune:
+                    exp_folder = os.path.join(seed_folder, model_option+'-tune')
+                else:
+                    exp_folder = os.path.join(seed_folder, model_option)
                 utils.create_dir(exp_folder)
                 num_epochs = NUM_EPOCHS.get(
                     os.path.basename(experiment_root),
@@ -394,6 +398,7 @@ def run_experiments(base_dir,
                     model_option,
                     force=force,
                     num_epochs=num_epochs,
+                    tune=tune,
                 )
 
 
@@ -419,12 +424,14 @@ def run_single_experiment(
         model_option,
         force=False,
         num_epochs=100,
+        tune=False,
 ):
 
     if get_trained_model_path(folder) is not None and not force:
         print("Skipping training in {}, model exists".format(folder))
         print("Use --force if re-training is desired")
     else:
+        fixed_embeddings = not tune
         train(
             code_path,
             nl_path,
@@ -435,6 +442,7 @@ def run_single_experiment(
             save_every=100,
             num_epochs=num_epochs,
             output_folder=folder,
+            fixed_embeddings=fixed_embeddings,
             valid_code_path=valid_code_path,
             valid_docstrings_path=valid_nl_path,
         )
@@ -888,6 +896,11 @@ def get_args():
         nargs="+",
         help="Subset of experiment folders to run (name, not full path)",
     )
+    run_parser.add_argument(
+        "--tune",
+        action="store_true",
+        help="Train the models with tunable embeddings",
+    )
     run_parser.set_defaults(which="run")
     return parser.parse_args()
 
@@ -912,6 +925,7 @@ def main():
             args.test,
             subset=args.subset,
             force=args.force,
+            tune=args.tune,
         )
     else:
         raise ValueError("Unknown action: {}".format(args.which))

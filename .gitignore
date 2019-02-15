@@ -7,3 +7,4 @@ init_exps/
 bm25-*.json
 tfidf*.json
 table.txt
+*.tex
