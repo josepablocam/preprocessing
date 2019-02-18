@@ -32,6 +32,7 @@ VALID_SEED = 123123
 # and 10 epochs for full
 NUM_EPOCHS = {
     "full": 10,
+    "partial-10": 100,
     "partial-50": 96,
     "partial-100": 91,
     "partial-250": 78,
@@ -260,7 +261,12 @@ def filter_experiment_subset(experiments, subset):
             print("Ignoring {}, not in {}".format(folder, subset))
         else:
             clean_experiments.append(entry)
-    return clean_experiments
+    # sort experiments based on the subset
+    clean_experiments = sorted(
+        clean_experiments,
+        key=lambda elem: subset.index(elem),
+    )
+    return list(clean_experiments)
 
 
 def generate_experiments(
@@ -798,17 +804,17 @@ def paper_experiments(output_dir):
     for ix, vocab_size in enumerate(vocab_sizes, start=1):
         size_config = dict(size)
         size_config["min_count"] = vocab_size
-        size_config["output_dir"] = os.path.join(output_dir, "size-{}".format(vocab_size))
+        size_config["output_dir"] = os.path.join(output_dir,
+                                                 "size-{}".format(vocab_size))
         experiments.append(size_config)
-
 
     full = dict(full_base)
     full["output_dir"] = os.path.join(output_dir, "full")
     experiments.append(full)
 
     # increasing amounts of data for training
-    partial_sizes = [50, 100, 250, 500, 750]
-    num_seeds = [9, 9, 7, 5, 3]
+    partial_sizes = [10, 50, 100, 250, 500, 750]
+    num_seeds = [10, 9, 9, 7, 5, 3]
 
     for downsample_size, num_seed in zip(partial_sizes, num_seeds):
         partial_config = dict(full_base)
