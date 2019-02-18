@@ -264,7 +264,7 @@ def filter_experiment_subset(experiments, subset):
     # sort experiments based on the subset
     clean_experiments = sorted(
         clean_experiments,
-        key=lambda elem: subset.index(elem),
+        key=lambda elem: subset.index(os.path.basename(elem)),
     )
     return list(clean_experiments)
 
