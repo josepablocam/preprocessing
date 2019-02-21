@@ -1,4 +1,7 @@
 
+Please see SUPPLEMENTARY_MATERIALS_FSE.pdf for our Supplementary
+Materials.
+
 ## General
 Everything is run from the preprocess/ root folder.
 You should use [conda](https://conda.io/docs/) to setup your environment.
