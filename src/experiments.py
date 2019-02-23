@@ -28,7 +28,17 @@ DIMENSION = 100
 # validation seed
 VALID_SEED = 123123
 
-NUM_EPOCHS = {"full": 10}
+# for partial, determined by interpolating between 10k subsample 100 epochs
+# and 10 epochs for full
+NUM_EPOCHS = {
+    "full": 10,
+    "partial-10": 100,
+    "partial-50": 96,
+    "partial-100": 91,
+    "partial-250": 78,
+    "partial-500": 55,
+    "partial-750": 32,
+}
 
 # Test data is always modified with the same pipeline
 TEST_PIPELINE = preprocess.sequence(
@@ -251,7 +261,12 @@ def filter_experiment_subset(experiments, subset):
             print("Ignoring {}, not in {}".format(folder, subset))
         else:
             clean_experiments.append(entry)
-    return clean_experiments
+    # sort experiments based on the subset
+    clean_experiments = sorted(
+        clean_experiments,
+        key=lambda elem: subset.index(os.path.basename(elem)),
+    )
+    return list(clean_experiments)
 
 
 def generate_experiments(
@@ -320,12 +335,14 @@ def get_test_data_paths(folder):
     return paths
 
 
-def run_experiments(base_dir,
-                    model_option,
-                    test_option,
-                    subset=None,
-                    force=False,
-                    tune=False):
+def run_experiments(
+        base_dir,
+        model_option,
+        test_option,
+        tune=False,
+        subset=None,
+        force=False,
+):
     # Models to run
     models = []
     if model_option == "lstm":
@@ -399,6 +416,7 @@ def run_experiments(base_dir,
                     embeddings_path,
                     encoder_path,
                     model_option,
+                    tune=tune,
                     force=force,
                     num_epochs=num_epochs,
                     tune=tune,
@@ -425,6 +443,7 @@ def run_single_experiment(
         embeddings_path,
         encoder_path,
         model_option,
+        tune=False,
         force=False,
         num_epochs=100,
         tune=False,
@@ -441,6 +460,7 @@ def run_single_experiment(
             embeddings_path,
             encoder_path,
             model_option,
+            fixed_embeddings=not tune,
             print_every=1000,
             save_every=100,
             num_epochs=num_epochs,
@@ -788,30 +808,34 @@ def paper_experiments(output_dir):
     experiments.append(nl7)
 
     # vocab size experiments
-    size1 = dict(size)
-    size1["min_count"] = 1
-    size1["output_dir"] = os.path.join(output_dir, "size-1")
-    experiments.append(size1)
-
     # Note that min_count=5 we already have
-    size2 = dict(size)
-    size2["min_count"] = 10
-    size2["output_dir"] = os.path.join(output_dir, "size-2")
-    experiments.append(size2)
-
-    size3 = dict(size)
-    size3["min_count"] = 15
-    size3["output_dir"] = os.path.join(output_dir, "size-3")
-    experiments.append(size3)
-
-    size4 = dict(size)
-    size4["min_count"] = 20
-    size4["output_dir"] = os.path.join(output_dir, "size-4")
-    experiments.append(size4)
+    # some large min frequency experiments to observe performance degradation
+    vocab_sizes = [1, 10, 15, 20, 100, 1000, 10000]
+    for ix, vocab_size in enumerate(vocab_sizes, start=1):
+        size_config = dict(size)
+        size_config["min_count"] = vocab_size
+        size_config["output_dir"] = os.path.join(output_dir,
+                                                 "size-{}".format(vocab_size))
+        experiments.append(size_config)
 
     full = dict(full_base)
     full["output_dir"] = os.path.join(output_dir, "full")
     experiments.append(full)
+
+    # increasing amounts of data for training
+    partial_sizes = [10, 50, 100, 250, 500, 750]
+    num_seeds = [10, 9, 9, 7, 5, 3]
+
+    for downsample_size, num_seed in zip(partial_sizes, num_seeds):
+        partial_config = dict(full_base)
+        partial_config["downsample_train"] = int(downsample_size * 1e3)
+        partial_config["output_dir"] = os.path.join(
+            output_dir,
+            "partial-{}".format(downsample_size),
+        )
+        partial_config["seeds"] = list(range(10, (num_seed + 1) * 10, 10))
+        experiments.append(partial_config)
+
     return experiments
 
 
@@ -902,7 +926,7 @@ def get_args():
     run_parser.add_argument(
         "--tune",
         action="store_true",
-        help="Train the models with tunable embeddings",
+        help="Train models with tune-able embeddings (i.e. not fixed)",
     )
     run_parser.set_defaults(which="run")
     return parser.parse_args()
@@ -926,6 +950,7 @@ def main():
             args.data,
             args.model,
             args.test,
+            tune=args.tune,
             subset=args.subset,
             force=args.force,
             tune=args.tune,

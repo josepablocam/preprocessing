@@ -226,7 +226,7 @@ def train(
     models = {}
     models["sim_model"] = sim_model
 
-#    log_models(models, model_folder, "pre-start")
+    # log_models(models, model_folder, "pre-start")
     batch_count = 0
     losses = defaultdict(lambda: [])
 

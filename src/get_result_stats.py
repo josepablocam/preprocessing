@@ -53,10 +53,11 @@ def get_args():
         help="Path to save down latex of tables",
     )
     table_parser.add_argument(
+        "-s",
         "--subset",
         type=str,
         nargs="+",
-        help="Subset of exp folders to generate table",
+        help="Subset of experiment folders to use",
     )
     table_parser.set_defaults(which="latex")
     return parser.parse_args()
@@ -93,8 +94,11 @@ def compute_stats(root_folder, args):
         for seed_folder in experiment_subfolders:
             # Read results
             for model in models:
-                with open(os.path.join(seed_folder, model, RESULTS_FILE),
-                          'r') as f:
+                model_path = os.path.join(seed_folder, model, RESULTS_FILE)
+                if not os.path.exists(model_path):
+                    print("Skipping {}, doesnt exist".format(model_path))
+                    continue
+                with open(model_path, 'r') as f:
                     data = json.load(f)
                     for data_entry in data:
                         for metric in metrics:
@@ -173,6 +177,10 @@ def build_latex_doc(root_folder, args):
         experiment_folders = filtered
     data = {}
     for folder in experiment_folders:
+        if folder is not None and subset is not None and os.path.basename(folder) not in subset:
+            print("Skipping {}, not in {}".format(folder, subset))
+            continue
+
         stats_path = os.path.join(folder, STATS_FILE)
         with open(stats_path, "r") as fin:
             stats = json.load(fin)
