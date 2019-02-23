@@ -10,7 +10,7 @@ import pandas as pd
 from . import utils
 
 RESULTS_FILE = "results.json"
-STATS_FILE = "stats-tune.json"
+STATS_FILE = "stats-dannew.json"
 
 
 def get_args():
@@ -24,6 +24,18 @@ def get_args():
         "--data",
         type=str,
         help="Root directory of experiments",
+    )
+    compute_parser.add_argument(
+        "--subset",
+        type=str,
+        nargs="+",
+        help="Subset of exp folders to compute stats",
+    )
+    compute_parser.add_argument(
+        "--model",
+        type=str,
+        nargs="+",
+        help="Models to compute stats on",
     )
     compute_parser.set_defaults(which="compute")
 
@@ -40,6 +52,12 @@ def get_args():
         type=str,
         help="Path to save down latex of tables",
     )
+    table_parser.add_argument(
+        "--subset",
+        type=str,
+        nargs="+",
+        help="Subset of exp folders to generate table",
+    )
     table_parser.set_defaults(which="latex")
     return parser.parse_args()
 
@@ -48,13 +66,21 @@ def get_experiment_folders(root_folder):
     return [os.path.join(root_folder, p) for p in os.listdir(root_folder) if not p=='full']
 
 
-def compute_stats(root_folder):
+def compute_stats(root_folder, args):
     experiment_folders = get_experiment_folders(root_folder)
+    if args.subset is not None:
+        filtered = []
+        for exp_folder in experiment_folders:
+            if os.path.basename(exp_folder) in args.subset:
+                filtered.append(exp_folder)
+        experiment_folders = filtered
     for setting_folder in experiment_folders:
         experiment_subfolders = glob.glob(setting_folder + "/seed*")
         n = len(experiment_subfolders)  # Number of seeds
         results = {}
         models = ['lstm', 'dan']
+        if args.model is not None:
+            models = args.model
         tests = ['conala', 'github']
         metrics = ['mrr', 'success@1', 'success@5', 'success@10']
         for model in models:
@@ -67,7 +93,7 @@ def compute_stats(root_folder):
         for seed_folder in experiment_subfolders:
             # Read results
             for model in models:
-                with open(os.path.join(seed_folder, model+'-tune', RESULTS_FILE),
+                with open(os.path.join(seed_folder, model, RESULTS_FILE),
                           'r') as f:
                     data = json.load(f)
                     for data_entry in data:
@@ -136,8 +162,15 @@ def to_latex(dfs):
     return document
 
 
-def build_latex_doc(root_folder, output):
+def build_latex_doc(root_folder, args):
+    output = args.output
     experiment_folders = get_experiment_folders(root_folder)
+    if args.subset is not None:
+        filtered = []
+        for exp_folder in experiment_folders:
+            if os.path.basename(exp_folder) in args.subset:
+                filtered.append(exp_folder)
+        experiment_folders = filtered
     data = {}
     for folder in experiment_folders:
         stats_path = os.path.join(folder, STATS_FILE)
@@ -155,9 +188,9 @@ def main():
     # For each exp settings
     root_folder = args.data
     if args.which == "compute":
-        compute_stats(root_folder)
+        compute_stats(root_folder, args)
     elif args.which == "latex":
-        build_latex_doc(root_folder, args.output)
+        build_latex_doc(root_folder, args)
     else:
         raise Exception("Unknown action")
 

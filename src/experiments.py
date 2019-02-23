@@ -332,6 +332,9 @@ def run_experiments(base_dir,
         models.append("lstm")
     elif model_option == "dan":
         models.append("dan")
+    elif model_option == 'dannew':
+        models.append("dan2")
+        models.append("dan3")
     elif model_option == "all":
         models.append("lstm")
         models.append("dan")
@@ -881,7 +884,7 @@ def get_args():
         type=str,
         help="Model you want to run experiment with, can be lstm, dan, all",
         default="all",
-        choices=["lstm", "dan", "all"],
+        choices=["lstm", "dan", "dannew", "all"],
     )
     run_parser.add_argument(
         "--test",

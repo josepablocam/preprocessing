@@ -1,7 +1,6 @@
 cd ..
 python -m src.experiments run \
  --data experiment_pipelines/ \
- --model all \
+ --model dannew \
  --test all \
- --tune \
- --subset nl-1 nl-2 nl-3 nl-4 nl-5 nl-6 nl-7
+ --subset code-1 code-2 code-5 code-6 nl-1 nl-2 nl-5 nl-6 nl-7

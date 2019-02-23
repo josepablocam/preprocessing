@@ -127,6 +127,10 @@ def train(
         valid_code_path=None,
         valid_docstrings_path=None,
 ):
+    if model_option == 'dan2':
+        num_layers += 1 # become 4
+    if model_option == 'dan3':
+        dan_hidden_size += HIDDEN_SIZE # become 900
     embeddings = precomputed_embeddings.read_embeddings(embeddings_path)
     emb_size = list(embeddings.values())[0].shape[0]
 
